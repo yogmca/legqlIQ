@@ -1,0 +1,137 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './LawyerCard.css';
+import ConsultationForm from './ConsultationForm';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+
+import authService from '../services/authService';
+
+const LawyerCard = ({ lawyer }) => {
+  const navigate = useNavigate();
+  const [showConsultationForm, setShowConsultationForm] = useState(false);
+
+  const handleBookConsultation = () => {
+    setShowConsultationForm(true);
+  };
+
+  const handleBookVideoConsultation = () => {
+    const user = authService.getUser();
+    if (!user) {
+      alert('Please login to book a video consultation');
+      navigate('/login');
+      return;
+    }
+    navigate('/video-consultations');
+  };
+
+  const handleCloseForm = () => {
+    setShowConsultationForm(false);
+  };
+
+  const handleSubmitConsultation = async (consultationData) => {
+    try {
+      const response = await fetch(`${API_URL}/consultations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(consultationData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to book consultation');
+      }
+
+      const result = await response.json();
+      
+      alert(`Consultation booked successfully! Your booking ID is ${result.consultation.id}. The lawyer will contact you soon.`);
+      setShowConsultationForm(false);
+    } catch (error) {
+      console.error('Error booking consultation:', error);
+      throw error;
+    }
+  };
+
+  return (
+    <div className="lawyer-card">
+      <div className="lawyer-card-header">
+        <div className="lawyer-avatar">
+          {lawyer.name.split(' ')[1]?.[0] || lawyer.name[0]}
+        </div>
+        <div className="lawyer-title">
+          <h3>{lawyer.name}</h3>
+          <p className="bar-registration">Bar Reg: {lawyer.barRegistrationNo}</p>
+        </div>
+      </div>
+
+      <div className="lawyer-card-body">
+        <div className="specialization-tags">
+          {lawyer.specialization.map((spec, index) => (
+            <span key={index} className="tag">
+              {spec}
+            </span>
+          ))}
+        </div>
+
+        <div className="lawyer-info">
+          <div className="info-row">
+            <span className="info-label">📍 Location:</span>
+            <span className="info-value">{lawyer.location}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">⚖️ Court:</span>
+            <span className="info-value">{lawyer.court}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">💼 Experience:</span>
+            <span className="info-value">{lawyer.experience} years</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">🎓 Education:</span>
+            <span className="info-value">{lawyer.education}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">🗣️ Languages:</span>
+            <span className="info-value">{lawyer.languages.join(', ')}</span>
+          </div>
+        </div>
+
+        <p className="lawyer-description">{lawyer.description}</p>
+
+        <div className="contact-info">
+          <div className="contact-item">
+            <span className="contact-icon">📞</span>
+            <a href={`tel:${lawyer.phone}`}>{lawyer.phone}</a>
+          </div>
+          <div className="contact-item">
+            <span className="contact-icon">✉️</span>
+            <a href={`mailto:${lawyer.email}`}>{lawyer.email}</a>
+          </div>
+          <div className="contact-item">
+            <span className="contact-icon">📍</span>
+            <span>{lawyer.address}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="lawyer-card-footer">
+        <button className="btn-contact" onClick={handleBookConsultation}>
+          📅 Book Lawyer Visit
+        </button>
+        <button className="btn-video-consultation" onClick={handleBookVideoConsultation}>
+          📹 Book Video Consultation
+        </button>
+      </div>
+
+      {showConsultationForm && (
+        <ConsultationForm
+          lawyer={lawyer}
+          onClose={handleCloseForm}
+          onSubmit={handleSubmitConsultation}
+        />
+      )}
+    </div>
+  );
+};
+
+export default LawyerCard;

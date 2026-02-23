@@ -1,0 +1,10 @@
+# Backend API URL - Use your EC2 public IP
+VITE_API_URL=http://13.62.225.158:4000/api
+
+# Razorpay Configuration
+VITE_RAZORPAY_KEY_ID=rzp_live_SINnm2d5ld3vlh
+
+# WebRTC Configuration
+VITE_ENABLE_WEBRTC=true
+# WebSocket server URL - Use your EC2 public IP
+VITE_SOCKET_URL=http://13.62.225.158:4000

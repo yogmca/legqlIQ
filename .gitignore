@@ -1,0 +1,29 @@
+# Tar files
+*.tar.gz
+*.tar
+*.zip
+
+# Dependencies
+node_modules/
+
+# Environment files
+backend/.env
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+frontend.log
+
+# Build output
+dist/
+
+# Backups
+backups/
+
+# OS files
+.DS_Store
+
+# PM2
+.pm2/
