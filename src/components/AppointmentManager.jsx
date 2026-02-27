@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './AppointmentManager.css';
 import VideoConsultation from './VideoConsultation';
 import authService from '../services/authService';
@@ -176,23 +177,33 @@ const AppointmentManager = ({ userEmail }) => {
 
   return (
     <div className="appointment-manager">
-      <div className="appointment-header">
-        <h2>{isLawyer ? 'Client Consultations' : 'My Consultations'}</h2>
-        {isLawyer && (
-          <div className="lawyer-badge">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L3 7V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V7L12 2Z"/>
+      <div className="appointment-container">
+        <div className="appointment-nav">
+          <Link to="/" className="home-link">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
             </svg>
-            Lawyer Account
-          </div>
-        )}
-        <button className="btn-refresh" onClick={fetchAppointments}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M4 2v6h6M16 18v-6h-6M17.65 6.35A8 8 0 1 0 6.35 17.65" stroke="currentColor" strokeWidth="2" fill="none"/>
-          </svg>
-          Refresh
-        </button>
-      </div>
+            Home
+          </Link>
+        </div>
+
+        <div className="appointment-header">
+          <h2>{isLawyer ? 'Client Consultations' : 'My Consultations'}</h2>
+          {isLawyer && (
+            <div className="lawyer-badge">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L3 7V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V7L12 2Z"/>
+              </svg>
+              Lawyer Account
+            </div>
+          )}
+          <button className="btn-refresh" onClick={fetchAppointments}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M4 2v6h6M16 18v-6h-6M17.65 6.35A8 8 0 1 0 6.35 17.65" stroke="currentColor" strokeWidth="2" fill="none"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
 
       <div className="appointment-tabs">
         <button
@@ -330,6 +341,7 @@ const AppointmentManager = ({ userEmail }) => {
             </div>
           ))
         )}
+      </div>
       </div>
     </div>
   );
