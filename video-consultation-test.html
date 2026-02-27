@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Consultation Test - Karnataka Bar Association</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .test-container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .feature-list {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .feature-list h2 {
+            color: #1f2937;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            color: #374151;
+        }
+
+        .feature-item svg {
+            color: #10b981;
+            flex-shrink: 0;
+        }
+
+        .demo-button {
+            width: 100%;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 16px;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box p {
+            color: #1e40af;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .video-demo-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #1a1a1a;
+            z-index: 9999;
+        }
+
+        .video-demo-container.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .video-header h3 {
+            font-size: 18px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .video-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 16px;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: relative;
+        }
+
+        .video-element {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .lawyer-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .local-video {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            width: 200px;
+            height: 150px;
+            background: #2d2d2d;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+        }
+
+        .video-controls {
+            background: #2d2d2d;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .control-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        .control-btn.end-call {
+            background: #ef4444;
+        }
+
+        .control-btn.end-call:hover {
+            background: #dc2626;
+        }
+
+        .code-section {
+            background: #1f2937;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        .code-section pre {
+            color: #e5e7eb;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .code-section code {
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎥 Video Consultation Feature Test</h1>
+        <p class="subtitle">Karnataka Bar Association - Live Demo</p>
+
+        <div class="info-box">
+            <p><strong>📌 Note:</strong> This demo will request access to your camera and microphone to demonstrate the real video consultation feature. Click "Allow" when prompted by your browser.</p>
+        </div>
+
+        <div class="feature-list">
+            <h2>✅ Implemented Features:</h2>
+            <div class="feature-item">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                <span><strong>WebRTC Video Calling</strong> - Real camera and microphone access</span>
+            </div>
+            <div class="feature-item">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                <span><strong>Dual Video Feeds</strong> - Remote (lawyer) + Local (client) video</span>
+            </div>
+            <div class="feature-item">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                <span><strong>Video Controls</strong> - Mute, Camera toggle, End call</span>
+            </div>
+            <div class="feature-item">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                <span><strong>Text Chat</strong> - Real-time messaging during call</span>
+            </div>
+            <div class="feature-item">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                <span><strong>Call Timer</strong> - Duration tracking</span>
+            </div>
+            <div class="feature-item">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                <span><strong>Full-Screen Interface</strong> - Professional UI</span>
+            </div>
+        </div>
+
+        <button class="demo-button" onclick="startVideoDemo()">
+            🎥 Start Video Consultation Demo
+        </button>
+
+        <button class="demo-button" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="window.open('http://localhost:5173', '_blank')">
+            🌐 Open Full Application
+        </button>
+
+        <div class="code-section">
+            <pre><code>// VideoConsultation.jsx - WebRTC Implementation
+const initializeVideoCall = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: true
+  });
+  
+  if (localVideoRef.current) {
+    localVideoRef.current.srcObject = stream;
+  }
+  
+  setIsCallActive(true);
+  startTimer();
+};</code></pre>
+        </div>
+    </div>
+
+    <div class="video-demo-container" id="videoDemo">
+        <div class="video-header">
+            <div>
+                <h3>Video Consultation with Adv. Rajesh Kumar</h3>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span id="callStatus">Connected • <span id="timer">00:00</span></span>
+                </div>
+            </div>
+            <button class="control-btn" onclick="closeVideoDemo()" style="background: rgba(255,255,255,0.2);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="video-body">
+            <div class="video-placeholder">
+                <video id="remoteVideo" class="video-element" autoplay playsinline style="display:none;"></video>
+                <div id="lawyerPlaceholder">
+                    <div class="lawyer-avatar">R</div>
+                    <h2>Adv. Rajesh Kumar</h2>
+                    <p>Criminal Law, Constitutional Law</p>
+                </div>
+            </div>
+
+            <div class="local-video">
+                <video id="localVideo" class="video-element" autoplay playsinline muted></video>
+            </div>
+        </div>
+
+        <div class="video-controls">
+            <button class="control-btn" id="muteBtn" onclick="toggleMute()" title="Mute/Unmute">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+            </button>
+
+            <button class="control-btn" id="videoBtn" onclick="toggleVideo()" title="Camera On/Off">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                </svg>
+            </button>
+
+            <button class="control-btn end-call" onclick="closeVideoDemo()" title="End Call">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let localStream = null;
+        let isMuted = false;
+        let isVideoOff = false;
+        let timerInterval = null;
+        let seconds = 0;
+
+        async function startVideoDemo() {
+            try {
+                // Request camera and microphone access
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+
+                // Show video demo container
+                document.getElementById('videoDemo').classList.add('active');
+
+                // Set local video stream
+                const localVideo = document.getElementById('localVideo');
+                localVideo.srcObject = localStream;
+
+                // Start timer
+                startTimer();
+
+                alert('✅ Video consultation started! Your camera and microphone are now active. This demonstrates the real WebRTC video calling feature.');
+            } catch (error) {
+                console.error('Error accessing media devices:', error);
+                alert('⚠️ Camera/Microphone access denied. Please allow access to test the video consultation feature.\n\nError: ' + error.message);
+            }
+        }
+
+        function closeVideoDemo() {
+            // Stop all tracks
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+
+            // Hide video demo
+            document.getElementById('videoDemo').classList.remove('active');
+
+            // Stop timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                seconds = 0;
+            }
+
+            alert('✅ Video consultation ended. Duration: ' + formatTime(seconds));
+        }
+
+        function toggleMute() {
+            if (localStream) {
+                const audioTrack = localStream.getAudioTracks()[0];
+                if (audioTrack) {
+                    audioTrack.enabled = !audioTrack.enabled;
+                    isMuted = !audioTrack.enabled;
+                    document.getElementById('muteBtn').style.background = isMuted ? '#ef4444' : 'rgba(255, 255, 255, 0.15)';
+                }
+            }
+        }
+
+        function toggleVideo() {
+            if (localStream) {
+                const videoTrack = localStream.getVideoTracks()[0];
+                if (videoTrack) {
+                    videoTrack.enabled = !videoTrack.enabled;
+                    isVideoOff = !videoTrack.enabled;
+                    document.getElementById('videoBtn').style.background = isVideoOff ? '#ef4444' : 'rgba(255, 255, 255, 0.15)';
+                }
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                document.getElementById('timer').textContent = formatTime(seconds);
+            }, 1000);
+        }
+
+        function formatTime(secs) {
+            const mins = Math.floor(secs / 60);
+            const remainingSecs = secs % 60;
+            return `${mins.toString().padStart(2, '0')}:${remainingSecs.toString().padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html>

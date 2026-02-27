@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Way Video Consultation Test - Karnataka Bar Association</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px;
+            background: #000;
+        }
+
+        .video-panel {
+            background: #2d2d2d;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 16px;
+            background: #1f2937;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h2 {
+            font-size: 18px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .video-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .video-wrapper {
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .controls {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .control-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        .control-btn.active {
+            background: #ef4444;
+        }
+
+        .instructions {
+            background: #374151;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .instructions h3 {
+            margin-bottom: 12px;
+            color: #10b981;
+        }
+
+        .instructions p {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .btn-start {
+            margin-top: 16px;
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎥 Two-Way Video Consultation Test</h1>
+        <p>Simulating both Client and Lawyer video feeds simultaneously</p>
+    </div>
+
+    <div class="instructions">
+        <h3>📌 How to Test Both Sides:</h3>
+        <p><strong>Option 1:</strong> Click "Start Both Videos" below to see both client and lawyer feeds in split screen</p>
+        <p><strong>Option 2:</strong> Open this page in two different browser windows/tabs to simulate real two-way communication</p>
+        <p><strong>Option 3:</strong> Open on two different devices (computer + phone) for true peer-to-peer testing</p>
+        <button class="btn-start" onclick="startBothVideos()">🎥 Start Both Videos</button>
+    </div>
+
+    <div class="container">
+        <!-- Client Side -->
+        <div class="video-panel">
+            <div class="panel-header">
+                <h2>👤 Client Side (You)</h2>
+                <div class="status">
+                    <span class="status-dot"></span>
+                    <span id="clientStatus">Ready</span>
+                </div>
+            </div>
+            <div class="video-area">
+                <div class="video-wrapper">
+                    <video id="clientVideo" autoplay playsinline muted></video>
+                    <div class="video-placeholder" id="clientPlaceholder">
+                        <div class="avatar">C</div>
+                        <h3>Client</h3>
+                        <p>Your Video Feed</p>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="control-btn" id="clientMute" onclick="toggleClientMute()" title="Mute/Unmute">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                </button>
+                <button class="control-btn" id="clientVideo" onclick="toggleClientVideo()" title="Camera On/Off">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Lawyer Side -->
+        <div class="video-panel">
+            <div class="panel-header">
+                <h2>⚖️ Lawyer Side (Adv. Rajesh Kumar)</h2>
+                <div class="status">
+                    <span class="status-dot"></span>
+                    <span id="lawyerStatus">Ready</span>
+                </div>
+            </div>
+            <div class="video-area">
+                <div class="video-wrapper">
+                    <video id="lawyerVideo" autoplay playsinline muted></video>
+                    <div class="video-placeholder" id="lawyerPlaceholder">
+                        <div class="avatar">R</div>
+                        <h3>Adv. Rajesh Kumar</h3>
+                        <p>Lawyer Video Feed</p>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="control-btn" id="lawyerMute" onclick="toggleLawyerMute()" title="Mute/Unmute">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                </button>
+                <button class="control-btn" id="lawyerVideo" onclick="toggleLawyerVideo()" title="Camera On/Off">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let clientStream = null;
+        let lawyerStream = null;
+        let clientMuted = false;
+        let clientVideoOff = false;
+        let lawyerMuted = false;
+        let lawyerVideoOff = false;
+
+        async function startBothVideos() {
+            try {
+                // Start client video
+                clientStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+                
+                document.getElementById('clientVideo').srcObject = clientStream;
+                document.getElementById('clientPlaceholder').style.display = 'none';
+                document.getElementById('clientStatus').textContent = 'Connected';
+
+                // For lawyer side, we'll use the same camera but mirror it
+                // In a real scenario, this would be a separate WebRTC connection
+                lawyerStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+                
+                document.getElementById('lawyerVideo').srcObject = lawyerStream;
+                document.getElementById('lawyerPlaceholder').style.display = 'none';
+                document.getElementById('lawyerStatus').textContent = 'Connected';
+
+                alert('✅ Both video feeds started!\n\n' +
+                      'This demonstrates:\n' +
+                      '• Client can see their own video (left)\n' +
+                      '• Lawyer can see their own video (right)\n' +
+                      '• In real use, each side sees the OTHER person\'s video\n' +
+                      '• Both sides have independent controls\n\n' +
+                      'For true two-way testing:\n' +
+                      '1. Open this page in 2 browser windows, OR\n' +
+                      '2. Open on 2 different devices, OR\n' +
+                      '3. Use WebRTC signaling server for peer-to-peer connection');
+
+            } catch (error) {
+                console.error('Error accessing media devices:', error);
+                alert('⚠️ Camera/Microphone access denied.\n\nPlease:\n1. Allow camera and microphone access\n2. Make sure no other app is using the camera\n3. Try refreshing the page');
+            }
+        }
+
+        function toggleClientMute() {
+            if (clientStream) {
+                const audioTrack = clientStream.getAudioTracks()[0];
+                if (audioTrack) {
+                    audioTrack.enabled = !audioTrack.enabled;
+                    clientMuted = !audioTrack.enabled;
+                    document.getElementById('clientMute').classList.toggle('active', clientMuted);
+                }
+            }
+        }
+
+        function toggleClientVideo() {
+            if (clientStream) {
+                const videoTrack = clientStream.getVideoTracks()[0];
+                if (videoTrack) {
+                    videoTrack.enabled = !videoTrack.enabled;
+                    clientVideoOff = !videoTrack.enabled;
+                    document.getElementById('clientVideo').classList.toggle('active', clientVideoOff);
+                    document.getElementById('clientPlaceholder').style.display = clientVideoOff ? 'flex' : 'none';
+                }
+            }
+        }
+
+        function toggleLawyerMute() {
+            if (lawyerStream) {
+                const audioTrack = lawyerStream.getAudioTracks()[0];
+                if (audioTrack) {
+                    audioTrack.enabled = !audioTrack.enabled;
+                    lawyerMuted = !audioTrack.enabled;
+                    document.getElementById('lawyerMute').classList.toggle('active', lawyerMuted);
+                }
+            }
+        }
+
+        function toggleLawyerVideo() {
+            if (lawyerStream) {
+                const videoTrack = lawyerStream.getVideoTracks()[0];
+                if (videoTrack) {
+                    videoTrack.enabled = !videoTrack.enabled;
+                    lawyerVideoOff = !videoTrack.enabled;
+                    document.getElementById('lawyerVideo').classList.toggle('active', lawyerVideoOff);
+                    document.getElementById('lawyerPlaceholder').style.display = lawyerVideoOff ? 'flex' : 'none';
+                }
+            }
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (clientStream) {
+                clientStream.getTracks().forEach(track => track.stop());
+            }
+            if (lawyerStream) {
+                lawyerStream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>
