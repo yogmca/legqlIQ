@@ -38,8 +38,8 @@
   align-items: center;
   gap: 15px;
   margin-bottom: 30px;
-  text-decoration: none;
-  color: white;
+  text-decoration: none !important;
+  color: white !important;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -47,6 +47,15 @@
 .logo-section:hover {
   transform: translateX(5px);
   opacity: 0.9;
+  color: white !important;
+}
+
+.logo-section:visited {
+  color: white !important;
+}
+
+.logo-section:active {
+  color: white !important;
 }
 
 .logo-icon {
