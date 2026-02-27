@@ -10,7 +10,7 @@ const LegalChatbot = () => {
   const [messages, setMessages] = useState([
     {
       type: 'bot',
-      text: BACKEND.welcomeMessage,
+      text: 'Hello! I\'m LegalIQ AI Assistant. I can help you with:\n\n• Indian Penal Code (IPC) Sections\n• Legal Procedures (FIR, Bail, Divorce)\n• Fundamental Rights\n• Acts and Amendments\n• Case Law Information\n\nAsk me anything about Indian law!',
       timestamp: new Date()
     }
   ]);
@@ -140,7 +140,7 @@ const LegalChatbot = () => {
               </div>
               <div>
                 <h3>LegalIQ AI Assistant</h3>
-                <p>Powered by {BACKEND.name}</p>
+                <p>Your Legal Companion</p>
               </div>
             </div>
           </div>
