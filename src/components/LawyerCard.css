@@ -80,15 +80,16 @@
   gap: 8px;
 }
 
-.info-row {
-  display: flex;
-  align-items: flex-start;
+.lawyer-card .info-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
   gap: 8px;
   font-size: 14px;
   line-height: 1.6;
 }
 
-.info-label {
+.lawyer-card .info-label {
   font-weight: 600;
   color: #4a5568;
   min-width: 130px;
@@ -96,7 +97,7 @@
   white-space: nowrap;
 }
 
-.info-value {
+.lawyer-card .info-value {
   color: #2d3748;
   flex: 1;
   word-break: break-word;
