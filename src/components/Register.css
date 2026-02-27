@@ -33,6 +33,54 @@
   z-index: 1;
 }
 
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logo-section:hover {
+  transform: translateX(5px);
+  opacity: 0.9;
+}
+
+.logo-icon {
+  width: 50px;
+  height: 50px;
+  color: white;
+}
+
+.logo-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.logo-text {
+  font-size: 36px;
+  font-weight: 700;
+  color: white !important;
+  margin: 0;
+}
+
+.tagline {
+  font-size: 24px;
+  font-weight: 600;
+  color: white !important;
+  margin-bottom: 15px;
+}
+
+.description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: white !important;
+  opacity: 0.95;
+}
+
 .stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -48,11 +96,13 @@
   font-size: 32px;
   font-weight: 700;
   margin-bottom: 8px;
+  color: white !important;
 }
 
 .stat-item p {
   font-size: 14px;
   opacity: 0.9;
+  color: white !important;
 }
 
 .register-right {
