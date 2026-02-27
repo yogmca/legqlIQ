@@ -551,6 +551,36 @@
 
 /* Responsive */
 @media (max-width: 968px) {
+  .header-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .header-nav {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .nav-link {
+    font-size: 13px;
+    padding: 8px 16px;
+    background: #f5f5f5;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  
+  .auth-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .user-menu {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
   .hero-container {
     grid-template-columns: 1fr;
     gap: 40px;
@@ -562,14 +592,6 @@
 
   .hero-title {
     font-size: 36px;
-  }
-
-  .header-nav {
-    gap: 16px;
-  }
-
-  .nav-link {
-    display: none;
   }
 
   .specializations-grid {
