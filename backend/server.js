@@ -66,6 +66,8 @@ const authRoutes = require('./routes/authRoutes');
 const consultationRoutes = require('./routes/consultationRoutes');
 const otpRoutes = require('./routes/otpRoutes');
 const contactRoutes = require('./routes/contactRoutes');
+const chatbotRoutes = require('./routes/chatbotRoutes');
+const scraperRoutes = require('./routes/scraperRoutes');
 
 // Import fallback data
 const fallbackData = require('./lawyersData.js');
@@ -170,6 +172,12 @@ app.use('/api/consultations', consultationRoutes);
 
 // Contact routes
 app.use('/api/contact', contactRoutes);
+
+// Chatbot routes
+app.use('/api/chatbot', chatbotRoutes);
+
+// Web Scraper routes
+app.use('/api/scraper', scraperRoutes);
 
 // Get initial lawyers
 app.get('/api/lawyers', async (req, res) => {

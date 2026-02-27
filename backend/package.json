@@ -13,9 +13,12 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@huggingface/inference": "^4.13.13",
     "axios": "^1.13.5",
     "bcryptjs": "^3.0.3",
     "cheerio": "^1.2.0",
+    "chromium": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "crypto": "^1.0.1",
@@ -24,9 +27,12 @@
     "express-session": "^1.19.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.1",
+    "node-cache": "^5.1.2",
+    "nodemailer": "^8.0.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "puppeteer": "^24.37.3",
+    "puppeteer-core": "^24.37.5",
     "razorpay": "^2.9.6",
     "socket.io": "^4.8.3"
   }
