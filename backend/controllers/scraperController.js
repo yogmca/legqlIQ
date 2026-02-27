@@ -189,7 +189,7 @@ function formatChatResponse(scrapedData, query) {
       response = formatGeneralResponse(scrapedData);
   }
 
-  response += '\n\n---\n*Information sourced from Indian Kanoon. For personalized legal advice, consult a verified lawyer on LegalIQ.*';
+  response += '\n\n---\n*For personalized legal advice, consult a verified lawyer on LegalIQ.*';
 
   return response;
 }
