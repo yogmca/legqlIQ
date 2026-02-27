@@ -10,8 +10,8 @@ class EmailService {
 
   initialize() {
     // Create transporter using Gmail
-    // You'll need to set up an App Password in Gmail settings
-    this.transporter = nodemailer.createTransporter({
+    // Note: In nodemailer v8+, the method is createTransport (not createTransporter)
+    this.transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER || 'your-email@gmail.com',
