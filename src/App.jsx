@@ -13,6 +13,7 @@ import VideoConsultation from './components/VideoConsultation';
 import AboutUs from './components/AboutUs';
 import ContactUs from './components/ContactUs';
 import Logo from './components/Logo';
+import LegalChatbot from './components/LegalChatbot';
 import { lawyerService } from './services/lawyerService';
 import authService from './services/authService';
 
@@ -394,6 +395,9 @@ function App() {
         />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      
+      {/* AI Legal Chatbot - Available on all pages */}
+      <LegalChatbot />
     </Router>
   );
 }
