@@ -237,12 +237,21 @@ const AppointmentManager = ({ userEmail }) => {
       pending: 'status-pending',
       confirmed: 'status-confirmed',
       completed: 'status-completed',
-      cancelled: 'status-cancelled'
+      cancelled: 'status-cancelled',
+      rescheduled: 'status-confirmed' // Use confirmed styling for rescheduled
+    };
+
+    const statusLabels = {
+      pending: 'Pending',
+      confirmed: 'Confirmed',
+      completed: 'Completed',
+      cancelled: 'Cancelled',
+      rescheduled: 'Rescheduled & Confirmed'
     };
 
     return (
       <span className={`status-badge ${statusClasses[status] || ''}`}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {statusLabels[status] || status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
     );
   };
@@ -465,8 +474,8 @@ const AppointmentManager = ({ userEmail }) => {
                   </div>
                 )}
 
-                {/* Video Call and Cancel for Confirmed Appointments */}
-                {(appointment.status === 'confirmed' || appointment.status === 'pending_payment') && activeTab === 'upcoming' && !rescheduleData && (
+                {/* Video Call and Cancel for Confirmed/Rescheduled Appointments */}
+                {(appointment.status === 'confirmed' || appointment.status === 'rescheduled' || appointment.status === 'pending_payment') && activeTab === 'upcoming' && !rescheduleData && (
                   <>
                     <button
                       className="btn-start-call"
