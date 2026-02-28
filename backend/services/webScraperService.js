@@ -80,6 +80,11 @@ class WebScraperService {
   detectQueryType(query) {
     const lowerQuery = query.toLowerCase();
     
+    // Check for LegalIQ platform queries FIRST - these should not be handled by scraper
+    if (lowerQuery.includes('legaliq')) {
+      return 'platform'; // This will be caught by controller routing
+    }
+    
     if (lowerQuery.match(/ipc\s*\d+|section\s*\d+/)) {
       return 'ipc';
     }
@@ -89,7 +94,7 @@ class WebScraperService {
     if (lowerQuery.includes('case') || lowerQuery.includes('judgment') || lowerQuery.includes('verdict')) {
       return 'case_law';
     }
-    if (lowerQuery.includes('bail') || lowerQuery.includes('fir') || lowerQuery.includes('divorce') || 
+    if (lowerQuery.includes('bail') || lowerQuery.includes('fir') || lowerQuery.includes('divorce') ||
         lowerQuery.includes('procedure') || lowerQuery.includes('how to') || lowerQuery.includes('process')) {
       return 'legal_procedure';
     }
@@ -337,7 +342,7 @@ class WebScraperService {
       // Provide comprehensive procedure information
       let procedureInfo = {
         title: `Legal Procedure: ${query}`,
-        description: `For detailed information about "${query}", including step-by-step procedures, required documents, timelines, and legal requirements, we recommend consulting with a legal expert on LegalIQ who can guide you through the specific procedures relevant to your situation.`
+        description: `For detailed information about "${query}", including step-by-step procedures, required documents, timelines, and legal requirements, we recommend consulting with a legal expert on LegalIQ (https://legaliq.in) who can guide you through the specific procedures relevant to your situation.`
       };
 
       if (lowerQuery.includes('bail')) {
@@ -363,8 +368,7 @@ class WebScraperService {
         query: query,
         procedures: [{
           title: procedureInfo.title,
-          description: procedureInfo.description,
-          link: 'https://www.indiacode.nic.in/'
+          description: procedureInfo.description
         }],
         source: 'Legal Procedure Guide',
         timestamp: new Date().toISOString()
@@ -392,8 +396,7 @@ class WebScraperService {
           query: query,
           results: [{
             title: 'Fundamental Rights in India',
-            snippet: 'The Indian Constitution guarantees six fundamental rights under Part III (Articles 12-35): 1) Right to Equality (Articles 14-18) - equality before law, prohibition of discrimination, 2) Right to Freedom (Articles 19-22) - freedom of speech, assembly, movement, profession, 3) Right against Exploitation (Articles 23-24) - prohibition of trafficking and child labor, 4) Right to Freedom of Religion (Articles 25-28), 5) Cultural and Educational Rights (Articles 29-30), 6) Right to Constitutional Remedies (Article 32) - right to move Supreme Court for enforcement.',
-            link: 'https://www.india.gov.in/my-government/constitution-india/fundamental-rights'
+            snippet: 'The Indian Constitution guarantees six fundamental rights under Part III (Articles 12-35): 1) Right to Equality (Articles 14-18) - equality before law, prohibition of discrimination, 2) Right to Freedom (Articles 19-22) - freedom of speech, assembly, movement, profession, 3) Right against Exploitation (Articles 23-24) - prohibition of trafficking and child labor, 4) Right to Freedom of Religion (Articles 25-28), 5) Cultural and Educational Rights (Articles 29-30), 6) Right to Constitutional Remedies (Article 32) - right to move Supreme Court for enforcement.'
           }],
           source: 'Constitution of India',
           timestamp: new Date().toISOString()
@@ -406,8 +409,7 @@ class WebScraperService {
         query: query,
         results: [{
           title: `Legal Information: ${query}`,
-          snippet: `For comprehensive information about "${query}", we recommend consulting with a verified lawyer on LegalIQ who can provide accurate legal advice tailored to your specific circumstances. Our lawyers are available 24/7 for video consultations and can help you understand the legal aspects, procedures, and implications related to your query.`,
-          link: 'https://www.indiacode.nic.in/'
+          snippet: `For comprehensive information about "${query}", we recommend consulting with a verified lawyer on LegalIQ (https://legaliq.in) who can provide accurate legal advice tailored to your specific circumstances. Our lawyers are available 24/7 for video consultations and can help you understand the legal aspects, procedures, and implications related to your query.`
         }],
         source: 'LegalIQ Platform',
         timestamp: new Date().toISOString()

@@ -64,8 +64,9 @@ exports.getChatResponse = async (req, res) => {
 
     // Check if query is about LegalIQ platform - route to chatbot controller
     const lowerMessage = message.toLowerCase();
-    if ((lowerMessage.includes('legaliq') || lowerMessage.includes('platform')) &&
-        (lowerMessage.includes('use') || lowerMessage.includes('how') || lowerMessage.includes('work'))) {
+    if (lowerMessage.includes('legaliq') ||
+        (lowerMessage.includes('platform') && (lowerMessage.includes('use') || lowerMessage.includes('how')))) {
+      console.log('Routing LegalIQ platform query to chatbot controller');
       const chatbotController = require('./chatbotController');
       return chatbotController.getChatResponse(req, res);
     }
