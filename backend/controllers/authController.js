@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Lawyer = require('../models/Lawyer');
+const emailService = require('../services/emailService');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -41,6 +42,17 @@ exports.register = async (req, res) => {
 
     // Generate token
     const token = generateToken(user._id);
+
+    // Send notification email to admin (non-blocking)
+    emailService.sendNewUserNotification({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role || 'client',
+      dateOfBirth: user.dateOfBirth,
+      gender: user.gender,
+      address: user.address
+    }).catch(err => console.error('Failed to send new user notification:', err));
 
     res.status(201).json({
       success: true,
@@ -242,6 +254,20 @@ exports.registerLawyer = async (req, res) => {
 
     // Generate token
     const token = generateToken(user._id);
+
+    // Send notification email to admin (non-blocking)
+    emailService.sendNewUserNotification({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: 'lawyer',
+      dateOfBirth: user.dateOfBirth,
+      gender: user.gender,
+      address: user.address,
+      barRegistrationNo: lawyer.barRegistrationNo,
+      specialization: lawyer.specialization,
+      experience: lawyer.experience
+    }).catch(err => console.error('Failed to send lawyer registration notification:', err));
 
     res.status(201).json({
       success: true,

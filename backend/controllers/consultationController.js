@@ -4,6 +4,7 @@ const User = require('../models/User');
 const mongoose = require('mongoose');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const emailService = require('../services/emailService');
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
@@ -164,6 +165,21 @@ exports.createConsultation = async (req, res) => {
     });
 
     console.log('Consultation created successfully:', consultation._id);
+
+    // Send notification email to admin (non-blocking)
+    emailService.sendNewConsultationNotification({
+      clientName: consultation.clientInfo.name,
+      clientEmail: consultation.clientInfo.email,
+      clientPhone: consultation.clientInfo.phone,
+      lawyerName: consultation.lawyerInfo.name,
+      lawyerEmail: consultation.lawyerInfo.email,
+      caseType: consultation.caseType,
+      caseDescription: consultation.caseDescription,
+      preferredDate: consultation.preferredDate,
+      preferredTime: consultation.preferredTime,
+      consultationType: 'in-person'
+    }).catch(err => console.error('Failed to send consultation notification:', err));
+
     console.log('=== End Create Consultation ===');
 
     res.status(201).json({
@@ -641,6 +657,21 @@ exports.verifyPayment = async (req, res) => {
     consultation.paidAt = Date.now();
     await consultation.save();
 
+    // Send notification email to admin for paid video consultation (non-blocking)
+    emailService.sendNewConsultationNotification({
+      clientName: consultation.clientInfo.name,
+      clientEmail: consultation.clientInfo.email,
+      clientPhone: consultation.clientInfo.phone,
+      lawyerName: consultation.lawyerInfo.name,
+      lawyerEmail: consultation.lawyerInfo.email,
+      caseType: consultation.caseType,
+      caseDescription: consultation.caseDescription,
+      preferredDate: consultation.preferredDate,
+      preferredTime: consultation.preferredTime,
+      consultationType: 'video',
+      amount: consultation.amount
+    }).catch(err => console.error('Failed to send video consultation notification:', err));
+
     res.status(200).json({
       success: true,
       message: 'Payment verified successfully',
@@ -651,6 +682,197 @@ exports.verifyPayment = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to verify payment'
+    });
+  }
+};
+
+// Lawyer accepts consultation
+exports.acceptConsultation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    // Find the lawyer record for this user
+    const lawyer = await Lawyer.findOne({ userId: userId });
+    
+    if (!lawyer) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only lawyers can accept consultations'
+      });
+    }
+
+    const consultation = await Consultation.findById(id);
+
+    if (!consultation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Consultation not found'
+      });
+    }
+
+    // Check if this lawyer owns this consultation
+    if (consultation.lawyerId.toString() !== lawyer._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to accept this consultation'
+      });
+    }
+
+    // Check if consultation is in pending status
+    if (consultation.status !== 'pending' && consultation.status !== 'pending_payment') {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot accept consultation with status: ${consultation.status}`
+      });
+    }
+
+    consultation.status = 'confirmed';
+    consultation.confirmedAt = Date.now();
+    await consultation.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Consultation accepted successfully',
+      consultation: consultation.getSummary()
+    });
+  } catch (error) {
+    console.error('Accept consultation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to accept consultation'
+    });
+  }
+};
+
+// Lawyer rejects consultation
+exports.rejectConsultation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const userId = req.user.id;
+
+    // Find the lawyer record for this user
+    const lawyer = await Lawyer.findOne({ userId: userId });
+    
+    if (!lawyer) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only lawyers can reject consultations'
+      });
+    }
+
+    const consultation = await Consultation.findById(id);
+
+    if (!consultation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Consultation not found'
+      });
+    }
+
+    // Check if this lawyer owns this consultation
+    if (consultation.lawyerId.toString() !== lawyer._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to reject this consultation'
+      });
+    }
+
+    // Check if consultation can be rejected
+    if (consultation.status === 'completed' || consultation.status === 'cancelled') {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot reject a ${consultation.status} consultation`
+      });
+    }
+
+    consultation.status = 'cancelled';
+    consultation.cancelledAt = Date.now();
+    consultation.lawyerNotes = reason || 'Rejected by lawyer';
+    await consultation.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Consultation rejected successfully',
+      consultation: consultation.getSummary()
+    });
+  } catch (error) {
+    console.error('Reject consultation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reject consultation'
+    });
+  }
+};
+
+// Lawyer reschedules consultation (edit date/time)
+exports.rescheduleConsultation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { preferredDate, preferredTime, reason } = req.body;
+    const userId = req.user.id;
+
+    // Find the lawyer record for this user
+    const lawyer = await Lawyer.findOne({ userId: userId });
+    
+    if (!lawyer) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only lawyers can reschedule consultations'
+      });
+    }
+
+    const consultation = await Consultation.findById(id);
+
+    if (!consultation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Consultation not found'
+      });
+    }
+
+    // Check if this lawyer owns this consultation
+    if (consultation.lawyerId.toString() !== lawyer._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to reschedule this consultation'
+      });
+    }
+
+    // Check if consultation can be rescheduled
+    if (consultation.status === 'completed' || consultation.status === 'cancelled') {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot reschedule a ${consultation.status} consultation`
+      });
+    }
+
+    // Validate new date and time
+    if (!preferredDate || !preferredTime) {
+      return res.status(400).json({
+        success: false,
+        message: 'Both date and time are required for rescheduling'
+      });
+    }
+
+    // Update consultation
+    consultation.preferredDate = preferredDate;
+    consultation.preferredTime = preferredTime;
+    consultation.status = 'rescheduled';
+    consultation.lawyerNotes = reason || 'Rescheduled by lawyer';
+    await consultation.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Consultation rescheduled successfully',
+      consultation: consultation.getSummary()
+    });
+  } catch (error) {
+    console.error('Reschedule consultation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reschedule consultation'
     });
   }
 };

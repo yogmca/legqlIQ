@@ -252,6 +252,381 @@ Received on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
     }
   }
 
+  async sendNewUserNotification(userData) {
+    const { name, email, phone, role, dateOfBirth, gender, address } = userData;
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'noreply@legaliq.in',
+      to: this.recipientEmail,
+      subject: `🆕 New User Registration - ${role === 'lawyer' ? 'Lawyer' : 'Client'}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              background-color: #f9f9f9;
+            }
+            .header {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 20px;
+              text-align: center;
+              border-radius: 8px 8px 0 0;
+            }
+            .content {
+              background: white;
+              padding: 30px;
+              border-radius: 0 0 8px 8px;
+            }
+            .field {
+              margin-bottom: 20px;
+            }
+            .label {
+              font-weight: bold;
+              color: #667eea;
+              display: block;
+              margin-bottom: 5px;
+            }
+            .value {
+              color: #333;
+              padding: 10px;
+              background: #f5f5f5;
+              border-radius: 4px;
+            }
+            .badge {
+              display: inline-block;
+              padding: 5px 15px;
+              background: ${role === 'lawyer' ? '#28a745' : '#007bff'};
+              color: white;
+              border-radius: 20px;
+              font-size: 14px;
+              font-weight: bold;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 20px;
+              padding-top: 20px;
+              border-top: 1px solid #ddd;
+              color: #666;
+              font-size: 12px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🆕 New User Registration</h1>
+              <p>LegalIQ Platform</p>
+            </div>
+            <div class="content">
+              <div style="text-align: center; margin-bottom: 20px;">
+                <span class="badge">${role === 'lawyer' ? '⚖️ LAWYER' : '👤 CLIENT'}</span>
+              </div>
+              
+              <div class="field">
+                <span class="label">👤 Name:</span>
+                <div class="value">${name}</div>
+              </div>
+              
+              <div class="field">
+                <span class="label">📧 Email:</span>
+                <div class="value"><a href="mailto:${email}">${email}</a></div>
+              </div>
+              
+              <div class="field">
+                <span class="label">📞 Phone:</span>
+                <div class="value"><a href="tel:${phone}">${phone}</a></div>
+              </div>
+              
+              ${dateOfBirth ? `
+              <div class="field">
+                <span class="label">🎂 Date of Birth:</span>
+                <div class="value">${new Date(dateOfBirth).toLocaleDateString('en-IN')}</div>
+              </div>
+              ` : ''}
+              
+              ${gender ? `
+              <div class="field">
+                <span class="label">⚧ Gender:</span>
+                <div class="value">${gender}</div>
+              </div>
+              ` : ''}
+              
+              ${address ? `
+              <div class="field">
+                <span class="label">📍 Address:</span>
+                <div class="value">${address}</div>
+              </div>
+              ` : ''}
+              
+              <div class="footer">
+                <p>This user registered on the LegalIQ platform</p>
+                <p>Registered on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</p>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+New User Registration - LegalIQ
+
+User Type: ${role === 'lawyer' ? 'LAWYER' : 'CLIENT'}
+
+Name: ${name}
+Email: ${email}
+Phone: ${phone}
+${dateOfBirth ? `Date of Birth: ${new Date(dateOfBirth).toLocaleDateString('en-IN')}` : ''}
+${gender ? `Gender: ${gender}` : ''}
+${address ? `Address: ${address}` : ''}
+
+---
+Registered on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+      `
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('New user notification email sent successfully:', info.messageId);
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      console.error('Error sending new user notification email:', error);
+      // Don't throw error - registration should succeed even if email fails
+      return { success: false, error: error.message };
+    }
+  }
+
+  async sendNewConsultationNotification(consultationData) {
+    const {
+      clientName,
+      clientEmail,
+      clientPhone,
+      lawyerName,
+      lawyerEmail,
+      caseType,
+      caseDescription,
+      preferredDate,
+      preferredTime,
+      consultationType,
+      amount
+    } = consultationData;
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'noreply@legaliq.in',
+      to: this.recipientEmail,
+      subject: `📅 New Consultation Booking - ${consultationType === 'video' ? 'Video Call' : 'In-Person'}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              background-color: #f9f9f9;
+            }
+            .header {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 20px;
+              text-align: center;
+              border-radius: 8px 8px 0 0;
+            }
+            .content {
+              background: white;
+              padding: 30px;
+              border-radius: 0 0 8px 8px;
+            }
+            .section {
+              margin-bottom: 30px;
+              padding: 20px;
+              background: #f8f9fa;
+              border-radius: 8px;
+              border-left: 4px solid #667eea;
+            }
+            .section-title {
+              font-size: 18px;
+              font-weight: bold;
+              color: #667eea;
+              margin-bottom: 15px;
+            }
+            .field {
+              margin-bottom: 15px;
+            }
+            .label {
+              font-weight: bold;
+              color: #555;
+              display: block;
+              margin-bottom: 5px;
+            }
+            .value {
+              color: #333;
+              padding: 8px;
+              background: white;
+              border-radius: 4px;
+            }
+            .badge {
+              display: inline-block;
+              padding: 5px 15px;
+              background: ${consultationType === 'video' ? '#28a745' : '#007bff'};
+              color: white;
+              border-radius: 20px;
+              font-size: 14px;
+              font-weight: bold;
+            }
+            .amount {
+              font-size: 24px;
+              font-weight: bold;
+              color: #28a745;
+              text-align: center;
+              padding: 15px;
+              background: #e8f5e9;
+              border-radius: 8px;
+              margin: 20px 0;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 20px;
+              padding-top: 20px;
+              border-top: 1px solid #ddd;
+              color: #666;
+              font-size: 12px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>📅 New Consultation Booking</h1>
+              <p>LegalIQ Platform</p>
+            </div>
+            <div class="content">
+              <div style="text-align: center; margin-bottom: 20px;">
+                <span class="badge">${consultationType === 'video' ? '🎥 VIDEO CONSULTATION' : '🏢 IN-PERSON CONSULTATION'}</span>
+              </div>
+              
+              ${amount ? `
+              <div class="amount">
+                ₹${amount}
+              </div>
+              ` : ''}
+              
+              <div class="section">
+                <div class="section-title">👤 Client Information</div>
+                <div class="field">
+                  <span class="label">Name:</span>
+                  <div class="value">${clientName}</div>
+                </div>
+                <div class="field">
+                  <span class="label">Email:</span>
+                  <div class="value"><a href="mailto:${clientEmail}">${clientEmail}</a></div>
+                </div>
+                <div class="field">
+                  <span class="label">Phone:</span>
+                  <div class="value"><a href="tel:${clientPhone}">${clientPhone}</a></div>
+                </div>
+              </div>
+              
+              <div class="section">
+                <div class="section-title">⚖️ Lawyer Information</div>
+                <div class="field">
+                  <span class="label">Name:</span>
+                  <div class="value">${lawyerName}</div>
+                </div>
+                ${lawyerEmail ? `
+                <div class="field">
+                  <span class="label">Email:</span>
+                  <div class="value"><a href="mailto:${lawyerEmail}">${lawyerEmail}</a></div>
+                </div>
+                ` : ''}
+              </div>
+              
+              <div class="section">
+                <div class="section-title">📋 Consultation Details</div>
+                <div class="field">
+                  <span class="label">Case Type:</span>
+                  <div class="value">${caseType}</div>
+                </div>
+                <div class="field">
+                  <span class="label">Description:</span>
+                  <div class="value">${caseDescription}</div>
+                </div>
+                <div class="field">
+                  <span class="label">Preferred Date:</span>
+                  <div class="value">${new Date(preferredDate).toLocaleDateString('en-IN', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}</div>
+                </div>
+                <div class="field">
+                  <span class="label">Preferred Time:</span>
+                  <div class="value">${preferredTime}</div>
+                </div>
+              </div>
+              
+              <div class="footer">
+                <p>This consultation was booked on the LegalIQ platform</p>
+                <p>Booked on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</p>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+New Consultation Booking - LegalIQ
+
+Consultation Type: ${consultationType === 'video' ? 'VIDEO CONSULTATION' : 'IN-PERSON CONSULTATION'}
+${amount ? `Amount: ₹${amount}` : ''}
+
+CLIENT INFORMATION:
+Name: ${clientName}
+Email: ${clientEmail}
+Phone: ${clientPhone}
+
+LAWYER INFORMATION:
+Name: ${lawyerName}
+${lawyerEmail ? `Email: ${lawyerEmail}` : ''}
+
+CONSULTATION DETAILS:
+Case Type: ${caseType}
+Description: ${caseDescription}
+Preferred Date: ${new Date(preferredDate).toLocaleDateString('en-IN')}
+Preferred Time: ${preferredTime}
+
+---
+Booked on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+      `
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('New consultation notification email sent successfully:', info.messageId);
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      console.error('Error sending new consultation notification email:', error);
+      // Don't throw error - consultation should succeed even if email fails
+      return { success: false, error: error.message };
+    }
+  }
+
   // Update recipient email (for admin panel in future)
   updateRecipientEmail(newEmail) {
     this.recipientEmail = newEmail;

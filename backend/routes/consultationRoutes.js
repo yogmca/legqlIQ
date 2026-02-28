@@ -31,4 +31,9 @@ router.delete('/:id', consultationController.cancelConsultation);
 // Add review to consultation
 router.post('/:id/review', consultationController.addReview);
 
+// Lawyer actions on consultations
+router.post('/:id/accept', consultationController.acceptConsultation);
+router.post('/:id/reject', consultationController.rejectConsultation);
+router.post('/:id/reschedule', consultationController.rescheduleConsultation);
+
 module.exports = router;
