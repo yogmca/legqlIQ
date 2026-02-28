@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Logo from './Logo';
 import './ContactUs.css';
 
 const ContactUs = () => {
@@ -108,10 +109,12 @@ const ContactUs = () => {
 
   return (
     <div className="contact-us-page">
+      {/* Logo Header */}
+      <div className="contact-page-header">
+        <Logo variant="large" />
+      </div>
+
       <div className="contact-header">
-        <button onClick={() => navigate('/')} className="back-btn">
-          ← Back to Home
-        </button>
         <h1>Contact Us</h1>
         <p>We're here to help. Send us a message and we'll respond as soon as possible.</p>
       </div>

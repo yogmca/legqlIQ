@@ -1,32 +1,24 @@
 .contact-us-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  background: #ffffff;
+}
+
+/* Logo Header */
+.contact-page-header {
+  background: white;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .contact-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   text-align: center;
   color: white;
-  padding: 40px 20px;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.contact-header .back-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-}
-
-.contact-header .back-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateX(-5px);
+  padding: 3rem 2rem;
+  width: 100%;
 }
 
 .contact-header h1 {
@@ -43,6 +35,7 @@
 .contact-container {
   max-width: 1200px;
   margin: 40px auto;
+  padding: 0 20px;
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 30px;

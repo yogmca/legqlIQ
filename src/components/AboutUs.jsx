@@ -93,7 +93,7 @@ const AboutUs = () => {
       <section className="about-hero">
         <div className="about-hero-content">
           <h1 className="about-hero-title">
-            About <span className="gradient-text">LegalIQ</span>
+            About LegalIQ
           </h1>
           <p className="about-hero-subtitle">
             Revolutionizing Legal Services in India
