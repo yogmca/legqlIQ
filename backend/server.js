@@ -221,9 +221,12 @@ app.get('/api/lawyers', async (req, res) => {
     // Combine MongoDB lawyers with fallback data
     const allLawyers = [...dbLawyers, ...lawyersCache];
     
-    // Remove duplicates based on ID (handle both string and number IDs)
+    // Remove duplicates based on email and phone number (prioritize DB lawyers)
     const uniqueLawyers = allLawyers.filter((lawyer, index, self) =>
-      index === self.findIndex((l) => String(l.id) === String(lawyer.id))
+      index === self.findIndex((l) =>
+        (l.email && lawyer.email && l.email.toLowerCase() === lawyer.email.toLowerCase()) ||
+        (l.phone && lawyer.phone && l.phone.replace(/\s+/g, '') === lawyer.phone.replace(/\s+/g, ''))
+      )
     );
 
     const start = parseInt(offset);
@@ -284,9 +287,12 @@ app.get('/api/lawyers/search', async (req, res) => {
     const barCouncilResults = await searchBarCouncilDatabase(q);
     const allLawyers = [...dbLawyers, ...lawyersCache, ...barCouncilResults];
     
-    // Remove duplicates based on ID (handle both string and number IDs)
+    // Remove duplicates based on email and phone number (prioritize DB lawyers)
     const uniqueLawyers = allLawyers.filter((lawyer, index, self) =>
-      index === self.findIndex((l) => String(l.id) === String(lawyer.id))
+      index === self.findIndex((l) =>
+        (l.email && lawyer.email && l.email.toLowerCase() === lawyer.email.toLowerCase()) ||
+        (l.phone && lawyer.phone && l.phone.replace(/\s+/g, '') === lawyer.phone.replace(/\s+/g, ''))
+      )
     );
 
     // Filter lawyers
