@@ -81,7 +81,8 @@
           </div>
           <div className="lawyer-title">
             <h3>{lawyer.name}</h3>
-            <p className="bar-registration">Bar Reg: {lawyer.barRegistrationNo}</p>
+            {/* Hidden for privacy - Bar Registration Number not allowed to display publicly */}
+            <p className="bar-registration" style={{display: 'none'}}>Bar Reg: {lawyer.barRegistrationNo}</p>
           </div>
         </div>
 

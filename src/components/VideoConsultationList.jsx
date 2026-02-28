@@ -149,7 +149,8 @@ const VideoConsultationList = () => {
                     </div>
                     <div className="lawyer-info">
                       <h3>{lawyer.name}</h3>
-                      <p className="bar-reg">Bar Reg: {lawyer.barRegistrationNo}</p>
+                      {/* Hidden for privacy - Bar Registration Number not allowed to display publicly */}
+                      <p className="bar-reg" style={{display: 'none'}}>Bar Reg: {lawyer.barRegistrationNo}</p>
                       <div className="rating">
                         ⭐ 4.8 <span className="reviews">(120 reviews)</span>
                       </div>
