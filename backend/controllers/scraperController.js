@@ -62,6 +62,14 @@ exports.getChatResponse = async (req, res) => {
 
     console.log('Processing chatbot query with scraper:', message);
 
+    // Check if query is about LegalIQ platform - route to chatbot controller
+    const lowerMessage = message.toLowerCase();
+    if ((lowerMessage.includes('legaliq') || lowerMessage.includes('platform')) &&
+        (lowerMessage.includes('use') || lowerMessage.includes('how') || lowerMessage.includes('work'))) {
+      const chatbotController = require('./chatbotController');
+      return chatbotController.getChatResponse(req, res);
+    }
+
     const scrapedData = await webScraperService.searchLegalInfo(message);
 
     // Format the scraped data into a chatbot-friendly response
