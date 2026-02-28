@@ -477,15 +477,18 @@ const AppointmentManager = ({ userEmail }) => {
                 {/* Video Call and Cancel for Confirmed/Rescheduled Appointments */}
                 {(appointment.status === 'confirmed' || appointment.status === 'rescheduled' || appointment.status === 'pending_payment') && activeTab === 'upcoming' && !rescheduleData && (
                   <>
-                    <button
-                      className="btn-start-call"
-                      onClick={() => handleStartVideoCall(appointment)}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
-                      </svg>
-                      Start Video Call
-                    </button>
+                    {/* Show video call button ONLY for video consultations */}
+                    {appointment.consultationType === 'video' && (
+                      <button
+                        className="btn-start-call"
+                        onClick={() => handleStartVideoCall(appointment)}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                        </svg>
+                        Start Video Call
+                      </button>
+                    )}
                     {isLawyer && (
                       <button
                         className="btn-reschedule"
