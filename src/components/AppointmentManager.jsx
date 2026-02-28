@@ -115,6 +115,90 @@ const AppointmentManager = ({ userEmail }) => {
     }
   };
 
+  const handleAcceptAppointment = async (appointmentId) => {
+    if (!window.confirm('Accept this consultation request?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/consultations/${appointmentId}/accept`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authService.getToken()}`
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert('Consultation accepted successfully!');
+        fetchAppointments();
+      } else {
+        alert(data.message || 'Failed to accept consultation');
+      }
+    } catch (error) {
+      console.error('Error accepting appointment:', error);
+      alert('Failed to accept consultation');
+    }
+  };
+
+  const handleRejectAppointment = async (appointmentId) => {
+    const reason = prompt('Reason for rejection (optional):');
+    if (reason === null) return; // User cancelled
+
+    try {
+      const response = await fetch(`${API_URL}/consultations/${appointmentId}/reject`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authService.getToken()}`
+        },
+        body: JSON.stringify({ reason })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert('Consultation rejected');
+        fetchAppointments();
+      } else {
+        alert(data.message || 'Failed to reject consultation');
+      }
+    } catch (error) {
+      console.error('Error rejecting appointment:', error);
+      alert('Failed to reject consultation');
+    }
+  };
+
+  const [rescheduleData, setRescheduleData] = useState(null);
+
+  const handleRescheduleAppointment = async (appointmentId, newDate, newTime, reason) => {
+    try {
+      const response = await fetch(`${API_URL}/consultations/${appointmentId}/reschedule`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authService.getToken()}`
+        },
+        body: JSON.stringify({
+          preferredDate: newDate,
+          preferredTime: newTime,
+          reason
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert('Consultation rescheduled successfully!');
+        setRescheduleData(null);
+        fetchAppointments();
+      } else {
+        alert(data.message || 'Failed to reschedule consultation');
+      }
+    } catch (error) {
+      console.error('Error rescheduling appointment:', error);
+      alert('Failed to reschedule consultation');
+    }
+  };
+
   const handleCancelAppointment = async (appointmentId) => {
     if (!window.confirm('Are you sure you want to cancel this appointment?')) {
       return;
@@ -309,7 +393,80 @@ const AppointmentManager = ({ userEmail }) => {
               </div>
 
               <div className="appointment-actions">
-                {(appointment.status === 'confirmed' || appointment.status === 'pending_payment') && activeTab === 'upcoming' && (
+                {/* Lawyer Actions for Pending Consultations */}
+                {isLawyer && appointment.status === 'pending' && activeTab === 'upcoming' && !rescheduleData && (
+                  <>
+                    <button
+                      className="btn-accept"
+                      onClick={() => handleAcceptAppointment(appointment._id)}
+                      style={{backgroundColor: '#10b981', color: 'white', padding: '8px 16px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '500'}}
+                    >
+                      ✓ Accept
+                    </button>
+                    <button
+                      className="btn-reject"
+                      onClick={() => handleRejectAppointment(appointment._id)}
+                      style={{backgroundColor: '#ef4444', color: 'white', padding: '8px 16px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '500'}}
+                    >
+                      ✗ Reject
+                    </button>
+                    <button
+                      className="btn-reschedule"
+                      onClick={() => setRescheduleData(appointment)}
+                      style={{backgroundColor: '#f59e0b', color: 'white', padding: '8px 16px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '500'}}
+                    >
+                      📅 Reschedule
+                    </button>
+                  </>
+                )}
+
+                {/* Reschedule Form */}
+                {rescheduleData && rescheduleData._id === appointment._id && (
+                  <div className="reschedule-form" style={{marginTop: '10px', padding: '15px', background: '#f3f4f6', borderRadius: '8px'}}>
+                    <h4 style={{marginBottom: '10px', fontSize: '14px'}}>Reschedule Consultation</h4>
+                    <div style={{display: 'flex', gap: '10px', flexDirection: 'column'}}>
+                      <input
+                        type="date"
+                        id={`date-${appointment._id}`}
+                        defaultValue={appointment.preferredDate?.split('T')[0]}
+                        style={{padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db'}}
+                      />
+                      <input
+                        type="time"
+                        id={`time-${appointment._id}`}
+                        defaultValue={appointment.preferredTime}
+                        style={{padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db'}}
+                      />
+                      <textarea
+                        id={`reason-${appointment._id}`}
+                        placeholder="Reason for rescheduling (optional)"
+                        style={{padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db', minHeight: '60px'}}
+                      />
+                      <div style={{display: 'flex', gap: '10px'}}>
+                        <button
+                          onClick={() => {
+                            const newDate = document.getElementById(`date-${appointment._id}`).value;
+                            const newTime = document.getElementById(`time-${appointment._id}`).value;
+                            const reason = document.getElementById(`reason-${appointment._id}`).value;
+                            handleRescheduleAppointment(appointment._id, newDate, newTime, reason);
+                          }}
+                          style={{flex: 1, padding: '8px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500'}}
+                        >
+                          Confirm Reschedule
+                        </button>
+                        <button
+                          onClick={() => setRescheduleData(null)}
+                          style={{flex: 1, padding: '8px', backgroundColor: '#6b7280', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500'}}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Video Call and Cancel for Confirmed Appointments */}
+                {(appointment.status === 'confirmed' || appointment.status === 'pending_payment') && activeTab === 'upcoming' && !rescheduleData && (
                   <>
                     <button
                       className="btn-start-call"
@@ -320,6 +477,15 @@ const AppointmentManager = ({ userEmail }) => {
                       </svg>
                       Start Video Call
                     </button>
+                    {isLawyer && (
+                      <button
+                        className="btn-reschedule"
+                        onClick={() => setRescheduleData(appointment)}
+                        style={{backgroundColor: '#f59e0b', color: 'white', padding: '8px 16px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '500'}}
+                      >
+                        📅 Reschedule
+                      </button>
+                    )}
                     <button
                       className="btn-cancel"
                       onClick={() => handleCancelAppointment(appointment._id)}
@@ -328,6 +494,8 @@ const AppointmentManager = ({ userEmail }) => {
                     </button>
                   </>
                 )}
+
+                {/* Completed Status */}
                 {appointment.status === 'completed' && (
                   <div className="completed-info">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
