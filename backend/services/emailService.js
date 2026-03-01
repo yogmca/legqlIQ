@@ -627,6 +627,151 @@ Booked on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
     }
   }
 
+  async sendPasswordResetEmail(userEmail, userName, resetToken) {
+    const resetURL = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'noreply@legaliq.in',
+      to: userEmail,
+      subject: 'Password Reset Request - LegalIQ',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            .header {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 30px;
+              text-align: center;
+              border-radius: 8px 8px 0 0;
+            }
+            .content {
+              background: white;
+              padding: 30px;
+              border: 1px solid #ddd;
+              border-top: none;
+              border-radius: 0 0 8px 8px;
+            }
+            .button {
+              display: inline-block;
+              padding: 14px 32px;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white !important;
+              text-decoration: none;
+              border-radius: 6px;
+              margin: 20px 0;
+              font-weight: 600;
+              font-size: 16px;
+            }
+            .warning {
+              background: #fff3cd;
+              border-left: 4px solid #ffc107;
+              padding: 15px;
+              margin: 20px 0;
+              border-radius: 4px;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 20px;
+              padding-top: 20px;
+              border-top: 1px solid #ddd;
+              color: #666;
+              font-size: 12px;
+            }
+            .link {
+              color: #667eea;
+              word-break: break-all;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🔐 Password Reset Request</h1>
+            </div>
+            <div class="content">
+              <p>Dear ${userName},</p>
+              
+              <p>We received a request to reset your password for your LegalIQ account. If you didn't make this request, please ignore this email.</p>
+              
+              <p>To reset your password, click the button below:</p>
+              
+              <center>
+                <a href="${resetURL}" class="button">Reset Password</a>
+              </center>
+              
+              <p>Or copy and paste this link into your browser:</p>
+              <p class="link">${resetURL}</p>
+              
+              <div class="warning">
+                <strong>⚠️ Important:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                  <li>This link will expire in <strong>1 hour</strong></li>
+                  <li>For security reasons, you can only use this link once</li>
+                  <li>If you didn't request this reset, please secure your account immediately</li>
+                </ul>
+              </div>
+              
+              <p>If you're having trouble clicking the button, copy and paste the URL above into your web browser.</p>
+              
+              <p style="margin-top: 30px;">Best regards,<br><strong>The LegalIQ Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>LegalIQ - Your Trusted Legal Partner</p>
+              <p>This is an automated email. Please do not reply to this message.</p>
+              <p>If you need help, contact us at ${this.recipientEmail}</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+Password Reset Request - LegalIQ
+
+Dear ${userName},
+
+We received a request to reset your password for your LegalIQ account. If you didn't make this request, please ignore this email.
+
+To reset your password, visit this link:
+${resetURL}
+
+IMPORTANT:
+- This link will expire in 1 hour
+- For security reasons, you can only use this link once
+- If you didn't request this reset, please secure your account immediately
+
+If you're having trouble with the link, copy and paste it into your web browser.
+
+Best regards,
+The LegalIQ Team
+
+---
+This is an automated email. Please do not reply to this message.
+If you need help, contact us at ${this.recipientEmail}
+      `
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Password reset email sent successfully:', info.messageId);
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      throw error;
+    }
+  }
+
   // Update recipient email (for admin panel in future)
   updateRecipientEmail(newEmail) {
     this.recipientEmail = newEmail;

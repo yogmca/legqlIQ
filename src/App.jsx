@@ -4,6 +4,8 @@ import './App.css';
 import Homepage from './components/Homepage';
 import Login from './components/Login';
 import Register from './components/Register';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import SearchBar from './components/SearchBar';
 import FilterSection from './components/FilterSection';
 import LawyerCard from './components/LawyerCard';
@@ -366,6 +368,8 @@ function App() {
         <Route path="/" element={<Homepage />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/register" element={<Register onRegister={handleRegister} />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword onLogin={handleLogin} />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/lawyers" element={<LawyersDirectory />} />
