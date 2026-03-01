@@ -251,6 +251,68 @@
   color: white;
 }
 
+/* Latest Updates Section */
+.updates-section {
+  padding: 5rem 2rem;
+  background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+}
+
+.updates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.update-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border-left: 4px solid #667eea;
+}
+
+.update-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(102, 126, 234, 0.15);
+  border-left-color: #764ba2;
+}
+
+.update-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.update-icon {
+  font-size: 2.5rem;
+}
+
+.update-date {
+  font-size: 0.9rem;
+  color: #667eea;
+  font-weight: 600;
+  background: #e0e7ff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+}
+
+.update-card h3 {
+  font-size: 1.4rem;
+  margin: 0 0 1rem 0;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.update-card p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #4b5563;
+  margin: 0;
+}
+
 /* Features Section */
 .features-section {
   padding: 5rem 2rem;
@@ -456,6 +518,7 @@
 
   .values-grid,
   .features-grid,
+  .updates-grid,
   .team-grid {
     grid-template-columns: 1fr;
   }

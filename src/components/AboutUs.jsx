@@ -42,7 +42,12 @@ const AboutUs = () => {
     {
       icon: '💻',
       title: 'Video Consultations',
-      description: 'Connect with lawyers remotely through secure video calls from anywhere in India.'
+      description: 'Connect with lawyers remotely through secure video calls with real-time communication from anywhere in India.'
+    },
+    {
+      icon: '🤖',
+      title: 'AI Legal Assistant',
+      description: 'Get instant answers to legal questions with our intelligent AI chatbot.'
     },
     {
       icon: '💰',
@@ -50,14 +55,51 @@ const AboutUs = () => {
       description: 'No hidden fees. Know exactly what you\'re paying for before booking a consultation.'
     },
     {
+      icon: '👥',
+      title: 'Multi-Professional Platform',
+      description: 'Access not just lawyers, but also tax consultants, chartered accountants, and other verified professionals.'
+    },
+    {
+      icon: '📧',
+      title: 'Email Notifications',
+      description: 'Stay updated with automated email notifications for consultations, bookings, and important updates.'
+    },
+    {
       icon: '⚡',
       title: 'Quick Response',
-      description: 'Get connected with lawyers within minutes and receive prompt responses to your queries.'
+      description: 'Get connected with professionals within minutes and receive prompt responses to your queries.'
     },
     {
       icon: '📱',
       title: '24/7 Support',
       description: 'Our support team is available round the clock to assist you with any questions.'
+    }
+  ];
+
+  const latestUpdates = [
+    {
+      icon: '💻',
+      title: 'Video Consultation System',
+      date: 'February 2026',
+      description: 'Launched secure video consultation system for seamless lawyer-client communication from anywhere in India.'
+    },
+    {
+      icon: '🤖',
+      title: 'AI Chatbot Integration',
+      date: 'February 2026',
+      description: 'Integrated intelligent AI chatbot for instant legal query responses and guidance.'
+    },
+    {
+      icon: '🌐',
+      title: 'Multi-Professional Expansion',
+      date: 'January 2026',
+      description: 'Expanded platform to include tax consultants, chartered accountants, and other professional services.'
+    },
+    {
+      icon: '📧',
+      title: 'Email Notification System',
+      date: 'January 2026',
+      description: 'Automated email notifications for consultation bookings, confirmations, and updates using Gmail OAuth.'
     }
   ];
 
@@ -99,8 +141,8 @@ const AboutUs = () => {
             Revolutionizing Legal Services in India
           </p>
           <p className="about-hero-description">
-            LegalIQ is India's premier online platform connecting clients with verified legal professionals. 
-            We're on a mission to make quality legal assistance accessible, affordable, and transparent for everyone.
+            LegalIQ is India's premier online platform connecting clients with verified lawyers, tax consultants, and auditors.
+            We're on a mission to make quality professional services accessible, affordable, and transparent for everyone.
           </p>
           <div className="hero-buttons">
             <Link to="/lawyers" className="btn-primary">Find a Lawyer</Link>
@@ -145,19 +187,19 @@ const AboutUs = () => {
             <div className="story-text">
               <h2>Our Story</h2>
               <p>
-                LegalIQ was born from a simple observation: finding the right lawyer in India is often 
-                complicated, time-consuming, and opaque. We saw countless individuals struggling to access 
-                quality legal services, not knowing where to start or whom to trust.
+                LegalIQ was born from a simple observation: finding the right lawyer, tax consultant, or auditor in India is often
+                complicated, time-consuming, and opaque. We saw countless individuals struggling to access
+                quality professional services, not knowing where to start or whom to trust.
               </p>
               <p>
-                Founded in 2024, we set out to change this. By leveraging technology and building a network 
-                of verified legal professionals, we've created a platform that makes legal assistance as 
+                Founded in 2024, we set out to change this. By leveraging technology and building a network
+                of verified legal and financial professionals, we've created a platform that makes professional assistance as
                 simple as a few clicks.
               </p>
               <p>
-                Today, LegalIQ serves thousands of clients across India, connecting them with experienced 
-                lawyers in various specializations. From criminal law to corporate matters, family disputes 
-                to property issues, we're here to help.
+                Today, LegalIQ serves thousands of clients across India, connecting them with experienced
+                lawyers, tax consultants, chartered accountants, and auditors in various specializations. From criminal law to corporate matters,
+                family disputes to property issues, tax planning to financial audits, we're here to help.
               </p>
             </div>
             <div className="story-image">
@@ -166,6 +208,28 @@ const AboutUs = () => {
                 <p>Justice Made Accessible</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Latest Updates Section - NEW */}
+      <section className="updates-section">
+        <div className="section-container">
+          <h2 className="section-title">Latest Feature Updates</h2>
+          <p className="section-subtitle">
+            Continuously innovating to serve you better
+          </p>
+          <div className="updates-grid">
+            {latestUpdates.map((update, index) => (
+              <div key={index} className="update-card">
+                <div className="update-header">
+                  <div className="update-icon">{update.icon}</div>
+                  <span className="update-date">{update.date}</span>
+                </div>
+                <h3>{update.title}</h3>
+                <p>{update.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
