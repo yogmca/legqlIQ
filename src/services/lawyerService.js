@@ -15,10 +15,10 @@ const apiClient = axios.create({
 // Lawyer service for fetching data from backend API
 export const lawyerService = {
   // Fetch initial lawyers (limited count)
-  async fetchInitialLawyers(limit = 12) {
+  async fetchInitialLawyers(limit = 12, professionalType = 'lawyer') {
     try {
       const response = await apiClient.get('/lawyers', {
-        params: { limit, offset: 0 }
+        params: { limit, offset: 0, professionalType }
       });
       return response.data;
     } catch (error) {
@@ -28,7 +28,7 @@ export const lawyerService = {
   },
 
   // Search lawyers dynamically from backend
-  async searchLawyers(searchTerm, specialization, location, offset = 0, limit = 12) {
+  async searchLawyers(searchTerm, specialization, location, offset = 0, limit = 12, professionalType = 'lawyer') {
     try {
       const response = await apiClient.get('/lawyers/search', {
         params: {
@@ -36,7 +36,8 @@ export const lawyerService = {
           specialization,
           location,
           offset,
-          limit
+          limit,
+          professionalType
         }
       });
       return response.data;
@@ -47,8 +48,8 @@ export const lawyerService = {
   },
 
   // Load more lawyers
-  async loadMore(searchTerm, specialization, location, offset, limit = 12) {
-    return this.searchLawyers(searchTerm, specialization, location, offset, limit);
+  async loadMore(searchTerm, specialization, location, offset, limit = 12, professionalType = 'lawyer') {
+    return this.searchLawyers(searchTerm, specialization, location, offset, limit, professionalType);
   },
 
   // Refresh backend cache

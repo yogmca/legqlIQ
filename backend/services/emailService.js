@@ -253,12 +253,28 @@ Received on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
   }
 
   async sendNewUserNotification(userData) {
-    const { name, email, phone, role, dateOfBirth, gender, address } = userData;
+    const { name, email, phone, role, dateOfBirth, gender, address, professionalType } = userData;
+
+    // Determine display label for role/professional type
+    const roleLabel = role === 'lawyer' ? 'Lawyer' :
+                      role === 'tax-consultant' ? 'Tax Consultant' :
+                      role === 'auditor' ? 'Auditor' :
+                      professionalType === 'lawyer' ? 'Lawyer' :
+                      professionalType === 'tax-consultant' ? 'Tax Consultant' :
+                      professionalType === 'auditor' ? 'Auditor' : 'Client';
+
+    const roleIcon = role === 'lawyer' || professionalType === 'lawyer' ? '⚖️' :
+                     role === 'tax-consultant' || professionalType === 'tax-consultant' ? '💰' :
+                     role === 'auditor' || professionalType === 'auditor' ? '📊' : '👤';
+
+    const roleColor = role === 'lawyer' || professionalType === 'lawyer' ? '#28a745' :
+                      role === 'tax-consultant' || professionalType === 'tax-consultant' ? '#fd7e14' :
+                      role === 'auditor' || professionalType === 'auditor' ? '#007bff' : '#6c757d';
 
     const mailOptions = {
       from: process.env.EMAIL_USER || 'noreply@legaliq.in',
       to: this.recipientEmail,
-      subject: `🆕 New User Registration - ${role === 'lawyer' ? 'Lawyer' : 'Client'}`,
+      subject: `🆕 New ${roleLabel} Registration - LegalIQ`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -305,7 +321,7 @@ Received on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
             .badge {
               display: inline-block;
               padding: 5px 15px;
-              background: ${role === 'lawyer' ? '#28a745' : '#007bff'};
+              background: ${roleColor};
               color: white;
               border-radius: 20px;
               font-size: 14px;
@@ -329,7 +345,7 @@ Received on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
             </div>
             <div class="content">
               <div style="text-align: center; margin-bottom: 20px;">
-                <span class="badge">${role === 'lawyer' ? '⚖️ LAWYER' : '👤 CLIENT'}</span>
+                <span class="badge">${roleIcon} ${roleLabel.toUpperCase()}</span>
               </div>
               
               <div class="field">
@@ -380,7 +396,7 @@ Received on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
       text: `
 New User Registration - LegalIQ
 
-User Type: ${role === 'lawyer' ? 'LAWYER' : 'CLIENT'}
+User Type: ${roleLabel.toUpperCase()}
 
 Name: ${name}
 Email: ${email}
@@ -769,6 +785,280 @@ If you need help, contact us at ${this.recipientEmail}
     } catch (error) {
       console.error('Error sending password reset email:', error);
       throw error;
+    }
+  }
+
+  // Send welcome email to newly registered user
+  async sendWelcomeEmail(userEmail, userName, userRole, professionalType = 'user') {
+    // Determine professional type display
+    const profTypeDisplay = professionalType === 'lawyer' ? 'Lawyer' :
+                           professionalType === 'tax-consultant' ? 'Tax Consultant' :
+                           professionalType === 'auditor' ? 'Auditor' : 'Client';
+    
+    const profIcon = professionalType === 'lawyer' ? '⚖️' :
+                     professionalType === 'tax-consultant' ? '💰' :
+                     professionalType === 'auditor' ? '📊' : '👤';
+    
+    const profColor = professionalType === 'lawyer' ? '#28a745' :
+                      professionalType === 'tax-consultant' ? '#fd7e14' :
+                      professionalType === 'auditor' ? '#007bff' : '#6c757d';
+
+    // Personalized welcome message based on professional type
+    let welcomeMessage = '';
+    let nextSteps = '';
+    
+    if (professionalType === 'lawyer') {
+      welcomeMessage = 'Welcome to LegalIQ! We\'re excited to have you join our network of legal professionals.';
+      nextSteps = `
+        <li><strong>Complete Your Profile:</strong> Add your specializations, experience, and credentials</li>
+        <li><strong>Get Verified:</strong> Our team will review your bar registration details</li>
+        <li><strong>Start Receiving Clients:</strong> Once verified, clients can book consultations with you</li>
+        <li><strong>Set Your Availability:</strong> Manage your consultation schedule and fees</li>
+      `;
+    } else if (professionalType === 'tax-consultant') {
+      welcomeMessage = 'Welcome to LegalIQ! We\'re thrilled to have you join our network of tax professionals.';
+      nextSteps = `
+        <li><strong>Complete Your Profile:</strong> Add your specializations in tax planning, GST, compliance, etc.</li>
+        <li><strong>Get Verified:</strong> Our team will review your registration details</li>
+        <li><strong>Connect with Clients:</strong> Once verified, clients can book consultations with you</li>
+        <li><strong>Set Your Services:</strong> Define your consultation fees and availability</li>
+      `;
+    } else if (professionalType === 'auditor') {
+      welcomeMessage = 'Welcome to LegalIQ! We\'re delighted to have you join our network of audit professionals.';
+      nextSteps = `
+        <li><strong>Complete Your Profile:</strong> Add your audit specializations and certifications</li>
+        <li><strong>Get Verified:</strong> Our team will review your registration details</li>
+        <li><strong>Offer Your Services:</strong> Once verified, clients can book consultations with you</li>
+        <li><strong>Manage Your Schedule:</strong> Set your consultation fees and availability</li>
+      `;
+    } else {
+      welcomeMessage = 'Welcome to LegalIQ! We\'re glad to have you join our platform.';
+      nextSteps = `
+        <li><strong>Explore Professionals:</strong> Browse lawyers, tax consultants, and auditors</li>
+        <li><strong>Book Consultations:</strong> Schedule video calls or in-person meetings</li>
+        <li><strong>Get Expert Advice:</strong> Connect with verified professionals for your needs</li>
+        <li><strong>Secure & Convenient:</strong> All payments and communications are secure</li>
+      `;
+    }
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'noreply@legaliq.in',
+      to: userEmail,
+      subject: `Welcome to LegalIQ - Your Account is Ready! ${profIcon}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              margin: 0;
+              padding: 0;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              background-color: #f9f9f9;
+            }
+            .header {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 30px 20px;
+              text-align: center;
+              border-radius: 8px 8px 0 0;
+            }
+            .header h1 {
+              margin: 0;
+              font-size: 28px;
+            }
+            .content {
+              background: white;
+              padding: 30px;
+              border-radius: 0 0 8px 8px;
+            }
+            .badge {
+              display: inline-block;
+              padding: 8px 20px;
+              background: ${profColor};
+              color: white;
+              border-radius: 25px;
+              font-size: 14px;
+              font-weight: bold;
+              margin: 15px 0;
+            }
+            .welcome-text {
+              font-size: 16px;
+              color: #555;
+              margin: 20px 0;
+            }
+            .next-steps {
+              background: #f8f9fa;
+              padding: 20px;
+              border-radius: 8px;
+              margin: 20px 0;
+            }
+            .next-steps h3 {
+              color: #667eea;
+              margin-top: 0;
+            }
+            .next-steps ul {
+              padding-left: 20px;
+            }
+            .next-steps li {
+              margin: 10px 0;
+            }
+            .cta-button {
+              display: inline-block;
+              padding: 12px 30px;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              text-decoration: none;
+              border-radius: 25px;
+              font-weight: bold;
+              margin: 20px 0;
+            }
+            .features {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 15px;
+              margin: 20px 0;
+            }
+            .feature {
+              background: #f8f9fa;
+              padding: 15px;
+              border-radius: 8px;
+              text-align: center;
+            }
+            .feature-icon {
+              font-size: 32px;
+              margin-bottom: 10px;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 30px;
+              padding-top: 20px;
+              border-top: 1px solid #ddd;
+              color: #666;
+              font-size: 12px;
+            }
+            .support-box {
+              background: #fff3cd;
+              border-left: 4px solid #ffc107;
+              padding: 15px;
+              margin: 20px 0;
+              border-radius: 4px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🎉 Welcome to LegalIQ!</h1>
+              <p>India's Leading Professional Services Platform</p>
+            </div>
+            <div class="content">
+              <div style="text-align: center;">
+                <span class="badge">${profIcon} ${profTypeDisplay.toUpperCase()}</span>
+              </div>
+              
+              <p style="font-size: 18px; color: #333;"><strong>Dear ${userName},</strong></p>
+              
+              <p class="welcome-text">${welcomeMessage}</p>
+              
+              <div class="next-steps">
+                <h3>📋 Next Steps:</h3>
+                <ul>
+                  ${nextSteps}
+                </ul>
+              </div>
+
+              <div style="text-align: center;">
+                <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}" class="cta-button">
+                  Go to Dashboard →
+                </a>
+              </div>
+
+              <div class="features">
+                <div class="feature">
+                  <div class="feature-icon">🔒</div>
+                  <strong>Secure Platform</strong>
+                  <p style="font-size: 12px; color: #666;">Your data is protected</p>
+                </div>
+                <div class="feature">
+                  <div class="feature-icon">💳</div>
+                  <strong>Safe Payments</strong>
+                  <p style="font-size: 12px; color: #666;">Secure transactions</p>
+                </div>
+                <div class="feature">
+                  <div class="feature-icon">📱</div>
+                  <strong>24/7 Access</strong>
+                  <p style="font-size: 12px; color: #666;">Anytime, anywhere</p>
+                </div>
+                <div class="feature">
+                  <div class="feature-icon">⭐</div>
+                  <strong>Verified Pros</strong>
+                  <p style="font-size: 12px; color: #666;">Trusted professionals</p>
+                </div>
+              </div>
+
+              <div class="support-box">
+                <strong>📞 Need Help?</strong><br>
+                Our support team is here to assist you 24/7<br>
+                Email: <a href="mailto:${this.recipientEmail}">${this.recipientEmail}</a>
+              </div>
+
+              <div class="footer">
+                <p><strong>LegalIQ</strong> - Connecting You with the Right Professionals</p>
+                <p>This is an automated email. Please do not reply to this message.</p>
+                <p>© ${new Date().getFullYear()} LegalIQ. All rights reserved.</p>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+Welcome to LegalIQ!
+
+Dear ${userName},
+
+${welcomeMessage}
+
+You've successfully registered as a ${profTypeDisplay} on LegalIQ platform.
+
+NEXT STEPS:
+${nextSteps.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ')}
+
+Visit your dashboard: ${process.env.CLIENT_URL || 'http://localhost:5173'}
+
+PLATFORM FEATURES:
+✓ Secure Platform - Your data is protected
+✓ Safe Payments - Secure transactions
+✓ 24/7 Access - Anytime, anywhere
+✓ Verified Professionals - Trusted experts
+
+NEED HELP?
+Our support team is here to assist you 24/7
+Email: ${this.recipientEmail}
+
+---
+LegalIQ - Connecting You with the Right Professionals
+This is an automated email. Please do not reply to this message.
+© ${new Date().getFullYear()} LegalIQ. All rights reserved.
+      `
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Welcome email sent successfully to:', userEmail, info.messageId);
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      console.error('Error sending welcome email:', error);
+      // Don't throw error - registration should succeed even if email fails
+      return { success: false, error: error.message };
     }
   }
 

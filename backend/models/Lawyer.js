@@ -5,16 +5,23 @@ const lawyerSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    sparse: true // Allow null for lawyers not yet registered as users
+    sparse: true // Allow null for professionals not yet registered as users
+  },
+  // Professional type: lawyer, tax-consultant, or auditor
+  professionalType: {
+    type: String,
+    enum: ['lawyer', 'tax-consultant', 'auditor'],
+    default: 'lawyer',
+    required: [true, 'Please specify professional type']
   },
   name: {
     type: String,
-    required: [true, 'Please provide lawyer name'],
+    required: [true, 'Please provide name'],
     trim: true
   },
   email: {
     type: String,
-    required: [true, 'Please provide lawyer email'],
+    required: [true, 'Please provide email'],
     unique: true,
     lowercase: true,
     trim: true,
@@ -27,10 +34,25 @@ const lawyerSchema = new mongoose.Schema({
   },
   barRegistrationNo: {
     type: String,
-    required: [true, 'Please provide bar registration number'],
-    unique: true,
+    required: function() {
+      // Only required for lawyers
+      return this.professionalType === 'lawyer';
+    },
+    sparse: true, // Allow null for non-lawyers
     trim: true
   },
+  // Registration number for tax consultants and auditors
+  registrationNo: {
+    type: String,
+    required: function() {
+      // Required for tax consultants and auditors
+      return this.professionalType === 'tax-consultant' || this.professionalType === 'auditor';
+    },
+    sparse: true,
+    trim: true
+  },
+  // For lawyers: array of specializations (dropdown)
+  // For tax-consultant/auditor: stored as single-item array with text value
   specialization: [{
     type: String,
     required: true
@@ -122,10 +144,12 @@ lawyerSchema.pre('save', async function() {
 lawyerSchema.methods.getPublicProfile = function() {
   return {
     id: this._id,
+    professionalType: this.professionalType,
     name: this.name,
     email: this.email,
     phone: this.phone,
     barRegistrationNo: this.barRegistrationNo,
+    registrationNo: this.registrationNo,
     specialization: this.specialization,
     experience: this.experience,
     location: this.location,

@@ -93,50 +93,57 @@ app.use('/api/scraper', scraperRoutes);
 // Get initial lawyers - ONLY from MongoDB database
 app.get('/api/lawyers', async (req, res) => {
   try {
-    const { limit = 12, offset = 0 } = req.query;
+    const { limit = 12, offset = 0, professionalType = 'lawyer' } = req.query;
     const Lawyer = require('./models/Lawyer');
     
-    // Get lawyers from MongoDB ONLY
-    const lawyersFromDB = await Lawyer.find({ isVerified: true })
+    // Get professionals from MongoDB ONLY, filtered by professional type
+    const query = {
+      isVerified: true,
+      professionalType: professionalType
+    };
+    
+    const professionalsFromDB = await Lawyer.find(query)
       .sort({ createdAt: -1 }) // Sort by newest first
       .lean();
       
-    const dbLawyers = lawyersFromDB.map(lawyer => ({
-      id: lawyer._id.toString(),
-      name: lawyer.name,
-      barRegistrationNo: lawyer.barRegistrationNo,
-      specialization: lawyer.specialization,
-      experience: lawyer.experience,
-      location: lawyer.location,
-      court: lawyer.court,
-      phone: lawyer.phone,
-      email: lawyer.email,
-      address: lawyer.address,
-      languages: lawyer.languages,
-      education: lawyer.education,
-      description: lawyer.description,
-      rating: lawyer.rating || 0,
-      totalReviews: lawyer.totalReviews || 0
+    const dbProfessionals = professionalsFromDB.map(professional => ({
+      id: professional._id.toString(),
+      name: professional.name,
+      professionalType: professional.professionalType,
+      barRegistrationNo: professional.barRegistrationNo,
+      registrationNo: professional.registrationNo,
+      specialization: professional.specialization,
+      experience: professional.experience,
+      location: professional.location,
+      court: professional.court,
+      phone: professional.phone,
+      email: professional.email,
+      address: professional.address,
+      languages: professional.languages,
+      education: professional.education,
+      description: professional.description,
+      rating: professional.rating || 0,
+      totalReviews: professional.totalReviews || 0
     }));
     
-    console.log(`✅ Found ${dbLawyers.length} verified lawyers in MongoDB`);
+    console.log(`✅ Found ${dbProfessionals.length} verified ${professionalType}s in MongoDB`);
 
     const start = parseInt(offset);
     const end = start + parseInt(limit);
-    const paginatedLawyers = dbLawyers.slice(start, end);
+    const paginatedProfessionals = dbProfessionals.slice(start, end);
 
     res.json({
-      data: paginatedLawyers,
-      total: dbLawyers.length,
-      hasMore: end < dbLawyers.length,
+      data: paginatedProfessionals,
+      total: dbProfessionals.length,
+      hasMore: end < dbProfessionals.length,
       offset: start,
       limit: parseInt(limit)
     });
   } catch (error) {
-    console.error('❌ Error fetching lawyers from MongoDB:', error);
-    res.status(500).json({ 
-      error: 'Failed to fetch lawyers',
-      message: 'Please ensure MongoDB is connected and lawyers are registered'
+    console.error('❌ Error fetching professionals from MongoDB:', error);
+    res.status(500).json({
+      error: 'Failed to fetch professionals',
+      message: 'Please ensure MongoDB is connected and professionals are registered'
     });
   }
 });
@@ -144,49 +151,56 @@ app.get('/api/lawyers', async (req, res) => {
 // Search lawyers - ONLY from MongoDB database
 app.get('/api/lawyers/search', async (req, res) => {
   try {
-    const { q = '', specialization = 'All Specializations', location = 'All Locations', limit = 12, offset = 0 } = req.query;
+    const { q = '', specialization = 'All Specializations', location = 'All Locations', limit = 12, offset = 0, professionalType = 'lawyer' } = req.query;
     const Lawyer = require('./models/Lawyer');
 
-    // Get lawyers from MongoDB ONLY
-    const lawyersFromDB = await Lawyer.find({ isVerified: true })
+    // Get professionals from MongoDB ONLY, filtered by professional type
+    const query = {
+      isVerified: true,
+      professionalType: professionalType
+    };
+    
+    const professionalsFromDB = await Lawyer.find(query)
       .sort({ createdAt: -1 })
       .lean();
       
-    const dbLawyers = lawyersFromDB.map(lawyer => ({
-      id: lawyer._id.toString(),
-      name: lawyer.name,
-      barRegistrationNo: lawyer.barRegistrationNo,
-      specialization: lawyer.specialization,
-      experience: lawyer.experience,
-      location: lawyer.location,
-      court: lawyer.court,
-      phone: lawyer.phone,
-      email: lawyer.email,
-      address: lawyer.address,
-      languages: lawyer.languages,
-      education: lawyer.education,
-      description: lawyer.description,
-      rating: lawyer.rating || 0,
-      totalReviews: lawyer.totalReviews || 0
+    const dbProfessionals = professionalsFromDB.map(professional => ({
+      id: professional._id.toString(),
+      name: professional.name,
+      professionalType: professional.professionalType,
+      barRegistrationNo: professional.barRegistrationNo,
+      registrationNo: professional.registrationNo,
+      specialization: professional.specialization,
+      experience: professional.experience,
+      location: professional.location,
+      court: professional.court,
+      phone: professional.phone,
+      email: professional.email,
+      address: professional.address,
+      languages: professional.languages,
+      education: professional.education,
+      description: professional.description,
+      rating: professional.rating || 0,
+      totalReviews: professional.totalReviews || 0
     }));
 
-    console.log(`✅ Searching ${dbLawyers.length} lawyers in MongoDB`);
+    console.log(`✅ Searching ${dbProfessionals.length} ${professionalType}s in MongoDB`);
 
-    // Filter lawyers based on search criteria
-    const filtered = dbLawyers.filter(lawyer => {
+    // Filter professionals based on search criteria
+    const filtered = dbProfessionals.filter(professional => {
       const searchLower = q.toLowerCase();
       const matchesSearch = !q ||
-        lawyer.name.toLowerCase().includes(searchLower) ||
-        lawyer.location.toLowerCase().includes(searchLower) ||
-        (Array.isArray(lawyer.specialization) && lawyer.specialization.some(spec => spec.toLowerCase().includes(searchLower))) ||
-        lawyer.description.toLowerCase().includes(searchLower) ||
-        lawyer.court.toLowerCase().includes(searchLower);
+        professional.name.toLowerCase().includes(searchLower) ||
+        professional.location.toLowerCase().includes(searchLower) ||
+        (Array.isArray(professional.specialization) && professional.specialization.some(spec => spec.toLowerCase().includes(searchLower))) ||
+        professional.description.toLowerCase().includes(searchLower) ||
+        professional.court.toLowerCase().includes(searchLower);
 
       const matchesSpecialization = specialization === 'All Specializations' ||
-        (Array.isArray(lawyer.specialization) && lawyer.specialization.includes(specialization));
+        (Array.isArray(professional.specialization) && professional.specialization.includes(specialization));
 
       const matchesLocation = location === 'All Locations' ||
-        lawyer.location === location;
+        professional.location === location;
 
       return matchesSearch && matchesSpecialization && matchesLocation;
     });
@@ -203,10 +217,10 @@ app.get('/api/lawyers/search', async (req, res) => {
       limit: parseInt(limit)
     });
   } catch (error) {
-    console.error('❌ Error searching lawyers in MongoDB:', error);
-    res.status(500).json({ 
-      error: 'Failed to search lawyers',
-      message: 'Please ensure MongoDB is connected and lawyers are registered'
+    console.error('❌ Error searching professionals in MongoDB:', error);
+    res.status(500).json({
+      error: 'Failed to search professionals',
+      message: 'Please ensure MongoDB is connected and professionals are registered'
     });
   }
 });

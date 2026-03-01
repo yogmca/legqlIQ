@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import './App.css';
 import Homepage from './components/Homepage';
 import Login from './components/Login';
@@ -23,6 +23,9 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
 // Lawyers Directory Component
 function LawyersDirectory() {
+  const [searchParams] = useSearchParams();
+  const professionalType = searchParams.get('type') || 'lawyer'; // Default to lawyer
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialization, setSelectedSpecialization] = useState('All Specializations');
   const [selectedLocation, setSelectedLocation] = useState('All Locations');
@@ -33,10 +36,52 @@ function LawyersDirectory() {
   const [error, setError] = useState(null);
   const [offset, setOffset] = useState(0);
   const limit = 12;
+  
+  // Get display labels based on professional type
+  const getLabels = () => {
+    switch(professionalType) {
+      case 'tax-consultant':
+        return {
+          title: 'Tax Consultant Directory',
+          subtitle: 'Find and Connect with Tax Professionals',
+          singular: 'tax consultant',
+          plural: 'tax consultants',
+          loading: 'Loading tax consultants...',
+          noResults: 'No tax consultants found',
+          loadMore: 'Load More Tax Consultants'
+        };
+      case 'auditor':
+        return {
+          title: 'Auditor Directory',
+          subtitle: 'Find and Connect with Audit Professionals',
+          singular: 'auditor',
+          plural: 'auditors',
+          loading: 'Loading auditors...',
+          noResults: 'No auditors found',
+          loadMore: 'Load More Auditors'
+        };
+      default:
+        return {
+          title: 'Lawyer Directory',
+          subtitle: 'Find and Connect with Legal Professionals',
+          singular: 'lawyer',
+          plural: 'lawyers',
+          loading: 'Loading lawyers...',
+          noResults: 'No lawyers found',
+          loadMore: 'Load More Lawyers'
+        };
+    }
+  };
+  
+  const labels = getLabels();
 
+  // Re-fetch when professional type changes
   useEffect(() => {
+    setSearchTerm('');
+    setSelectedSpecialization('All Specializations');
+    setSelectedLocation('All Locations');
     fetchInitialLawyers();
-  }, []);
+  }, [professionalType]);
 
   useEffect(() => {
     if (searchTerm || selectedSpecialization !== 'All Specializations' || selectedLocation !== 'All Locations') {
@@ -48,8 +93,8 @@ function LawyersDirectory() {
     setLoading(true);
     setError(null);
     try {
-      const result = await lawyerService.fetchInitialLawyers(limit);
-      console.log('Fetched initial lawyers:', result);
+      const result = await lawyerService.fetchInitialLawyers(limit, professionalType);
+      console.log(`Fetched initial ${labels.plural}:`, result);
       if (result && result.data && Array.isArray(result.data)) {
         setLawyers(result.data);
         setTotalLawyers(result.total || 0);
@@ -59,8 +104,8 @@ function LawyersDirectory() {
         throw new Error('Invalid response format from server');
       }
     } catch (error) {
-      console.error('Error fetching lawyers:', error);
-      setError(error.message || 'Failed to load lawyers');
+      console.error(`Error fetching ${labels.plural}:`, error);
+      setError(error.message || `Failed to load ${labels.plural}`);
       setLawyers([]);
     } finally {
       setLoading(false);
@@ -76,7 +121,8 @@ function LawyersDirectory() {
         selectedSpecialization,
         selectedLocation,
         0,
-        limit
+        limit,
+        professionalType
       );
       console.log('Search results:', result);
       if (result && result.data && Array.isArray(result.data)) {
@@ -88,8 +134,8 @@ function LawyersDirectory() {
         throw new Error('Invalid response format from server');
       }
     } catch (error) {
-      console.error('Error searching lawyers:', error);
-      setError(error.message || 'Failed to search lawyers');
+      console.error(`Error searching ${labels.plural}:`, error);
+      setError(error.message || `Failed to search ${labels.plural}`);
       setLawyers([]);
     } finally {
       setLoading(false);
@@ -105,7 +151,8 @@ function LawyersDirectory() {
         selectedSpecialization,
         selectedLocation,
         offset,
-        limit
+        limit,
+        professionalType
       );
       
       console.log('Load more results:', result);
@@ -128,8 +175,8 @@ function LawyersDirectory() {
         throw new Error('Invalid response format from server');
       }
     } catch (error) {
-      console.error('Error loading more lawyers:', error);
-      setError(error.message || 'Failed to load more lawyers');
+      console.error(`Error loading more ${labels.plural}:`, error);
+      setError(error.message || `Failed to load more ${labels.plural}`);
     } finally {
       setLoading(false);
     }
@@ -150,8 +197,8 @@ function LawyersDirectory() {
       
       <header className="app-header">
         <div className="header-content">
-          <h1 className="app-title">Lawyer Directory</h1>
-          <p className="app-subtitle">Find and Connect with Legal Professionals</p>
+          <h1 className="app-title">{labels.title}</h1>
+          <p className="app-subtitle">{labels.subtitle}</p>
         </div>
       </header>
 
@@ -168,18 +215,19 @@ function LawyersDirectory() {
             onSpecializationChange={setSelectedSpecialization}
             onLocationChange={setSelectedLocation}
             onReset={handleReset}
+            professionalType={professionalType}
           />
 
           <div className="results-info">
             <p className="results-count">
-              Showing <strong>{lawyers.length}</strong> of <strong>{totalLawyers}</strong> {totalLawyers === 1 ? 'lawyer' : 'lawyers'}
+              Showing <strong>{lawyers.length}</strong> of <strong>{totalLawyers}</strong> {totalLawyers === 1 ? labels.singular : labels.plural}
             </p>
           </div>
 
           {error ? (
             <div className="no-results">
               <div className="no-results-icon">⚠️</div>
-              <h3>Error Loading Lawyers</h3>
+              <h3>Error Loading {labels.plural.charAt(0).toUpperCase() + labels.plural.slice(1)}</h3>
               <p>{error}</p>
               <button className="reset-btn-large" onClick={fetchInitialLawyers}>
                 Try Again
@@ -188,7 +236,7 @@ function LawyersDirectory() {
           ) : loading && lawyers.length === 0 ? (
             <div className="loading-container">
               <div className="loading-spinner"></div>
-              <p>Loading lawyers...</p>
+              <p>{labels.loading}</p>
             </div>
           ) : lawyers.length > 0 ? (
             <>
@@ -205,10 +253,10 @@ function LawyersDirectory() {
                     onClick={handleLoadMore}
                     disabled={loading}
                   >
-                    {loading ? 'Loading...' : 'Load More Lawyers'}
+                    {loading ? 'Loading...' : labels.loadMore}
                   </button>
                   <p className="load-more-text">
-                    {totalLawyers - lawyers.length} more lawyers available
+                    {totalLawyers - lawyers.length} more {labels.plural} available
                   </p>
                 </div>
               )}
@@ -216,7 +264,7 @@ function LawyersDirectory() {
           ) : (
             <div className="no-results">
               <div className="no-results-icon">🔍</div>
-              <h3>No lawyers found</h3>
+              <h3>{labels.noResults}</h3>
               <p>Try adjusting your search criteria or filters</p>
               <button className="reset-btn-large" onClick={handleReset}>
                 Reset All Filters

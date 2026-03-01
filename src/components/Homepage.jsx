@@ -11,7 +11,22 @@ const Homepage = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/lawyers?search=${encodeURIComponent(searchQuery)}`);
+      const query = searchQuery.toLowerCase();
+      
+      // Detect professional type from search query
+      let professionalType = 'lawyer'; // default
+      if (query.includes('tax') || query.includes('gst') || query.includes('income tax')) {
+        professionalType = 'tax-consultant';
+      } else if (query.includes('audit') || query.includes('auditor')) {
+        professionalType = 'auditor';
+      }
+      
+      // Navigate with appropriate type parameter
+      if (professionalType === 'lawyer') {
+        navigate(`/lawyers?search=${encodeURIComponent(searchQuery)}`);
+      } else {
+        navigate(`/lawyers?type=${professionalType}&search=${encodeURIComponent(searchQuery)}`);
+      }
     }
   };
 
@@ -34,8 +49,8 @@ const Homepage = () => {
   const features = [
     {
       icon: '🔍',
-      title: 'Find Verified Lawyers',
-      description: 'Search from thousands of verified legal professionals across India'
+      title: 'Find Verified Professionals',
+      description: 'Search from thousands of verified lawyers, tax consultants, and auditors across India'
     },
     {
       icon: '📅',
@@ -45,12 +60,12 @@ const Homepage = () => {
     {
       icon: '💻',
       title: 'Video Consultations',
-      description: 'Connect with lawyers remotely through secure video calls'
+      description: 'Connect with professionals remotely through secure video calls'
     },
     {
       icon: '📱',
       title: '24/7 Support',
-      description: 'Get legal assistance anytime, anywhere with our round-the-clock service'
+      description: 'Get legal, tax, and financial assistance anytime, anywhere with our round-the-clock service'
     }
   ];
 
@@ -70,21 +85,25 @@ const Homepage = () => {
           </div>
 
           <nav className="header-nav">
-            {(!user || user.role !== 'lawyer') && (
+            {(!user || (user.role !== 'lawyer' && user.role !== 'tax-consultant' && user.role !== 'auditor')) && (
               <>
                 <Link to="/lawyers" className="nav-link">Find Lawyers</Link>
-                <Link to="/video-consultations" className="nav-link">Video Consultation</Link>
+                <Link to="/lawyers?type=tax-consultant" className="nav-link">Tax Consultants</Link>
+                <Link to="/lawyers?type=auditor" className="nav-link">Auditors</Link>
               </>
             )}
             {user && <Link to="/appointments" className="nav-link">Appointments</Link>}
+            {user && <Link to="/video-consultations" className="nav-link">Video Calls</Link>}
             <Link to="/about" className="nav-link">About</Link>
             <Link to="/contact" className="nav-link">Contact</Link>
             
             {user ? (
               <div className="user-menu">
                 <span className="user-name">Hi, {user.name}</span>
-                {user.role === 'lawyer' && (
-                  <span className="role-badge">Lawyer</span>
+                {(user.role === 'lawyer' || user.role === 'tax-consultant' || user.role === 'auditor') && (
+                  <span className="role-badge">
+                    {user.role === 'lawyer' ? 'Lawyer' : user.role === 'tax-consultant' ? 'Tax Consultant' : 'Auditor'}
+                  </span>
                 )}
                 <button onClick={handleLogout} className="logout-btn">Logout</button>
               </div>
@@ -103,11 +122,11 @@ const Homepage = () => {
         <div className="hero-container">
           <div className="hero-content">
             <h1 className="hero-title">
-              Find the Right Lawyer
-              <span className="gradient-text"> for Your Legal Needs</span>
+              Find the Right Professional
+              <span className="gradient-text"> for Your Legal, Tax & Financial Needs</span>
             </h1>
             <p className="hero-subtitle">
-              Connect with verified legal professionals across India. Book consultations, get expert advice, and resolve your legal matters with confidence.
+              Connect with verified lawyers, tax consultants, and auditors across India. Book consultations, get expert advice, and resolve your legal and financial matters with confidence.
             </p>
 
             <form onSubmit={handleSearch} className="search-form">
@@ -115,7 +134,7 @@ const Homepage = () => {
                 <span className="search-icon">🔍</span>
                 <input
                   type="text"
-                  placeholder="Search for lawyers by name, specialization, or location..."
+                  placeholder="Search for lawyers, tax consultants, auditors by name, specialization, or location..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="search-input"
@@ -129,7 +148,7 @@ const Homepage = () => {
             <div className="quick-stats">
               <div className="stat">
                 <strong>10,000+</strong>
-                <span>Verified Lawyers</span>
+                <span>Verified Professionals</span>
               </div>
               <div className="stat">
                 <strong>50,000+</strong>
@@ -211,10 +230,10 @@ const Homepage = () => {
       {/* CTA Section */}
       <section className="cta-section">
         <div className="cta-container">
-          <h2>Ready to Get Legal Help?</h2>
-          <p>Join thousands of satisfied clients who found the right lawyer on LegalIQ</p>
+          <h2>Ready to Get Professional Help?</h2>
+          <p>Join thousands of satisfied clients who found the right professional on LegalIQ</p>
           <div className="cta-buttons">
-            <Link to="/lawyers" className="cta-primary">Find a Lawyer</Link>
+            <Link to="/lawyers" className="cta-primary">Find Professionals</Link>
             <Link to="/video-consultations" className="cta-secondary">Book Video Consultation</Link>
             {!user && <Link to="/register" className="cta-secondary">Create Account</Link>}
           </div>
@@ -234,12 +253,14 @@ const Homepage = () => {
               </div>
               <span>LegalIQ</span>
             </div>
-            <p>Your trusted legal partner for finding verified lawyers across India.</p>
+            <p>Your trusted partner for finding verified lawyers, tax consultants, and auditors across India.</p>
           </div>
 
           <div className="footer-section">
             <h4>Quick Links</h4>
             <Link to="/lawyers">Find Lawyers</Link>
+            <Link to="/lawyers?type=tax-consultant">Find Tax Consultants</Link>
+            <Link to="/lawyers?type=auditor">Find Auditors</Link>
             <Link to="/about">About Us</Link>
             <Link to="/contact">Contact</Link>
           </div>

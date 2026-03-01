@@ -54,6 +54,14 @@ exports.register = async (req, res) => {
       address: user.address
     }).catch(err => console.error('Failed to send new user notification:', err));
 
+    // Send welcome email to the newly registered user (non-blocking)
+    emailService.sendWelcomeEmail(
+      user.email,
+      user.name,
+      user.role || 'client',
+      'user' // Client registration
+    ).catch(err => console.error('Failed to send welcome email:', err));
+
     res.status(201).json({
       success: true,
       message: 'Registration successful',
@@ -188,14 +196,17 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-// Register new lawyer
+// Register new professional (lawyer, tax-consultant, or auditor)
 exports.registerLawyer = async (req, res) => {
   try {
     const {
       name, email, phone, password, dateOfBirth, gender, address,
-      barRegistrationNo, specialization, experience, location, court,
-      education, consultationFee
+      professionalType, barRegistrationNo, registrationNo, specialization,
+      experience, location, court, education, consultationFee
     } = req.body;
+
+    // Determine the professional type (default to 'lawyer' for backward compatibility)
+    const profType = professionalType || 'lawyer';
 
     // Check if email or phone already exists in User collection
     const existingUser = await User.findOne({
@@ -211,21 +222,28 @@ exports.registerLawyer = async (req, res) => {
       });
     }
 
-    // Check if email or bar registration number already exists in Lawyer collection
-    const existingLawyer = await Lawyer.findOne({
-      $or: [{ email }, { barRegistrationNo }]
-    });
+    // Check if email or registration number already exists in Lawyer collection
+    const registrationQuery = { email };
+    
+    // Add registration number check based on professional type
+    if (profType === 'lawyer' && barRegistrationNo) {
+      registrationQuery.$or = [{ email }, { barRegistrationNo }];
+    } else if ((profType === 'tax-consultant' || profType === 'auditor') && registrationNo) {
+      registrationQuery.$or = [{ email }, { registrationNo }];
+    }
 
-    if (existingLawyer) {
+    const existingProfessional = await Lawyer.findOne(registrationQuery);
+
+    if (existingProfessional) {
       return res.status(400).json({
         success: false,
-        message: existingLawyer.email === email
-          ? 'Email already registered as lawyer'
-          : 'Bar registration number already registered'
+        message: existingProfessional.email === email
+          ? `Email already registered as ${profType}`
+          : 'Registration number already registered'
       });
     }
 
-    // Create user account first with role 'lawyer'
+    // Create user account first with appropriate role
     const user = await User.create({
       name,
       email,
@@ -234,56 +252,89 @@ exports.registerLawyer = async (req, res) => {
       dateOfBirth,
       gender,
       address,
-      role: 'lawyer'
+      role: profType // 'lawyer', 'tax-consultant', or 'auditor'
     });
 
-    // Create lawyer profile
-    const lawyer = await Lawyer.create({
+    // Create professional profile
+    const professionalData = {
       userId: user._id,
+      professionalType: profType,
       name,
       email,
       phone,
-      barRegistrationNo,
       specialization,
       experience: parseInt(experience),
       location,
-      court,
       education,
       consultationFee: consultationFee ? parseInt(consultationFee) : 500
-    });
+    };
+
+    // Add registration number based on professional type
+    if (profType === 'lawyer') {
+      professionalData.barRegistrationNo = barRegistrationNo;
+      professionalData.court = court;
+    } else {
+      professionalData.registrationNo = registrationNo;
+      professionalData.court = court; // Used as office/firm name for tax consultants and auditors
+    }
+
+    const professional = await Lawyer.create(professionalData);
 
     // Generate token
     const token = generateToken(user._id);
 
     // Send notification email to admin (non-blocking)
-    emailService.sendNewUserNotification({
+    const notificationData = {
       name: user.name,
       email: user.email,
       phone: user.phone,
-      role: 'lawyer',
+      role: profType,
+      professionalType: profType,
       dateOfBirth: user.dateOfBirth,
       gender: user.gender,
       address: user.address,
-      barRegistrationNo: lawyer.barRegistrationNo,
-      specialization: lawyer.specialization,
-      experience: lawyer.experience
-    }).catch(err => console.error('Failed to send lawyer registration notification:', err));
+      specialization: professional.specialization,
+      experience: professional.experience
+    };
+
+    if (profType === 'lawyer') {
+      notificationData.barRegistrationNo = professional.barRegistrationNo;
+    } else {
+      notificationData.registrationNo = professional.registrationNo;
+    }
+
+    emailService.sendNewUserNotification(notificationData)
+      .catch(err => console.error(`Failed to send ${profType} registration notification:`, err));
+
+    // Send welcome email to the newly registered professional (non-blocking)
+    emailService.sendWelcomeEmail(
+      user.email,
+      user.name,
+      profType, // Role is the professional type
+      profType  // Professional type: lawyer, tax-consultant, or auditor
+    ).catch(err => console.error(`Failed to send welcome email to ${profType}:`, err));
+
+    // Prepare response message
+    const roleLabel = profType === 'lawyer' ? 'Lawyer' :
+                      profType === 'tax-consultant' ? 'Tax Consultant' : 'Auditor';
 
     res.status(201).json({
       success: true,
-      message: 'Lawyer registration successful',
+      message: `${roleLabel} registration successful`,
       token,
       user: {
         ...user.getPublicProfile(),
-        lawyerId: lawyer._id,
-        barRegistrationNo: lawyer.barRegistrationNo
+        professionalId: professional._id,
+        professionalType: profType,
+        barRegistrationNo: professional.barRegistrationNo,
+        registrationNo: professional.registrationNo
       }
     });
   } catch (error) {
-    console.error('Lawyer registration error:', error);
+    console.error('Professional registration error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Lawyer registration failed'
+      message: error.message || 'Professional registration failed'
     });
   }
 };

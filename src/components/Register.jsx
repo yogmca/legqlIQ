@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
 const Register = ({ onRegister }) => {
   const navigate = useNavigate();
-  const [userType, setUserType] = useState(''); // 'client' or 'lawyer'
+  const [userType, setUserType] = useState(''); // 'client', 'lawyer', 'tax-consultant', or 'auditor'
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -24,9 +24,12 @@ const Register = ({ onRegister }) => {
       state: '',
       pincode: ''
     },
-    // Lawyer-specific fields
-    barRegistrationNo: '',
-    specialization: [],
+    // Professional-specific fields
+    professionalType: '', // 'lawyer', 'tax-consultant', or 'auditor'
+    barRegistrationNo: '', // For lawyers only
+    registrationNo: '', // For tax consultants and auditors
+    specialization: [], // Array for lawyers, single text for others
+    specializationText: '', // Free text for tax consultants and auditors
     experience: '',
     location: '',
     court: '',
@@ -119,15 +122,33 @@ const Register = ({ onRegister }) => {
     return true;
   };
 
-  const validateLawyerFields = () => {
-    if (!formData.barRegistrationNo.trim()) {
-      setError('Please enter your Bar Registration Number');
-      return false;
+  const validateProfessionalFields = () => {
+    // Validate registration number based on professional type
+    if (userType === 'lawyer') {
+      if (!formData.barRegistrationNo.trim()) {
+        setError('Please enter your Bar Registration Number');
+        return false;
+      }
+    } else if (userType === 'tax-consultant' || userType === 'auditor') {
+      if (!formData.registrationNo.trim()) {
+        setError('Please enter your Registration Number');
+        return false;
+      }
     }
-    if (selectedSpecializations.length === 0) {
-      setError('Please select at least one specialization');
-      return false;
+    
+    // Validate specialization based on professional type
+    if (userType === 'lawyer') {
+      if (selectedSpecializations.length === 0) {
+        setError('Please select at least one specialization');
+        return false;
+      }
+    } else if (userType === 'tax-consultant' || userType === 'auditor') {
+      if (!formData.specializationText.trim()) {
+        setError('Please enter your specialization');
+        return false;
+      }
     }
+    
     if (!formData.experience || formData.experience < 0) {
       setError('Please enter valid years of experience');
       return false;
@@ -136,17 +157,20 @@ const Register = ({ onRegister }) => {
       setError('Please enter your location');
       return false;
     }
-    if (!formData.court.trim()) {
+    
+    // Court is only required for lawyers
+    if (userType === 'lawyer' && !formData.court.trim()) {
       setError('Please enter the court where you practice');
       return false;
     }
+    
     return true;
   };
 
   const handleNext = () => {
     if (step === 1 && validateStep1()) {
       setStep(2);
-    } else if (step === 2 && userType === 'lawyer' && validateLawyerFields()) {
+    } else if (step === 2 && (userType === 'lawyer' || userType === 'tax-consultant' || userType === 'auditor') && validateProfessionalFields()) {
       setStep(3);
     } else if (step === 2 && userType === 'client') {
       setStep(3);
@@ -159,18 +183,26 @@ const Register = ({ onRegister }) => {
     setLoading(true);
 
     try {
-      const { confirmPassword, ...registrationData } = formData;
+      const { confirmPassword, specializationText, ...registrationData } = formData;
       
       // Set role based on user type
       registrationData.role = userType;
       
-      // Update specialization array
+      // Set professional type for professionals
+      if (userType === 'lawyer' || userType === 'tax-consultant' || userType === 'auditor') {
+        registrationData.professionalType = userType;
+      }
+      
+      // Update specialization based on professional type
       if (userType === 'lawyer') {
         registrationData.specialization = selectedSpecializations;
+      } else if (userType === 'tax-consultant' || userType === 'auditor') {
+        // Store as array with single text value for consistency
+        registrationData.specialization = [specializationText];
       }
 
       // Choose endpoint based on user type
-      const endpoint = userType === 'lawyer'
+      const endpoint = (userType === 'lawyer' || userType === 'tax-consultant' || userType === 'auditor')
         ? `${API_URL}/auth/register-lawyer`
         : `${API_URL}/auth/register`;
       
@@ -220,11 +252,15 @@ const Register = ({ onRegister }) => {
             </div>
             <h1 className="logo-text">LegalIQ</h1>
           </Link>
-          <h2 className="tagline">Join India's Leading Legal Platform</h2>
+          <h2 className="tagline">Join India's Leading Legal, Tax & Financial Platform</h2>
           <p className="description">
-            {userType === 'lawyer' 
+            {userType === 'lawyer'
               ? 'Register as a lawyer and connect with clients seeking legal assistance.'
-              : 'Get access to thousands of verified lawyers, instant consultations, and comprehensive legal support.'}
+              : userType === 'tax-consultant'
+              ? 'Register as a tax consultant and help clients with tax planning and compliance.'
+              : userType === 'auditor'
+              ? 'Register as an auditor and provide professional auditing services to clients.'
+              : 'Get access to thousands of verified lawyers, tax consultants, and auditors for instant consultations.'}
           </p>
           <div className="stats">
             <div className="stat-item">
@@ -263,9 +299,9 @@ const Register = ({ onRegister }) => {
             <div className="progress-line"></div>
             <div className={`progress-step ${step >= 2 ? 'active' : ''}`}>
               <div className="step-number">3</div>
-              <span>{userType === 'lawyer' ? 'Professional' : 'Personal'}</span>
+              <span>{(userType === 'lawyer' || userType === 'tax-consultant' || userType === 'auditor') ? 'Professional' : 'Personal'}</span>
             </div>
-            {userType === 'lawyer' && (
+            {(userType === 'lawyer' || userType === 'tax-consultant' || userType === 'auditor') && (
               <>
                 <div className="progress-line"></div>
                 <div className={`progress-step ${step >= 3 ? 'active' : ''}`}>
@@ -290,8 +326,8 @@ const Register = ({ onRegister }) => {
                 <h3 style={{ textAlign: 'center', marginBottom: '30px', color: '#333' }}>
                   I want to register as:
                 </h3>
-                <div className="user-type-selection">
-                  <div 
+                <div className="user-type-selection" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
+                  <div
                     className={`user-type-card ${userType === 'client' ? 'selected' : ''}`}
                     onClick={() => setUserType('client')}
                   >
@@ -301,10 +337,10 @@ const Register = ({ onRegister }) => {
                       </svg>
                     </div>
                     <h4>Client</h4>
-                    <p>Find and consult with lawyers</p>
+                    <p>Find and consult with professionals</p>
                   </div>
                   
-                  <div 
+                  <div
                     className={`user-type-card ${userType === 'lawyer' ? 'selected' : ''}`}
                     onClick={() => setUserType('lawyer')}
                   >
@@ -317,11 +353,37 @@ const Register = ({ onRegister }) => {
                     <h4>Lawyer</h4>
                     <p>Offer legal services to clients</p>
                   </div>
+                  
+                  <div
+                    className={`user-type-card ${userType === 'tax-consultant' ? 'selected' : ''}`}
+                    onClick={() => setUserType('tax-consultant')}
+                  >
+                    <div className="user-type-icon">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.8 10.9C9.53 10.31 8.8 9.7 8.8 8.75C8.8 7.66 9.81 6.9 11.5 6.9C13.28 6.9 13.94 7.75 14 9H16.21C16.14 7.28 15.09 5.7 13 5.19V3H10V5.16C8.06 5.58 6.5 6.84 6.5 8.77C6.5 11.08 8.41 12.23 11.2 12.9C13.7 13.5 14.2 14.38 14.2 15.31C14.2 16 13.71 17.1 11.5 17.1C9.44 17.1 8.63 16.18 8.52 15H6.32C6.44 17.19 8.08 18.42 10 18.83V21H13V18.85C14.95 18.48 16.5 17.35 16.5 15.3C16.5 12.46 14.07 11.49 11.8 10.9Z" fill="currentColor"/>
+                      </svg>
+                    </div>
+                    <h4>Tax Consultant</h4>
+                    <p>Provide tax advisory services</p>
+                  </div>
+                  
+                  <div
+                    className={`user-type-card ${userType === 'auditor' ? 'selected' : ''}`}
+                    onClick={() => setUserType('auditor')}
+                  >
+                    <div className="user-type-icon">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 17H7V10H9V17ZM13 17H11V7H13V17ZM17 17H15V13H17V17ZM19 19H5V5H19V19ZM19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3Z" fill="currentColor"/>
+                      </svg>
+                    </div>
+                    <h4>Auditor</h4>
+                    <p>Offer auditing & compliance services</p>
+                  </div>
                 </div>
                 
-                <button 
-                  type="button" 
-                  onClick={() => userType && setStep(1)} 
+                <button
+                  type="button"
+                  onClick={() => userType && setStep(1)}
                   className="next-button"
                   disabled={!userType}
                   style={{ marginTop: '30px' }}
@@ -450,37 +512,82 @@ const Register = ({ onRegister }) => {
               </div>
             )}
 
-            {/* Step 2: Lawyer Professional Details OR Client Personal Details */}
-            {step === 2 && userType === 'lawyer' && (
+            {/* Step 2: Professional Details (Lawyer/Tax Consultant/Auditor) OR Client Personal Details */}
+            {step === 2 && (userType === 'lawyer' || userType === 'tax-consultant' || userType === 'auditor') && (
               <div className="form-step">
                 <h3 style={{ marginBottom: '20px', color: '#333' }}>Professional Information</h3>
                 
+                {/* Registration Number - Different for each type */}
                 <div className="form-group">
-                  <label htmlFor="barRegistrationNo">Bar Registration Number *</label>
-                  <input
-                    type="text"
-                    id="barRegistrationNo"
-                    name="barRegistrationNo"
-                    value={formData.barRegistrationNo}
-                    onChange={handleChange}
-                    placeholder="e.g., KAR/2015/12345"
-                    required
-                  />
+                  {userType === 'lawyer' ? (
+                    <>
+                      <label htmlFor="barRegistrationNo">Bar Registration Number *</label>
+                      <input
+                        type="text"
+                        id="barRegistrationNo"
+                        name="barRegistrationNo"
+                        value={formData.barRegistrationNo}
+                        onChange={handleChange}
+                        placeholder="e.g., KAR/2015/12345"
+                        required
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <label htmlFor="registrationNo">
+                        {userType === 'tax-consultant' ? 'Tax Consultant Registration Number *' : 'Auditor Registration Number *'}
+                      </label>
+                      <input
+                        type="text"
+                        id="registrationNo"
+                        name="registrationNo"
+                        value={formData.registrationNo}
+                        onChange={handleChange}
+                        placeholder={userType === 'tax-consultant' ? 'e.g., TC/2020/12345' : 'e.g., AUD/2020/12345'}
+                        required
+                      />
+                    </>
+                  )}
                 </div>
 
+                {/* Specialization - Dropdown for lawyers, text for others */}
                 <div className="form-group">
-                  <label>Specialization * (Select at least one)</label>
-                  <div className="specialization-grid">
-                    {specializationOptions.map(spec => (
-                      <div 
-                        key={spec}
-                        className={`specialization-chip ${selectedSpecializations.includes(spec) ? 'selected' : ''}`}
-                        onClick={() => handleSpecializationToggle(spec)}
-                      >
-                        {spec}
+                  {userType === 'lawyer' ? (
+                    <>
+                      <label>Specialization * (Select at least one)</label>
+                      <div className="specialization-grid">
+                        {specializationOptions.map(spec => (
+                          <div
+                            key={spec}
+                            className={`specialization-chip ${selectedSpecializations.includes(spec) ? 'selected' : ''}`}
+                            onClick={() => handleSpecializationToggle(spec)}
+                          >
+                            {spec}
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </>
+                  ) : (
+                    <>
+                      <label htmlFor="specializationText">Specialization *</label>
+                      <input
+                        type="text"
+                        id="specializationText"
+                        name="specializationText"
+                        value={formData.specializationText}
+                        onChange={handleChange}
+                        placeholder={
+                          userType === 'tax-consultant'
+                            ? 'e.g., GST, Income Tax, Corporate Tax'
+                            : 'e.g., Internal Audit, Statutory Audit, Tax Audit'
+                        }
+                        required
+                      />
+                      <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                        Enter your areas of expertise
+                      </small>
+                    </>
+                  )}
                 </div>
 
                 <div className="form-row">
@@ -530,18 +637,34 @@ const Register = ({ onRegister }) => {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label htmlFor="court">Court *</label>
-                    <input
-                      type="text"
-                      id="court"
-                      name="court"
-                      value={formData.court}
-                      onChange={handleChange}
-                      placeholder="e.g., Karnataka High Court"
-                      required
-                    />
-                  </div>
+                  {userType === 'lawyer' && (
+                    <div className="form-group">
+                      <label htmlFor="court">Court *</label>
+                      <input
+                        type="text"
+                        id="court"
+                        name="court"
+                        value={formData.court}
+                        onChange={handleChange}
+                        placeholder="e.g., Karnataka High Court"
+                        required
+                      />
+                    </div>
+                  )}
+                  
+                  {(userType === 'tax-consultant' || userType === 'auditor') && (
+                    <div className="form-group">
+                      <label htmlFor="court">Office/Firm Name</label>
+                      <input
+                        type="text"
+                        id="court"
+                        name="court"
+                        value={formData.court}
+                        onChange={handleChange}
+                        placeholder="e.g., ABC Consultancy Services"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="form-group">
@@ -552,7 +675,13 @@ const Register = ({ onRegister }) => {
                     name="education"
                     value={formData.education}
                     onChange={handleChange}
-                    placeholder="e.g., LLB from National Law School"
+                    placeholder={
+                      userType === 'lawyer'
+                        ? 'e.g., LLB from National Law School'
+                        : userType === 'tax-consultant'
+                        ? 'e.g., CA, CMA, MBA (Finance)'
+                        : 'e.g., CA, ICWA, CPA'
+                    }
                   />
                 </div>
 
@@ -661,8 +790,8 @@ const Register = ({ onRegister }) => {
               </div>
             )}
 
-            {/* Step 3: Lawyer Personal Details */}
-            {step === 3 && userType === 'lawyer' && (
+            {/* Step 3: Professional Personal Details */}
+            {step === 3 && (userType === 'lawyer' || userType === 'tax-consultant' || userType === 'auditor') && (
               <div className="form-step">
                 <h3 style={{ marginBottom: '20px', color: '#333' }}>Personal Information</h3>
                 

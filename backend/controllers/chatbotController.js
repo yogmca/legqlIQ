@@ -129,17 +129,22 @@ function getIntelligentResponse(message) {
   }
   
   // LegalIQ platform queries
-  if (lowerMessage.includes('legaliq') || lowerMessage.includes('use') || lowerMessage.includes('platform') || lowerMessage.includes('how to')) {
-    return `**How to Use LegalIQ**\n\nLegalIQ is India's leading legal platform connecting you with verified lawyers:\n\n1. **Search Lawyers:** Filter by specialization (criminal, family, corporate, etc.) and location\n2. **View Profiles:** Check lawyer ratings, reviews, experience, and fees\n3. **Book Consultation:** Schedule video consultations 24/7 at your convenience\n4. **Secure Payment:** Pay securely through our platform\n5. **Get Expert Advice:** Connect with lawyers via video call and get professional legal guidance\n\nOur lawyers specialize in all areas of Indian law and are ready to help you!`;
+  if (lowerMessage.includes('legaliq') || lowerMessage.includes('what is legaliq')) {
+    return `**What is LegalIQ?**\n\nLegalIQ is India's leading professional services platform connecting you with verified experts:\n\n🏛️ **Lawyers** - Legal professionals for all your legal matters\n💰 **Tax Consultants** - Tax and GST experts for financial compliance\n📊 **Auditors** - Audit professionals for financial verification\n\n**Key Features:**\n• 10,000+ verified professionals across India\n• Search by specialization and location\n• Book video consultations 24/7\n• Secure payment and data protection\n• Expert advice from experienced professionals\n\nWhether you need legal advice, tax planning, or audit services, LegalIQ connects you with the right professional!`;
+  }
+  
+  // How to use LegalIQ
+  if (lowerMessage.includes('how to use') || lowerMessage.includes('how do i use') || lowerMessage.includes('use legaliq')) {
+    return `**How to Use LegalIQ**\n\n**Step 1: Find Professionals**\n• Click "Find Lawyers", "Tax Consultants", or "Auditors"\n• Filter by specialization and location\n• View detailed profiles with ratings and experience\n\n**Step 2: Book Consultation**\n• Choose between in-person visit or video consultation\n• Select convenient date and time\n• Make secure payment\n\n**Step 3: Get Expert Advice**\n• Receive booking confirmation via email\n• Join video call at scheduled time\n• Get professional guidance for your needs\n\n**Need Help?** Our support team is available 24/7 at support@legaliq.in`;
   }
   
   // Greeting
   if (lowerMessage.match(/^(hi|hello|hey|namaste)/)) {
-    return `Hello! I'm your LegalIQ AI Assistant. I can help you with:\n\n• Indian Penal Code (IPC) sections\n• Legal procedures (FIR, bail, PIL, divorce)\n• Fundamental and legal rights\n• How to use LegalIQ platform\n\nWhat would you like to know about Indian law?`;
+    return `Hello! I'm your LegalIQ AI Assistant. I can help you with:\n\n• Indian Penal Code (IPC) sections\n• Legal procedures (FIR, bail, PIL, divorce)\n• Fundamental and legal rights\n• How to use LegalIQ platform\n• Finding lawyers, tax consultants, and auditors\n\nWhat would you like to know?`;
   }
   
   // Default response with suggestions
-  return `I can help you with information about Indian law. Here are some topics I can assist with:\n\n**IPC Sections:** Ask about any IPC section (e.g., "What is IPC 420?")\n**Legal Procedures:** FIR filing, bail, PIL, divorce procedures\n**Rights:** Fundamental rights, consumer rights, women's rights\n**LegalIQ Platform:** How to find and consult lawyers\n\nFor personalized legal advice specific to your situation, I recommend consulting with one of our verified lawyers on LegalIQ. They're available 24/7 for video consultations.\n\nWhat would you like to know?`;
+  return `I can help you with information about Indian law and the LegalIQ platform:\n\n**Legal Information:**\n• IPC Sections (e.g., "What is IPC 420?")\n• Legal Procedures (FIR, bail, PIL, divorce)\n• Rights (fundamental, consumer, women's rights)\n\n**LegalIQ Platform:**\n• What is LegalIQ?\n• How to use LegalIQ?\n• Finding professionals\n\n**Get Professional Help:**\nFor personalized advice, consult our verified professionals:\n• Lawyers for legal matters\n• Tax Consultants for tax planning\n• Auditors for financial audits\n\nWhat would you like to know?`;
 }
 
 // Health check endpoint

@@ -8,9 +8,44 @@ const FilterSection = ({
   selectedLocation,
   onSpecializationChange,
   onLocationChange,
-  onReset
+  onReset,
+  professionalType = 'lawyer'
 }) => {
   const [useAutocomplete, setUseAutocomplete] = useState(false);
+
+  // Get specializations based on professional type
+  const getSpecializations = () => {
+    switch(professionalType) {
+      case 'tax-consultant':
+        return [
+          'All Specializations',
+          'Income Tax',
+          'GST',
+          'Corporate Tax',
+          'International Tax',
+          'Tax Planning',
+          'Tax Audit',
+          'Transfer Pricing',
+          'Indirect Tax'
+        ];
+      case 'auditor':
+        return [
+          'All Specializations',
+          'Statutory Audit',
+          'Internal Audit',
+          'Tax Audit',
+          'Forensic Audit',
+          'Information Systems Audit',
+          'Compliance Audit',
+          'Operational Audit',
+          'Financial Audit'
+        ];
+      default:
+        return specializations; // Lawyer specializations
+    }
+  };
+
+  const currentSpecializations = getSpecializations();
 
   return (
     <div className="filter-section">
@@ -24,7 +59,7 @@ const FilterSection = ({
           value={selectedSpecialization}
           onChange={(e) => onSpecializationChange(e.target.value)}
         >
-          {specializations.map((spec, index) => (
+          {currentSpecializations.map((spec, index) => (
             <option key={index} value={spec}>
               {spec}
             </option>
