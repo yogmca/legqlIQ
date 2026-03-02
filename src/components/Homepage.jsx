@@ -74,15 +74,9 @@ const Homepage = () => {
       {/* Header */}
       <header className="homepage-header">
         <div className="header-container">
-          <div className="logo-section">
-            <div className="logo-icon">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L3 7V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V7L12 2Z" fill="currentColor"/>
-                <path d="M10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z" fill="white"/>
-              </svg>
-            </div>
-            <h1 className="logo-text">LegalIQ</h1>
-          </div>
+          <Link to="/" className="logo-section">
+            <img src="/LegalIQ-Combined.png" alt="LegalIQ" className="combined-logo" />
+          </Link>
 
           <nav className="header-nav">
             {(!user || (user.role !== 'lawyer' && user.role !== 'tax-consultant' && user.role !== 'auditor')) && (
@@ -245,13 +239,7 @@ const Homepage = () => {
         <div className="footer-container">
           <div className="footer-section">
             <div className="footer-logo">
-              <div className="logo-icon">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L3 7V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V7L12 2Z" fill="currentColor"/>
-                  <path d="M10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z" fill="white"/>
-                </svg>
-              </div>
-              <span>LegalIQ</span>
+              <img src="/LegalIQ-Combined.png" alt="LegalIQ" className="combined-logo" />
             </div>
             <p>Your trusted partner for finding verified lawyers, tax consultants, and auditors across India.</p>
           </div>
