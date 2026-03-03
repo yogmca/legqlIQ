@@ -26,6 +26,7 @@
   align-items: center;
   gap: 4px;
   text-decoration: none;
+  margin-left: -20px;
 }
 
 .logo-section .logo-image {
