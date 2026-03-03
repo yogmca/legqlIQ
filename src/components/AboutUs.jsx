@@ -128,7 +128,10 @@ const AboutUs = () => {
     <div className="about-us-page">
       {/* Logo Header */}
       <div className="about-page-header">
-        <Logo variant="large" />
+        <Link to="/" className="logo-section">
+          <img src="/Legaliq.jpg" alt="LegalIQ Logo" className="logo-image" />
+          <h1 className="logo-text">LegalIQ</h1>
+        </Link>
       </div>
 
       {/* Hero Section */}
