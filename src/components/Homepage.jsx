@@ -75,7 +75,8 @@ const Homepage = () => {
       <header className="homepage-header">
         <div className="header-container">
           <Link to="/" className="logo-section">
-            <img src="/LegalIQ-Combined.png" alt="LegalIQ" className="combined-logo" />
+            <img src="/Legaliq.jpg" alt="LegalIQ Logo" className="logo-image" />
+            <h1 className="logo-text">LegalIQ</h1>
           </Link>
 
           <nav className="header-nav">
@@ -239,7 +240,8 @@ const Homepage = () => {
         <div className="footer-container">
           <div className="footer-section">
             <div className="footer-logo">
-              <img src="/LegalIQ-Combined.png" alt="LegalIQ" className="combined-logo" />
+              <img src="/Legaliq.jpg" alt="LegalIQ Logo" className="logo-image" />
+              <span>LegalIQ</span>
             </div>
             <p>Your trusted partner for finding verified lawyers, tax consultants, and auditors across India.</p>
           </div>

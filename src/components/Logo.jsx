@@ -4,7 +4,12 @@ import './Logo.css';
 const Logo = ({ variant = 'default' }) => {
   return (
     <Link to="/" className={`logo-link ${variant}`}>
-      <img src="/LegalIQ-Combined.png" alt="LegalIQ" className="combined-logo" />
+      <div className="logo-container">
+        <div className="logo-icon">
+          <img src="/Legaliq.jpg" alt="LegalIQ Logo" className="logo-image" />
+        </div>
+        <span className="logo-text">LegalIQ</span>
+      </div>
     </Link>
   );
 };
