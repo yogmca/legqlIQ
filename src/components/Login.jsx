@@ -103,15 +103,11 @@ const Login = ({ onLogin }) => {
     <div className="login-container">
       <div className="login-left">
         <div className="login-branding">
-          <div className="logo-section">
+          <Link to="/" className="logo-section">
             <div className="logo-icon">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L3 7V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V7L12 2Z" fill="currentColor"/>
-                <path d="M10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z" fill="white"/>
-              </svg>
+              <img src="/Legaliq-login.png?v=3" alt="LegalIQ Logo" className="logo-image" />
             </div>
-            <h1 className="logo-text">LegalIQ</h1>
-          </div>
+          </Link>
           <h2 className="tagline">Your Trusted Legal Partner</h2>
           <p className="description">
             Connect with verified lawyers, book consultations, and get expert legal advice - all in one place.

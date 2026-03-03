@@ -24,13 +24,15 @@
 .logo-section {
   display: flex;
   align-items: center;
+  gap: 8px;
   text-decoration: none;
 }
 
-.combined-logo {
-  height: 75px;
-  width: auto;
+.logo-section .logo-image {
+  width: 120px;
+  height: 120px;
   object-fit: contain;
+  border-radius: 0;
 }
 
 .logo-icon svg {
@@ -528,13 +530,17 @@
 .footer-logo {
   display: flex;
   align-items: center;
+  gap: 8px;
   margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: 700;
 }
 
-.footer-logo .combined-logo {
-  height: 60px;
-  width: auto;
+.footer-logo .logo-image {
+  width: 80px;
+  height: 80px;
   object-fit: contain;
+  border-radius: 0;
 }
 
 .footer-bottom {

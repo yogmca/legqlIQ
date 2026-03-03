@@ -33,9 +33,12 @@
 }
 
 .login-branding {
-  max-width: 500px;
+  max-width: 100%;
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .logo-section {
@@ -43,17 +46,25 @@
   align-items: center;
   gap: 15px;
   margin-bottom: 30px;
+  justify-content: flex-start;
 }
 
 .logo-icon {
-  width: 60px;
-  height: 60px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  width: auto !important;
+  height: 150px !important;
+  background: transparent;
+  border-radius: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(10px);
+  justify-content: flex-start;
+  backdrop-filter: none;
+}
+
+.logo-icon .logo-image {
+  width: auto;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
 }
 
 .logo-icon svg {
@@ -64,9 +75,12 @@
 
 .logo-text {
   font-size: 42px;
-  font-weight: 700;
+  font-weight: 900;
   margin: 0;
   letter-spacing: -1px;
+  color: #1e3a8a !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .tagline {
@@ -354,8 +368,8 @@
   }
 
   .logo-icon {
-    width: 50px;
-    height: 50px;
+    width: auto;
+    height: 200px;
   }
 
   .logo-icon svg {
