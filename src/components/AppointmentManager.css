@@ -20,28 +20,43 @@
   gap: 16px;
 }
 
-.home-link {
+.appointment-nav .logo-section {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  gap: 4px;
   text-decoration: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
-  transition: all 0.3s ease;
 }
 
-.home-link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+.appointment-nav .logo-section:hover {
+  transform: none;
 }
 
-.home-link svg {
-  width: 18px;
-  height: 18px;
+.appointment-nav .logo-section .logo-image {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 0;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.appointment-nav .logo-section .logo-image:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
+}
+
+.appointment-nav .logo-text {
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
 }
 
 .appointment-header {

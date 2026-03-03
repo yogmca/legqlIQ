@@ -272,11 +272,9 @@ const AppointmentManager = ({ userEmail }) => {
     <div className="appointment-manager">
       <div className="appointment-container">
         <div className="appointment-nav">
-          <Link to="/" className="home-link">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-            </svg>
-            Home
+          <Link to="/" className="logo-section">
+            <img src="/Legaliq.jpg" alt="LegalIQ Logo" className="logo-image" />
+            <h1 className="logo-text">LegalIQ</h1>
           </Link>
         </div>
 
