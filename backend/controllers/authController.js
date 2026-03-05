@@ -266,7 +266,9 @@ exports.registerLawyer = async (req, res) => {
       experience: parseInt(experience),
       location,
       education,
-      consultationFee: consultationFee ? parseInt(consultationFee) : 500
+      consultationFee: consultationFee ? parseInt(consultationFee) : 500,
+      isVerified: true, // Auto-verify professionals upon registration
+      source: 'registration'
     };
 
     // Add registration number based on professional type

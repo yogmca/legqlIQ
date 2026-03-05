@@ -706,6 +706,8 @@ const Register = ({ onRegister }) => {
                       name="dateOfBirth"
                       value={formData.dateOfBirth}
                       onChange={handleChange}
+                      min="1940-01-01"
+                      max={new Date().toISOString().split('T')[0]}
                     />
                   </div>
 
@@ -800,6 +802,8 @@ const Register = ({ onRegister }) => {
                       name="dateOfBirth"
                       value={formData.dateOfBirth}
                       onChange={handleChange}
+                      min="1940-01-01"
+                      max={new Date().toISOString().split('T')[0]}
                     />
                   </div>
 
