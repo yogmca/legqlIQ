@@ -15,10 +15,11 @@
 .header-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 16px 24px;
+  padding: 8px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: 80px;
 }
 
 .logo-section {
@@ -26,12 +27,13 @@
   align-items: center;
   gap: 4px;
   text-decoration: none;
-  margin-left: -20px;
+  margin-left: -60px !important;
+  height: 80px;
 }
 
 .logo-section .logo-image {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
   border-radius: 0;
 }
@@ -55,7 +57,8 @@
 .header-nav {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 24px;
+  margin-left: 40px;
 }
 
 .nav-link {
@@ -125,6 +128,24 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.profile-btn {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.profile-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .logout-btn {

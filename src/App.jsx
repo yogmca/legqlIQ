@@ -6,6 +6,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
+import Profile from './components/Profile';
 import SearchBar from './components/SearchBar';
 import FilterSection from './components/FilterSection';
 import LawyerCard from './components/LawyerCard';
@@ -421,6 +422,14 @@ function App() {
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/lawyers" element={<LawyersDirectory />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/video-consultations"
           element={

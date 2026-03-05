@@ -42,6 +42,7 @@ router.get('/google/callback',
 // Protected routes
 router.get('/profile', protect, authController.getProfile);
 router.put('/profile', protect, authController.updateProfile);
+router.put('/change-password', protect, authController.changePassword);
 router.post('/logout', protect, authController.logout);
 
 module.exports = router;
