@@ -339,11 +339,14 @@
 @media (max-width: 968px) {
   .register-container {
     flex-direction: column;
+    min-height: 100vh;
+    overflow-y: auto;
   }
 
   .register-left {
     padding: 40px 30px;
-    min-height: 300px;
+    min-height: auto;
+    flex: 0 0 auto;
   }
 
   .stats {
@@ -361,6 +364,12 @@
 
   .register-right {
     padding: 30px 20px;
+    min-height: auto;
+    flex: 0 0 auto;
+  }
+
+  .register-form-container {
+    max-width: 100%;
   }
 }
 
@@ -397,6 +406,82 @@
 
   .stat-item h3 {
     font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-container {
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .register-left {
+    padding: 30px 20px;
+    min-height: 200px;
+  }
+
+  .register-right {
+    padding: 30px 20px;
+    min-height: calc(100vh - 200px);
+  }
+
+  .register-header h2 {
+    font-size: 24px;
+  }
+
+  .logo-icon {
+    height: 120px !important;
+  }
+
+  .logo-text {
+    font-size: 24px;
+  }
+
+  .tagline {
+    font-size: 18px;
+  }
+
+  .description {
+    font-size: 14px;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 12px 14px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .password-input-wrapper input {
+    padding-right: 45px;
+  }
+
+  .next-button,
+  .register-button,
+  .back-button {
+    padding: 14px;
+    font-size: 16px;
+  }
+
+  .user-type-selection {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .user-type-card {
+    padding: 20px 15px;
+  }
+
+  .user-type-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .user-type-card h4 {
+    font-size: 18px;
+  }
+
+  .specialization-grid {
+    grid-template-columns: 1fr;
   }
 }
 

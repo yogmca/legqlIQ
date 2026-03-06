@@ -364,11 +364,14 @@
 @media (max-width: 968px) {
   .login-container {
     flex-direction: column;
+    min-height: 100vh;
+    overflow-y: auto;
   }
 
   .login-left {
     padding: 40px 30px;
-    min-height: 300px;
+    min-height: auto;
+    flex: 0 0 auto;
   }
 
   .login-branding {
@@ -385,10 +388,31 @@
 
   .login-right {
     padding: 30px 20px;
+    min-height: auto;
+    flex: 0 0 auto;
+  }
+
+  .login-form-container {
+    max-width: 100%;
   }
 }
 
 @media (max-width: 480px) {
+  .login-container {
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .login-left {
+    padding: 30px 20px;
+    min-height: 200px;
+  }
+
+  .login-right {
+    padding: 30px 20px;
+    min-height: calc(100vh - 200px);
+  }
+
   .login-header h2 {
     font-size: 26px;
   }
@@ -399,7 +423,7 @@
 
   .logo-icon {
     width: auto;
-    height: 200px;
+    height: 120px !important;
   }
 
   .logo-icon svg {
@@ -409,5 +433,35 @@
 
   .logo-text {
     font-size: 28px;
+  }
+
+  .tagline {
+    font-size: 20px;
+  }
+
+  .description {
+    font-size: 14px;
+  }
+
+  .features {
+    gap: 15px;
+  }
+
+  .feature-item {
+    font-size: 14px;
+  }
+
+  .form-group input {
+    padding: 12px 14px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .password-input-wrapper input {
+    padding-right: 45px;
+  }
+
+  .login-button {
+    padding: 14px;
+    font-size: 16px;
   }
 }
