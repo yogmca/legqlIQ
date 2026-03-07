@@ -1,6 +1,7 @@
-// Web Scraper Controller with Google Search
-// Handles API requests for web scraping using Google search
+// Web Scraper Controller with Google Search fallback
+// Handles API requests for web scraping using old scraper + Google/Wikipedia fallback
 
+const webScraperService = require('../services/webScraperService');
 const axios = require('axios');
 const cheerio = require('cheerio');
 
@@ -24,12 +25,13 @@ exports.searchLegalInfo = async (req, res) => {
 
     console.log('Scraping legal information for query:', query);
 
-    const result = await scrapeGoogleForQuery(query);
+    const result = await webScraperService.searchLegalInfo(query);
 
-    if (!result) {
+    if (!result.success) {
       return res.status(500).json({
         success: false,
-        message: 'Failed to scrape legal information'
+        message: result.message || 'Failed to scrape legal information',
+        error: result.error
       });
     }
 
@@ -75,23 +77,37 @@ exports.getChatResponse = async (req, res) => {
       return chatbotController.getChatResponse(req, res);
     }
 
-    // Search Google for the query
-    console.log('🔍 Searching Google for:', message);
+    // First try the old web scraper service (for IPC, legal sites, etc.)
+    const scrapedData = await webScraperService.searchLegalInfo(message);
+
+    // If old scraper succeeded, format and return the response
+    if (scrapedData && scrapedData.success) {
+      const response = formatChatResponse(scrapedData, message);
+      console.log('✅ Answered from legal sites scraper');
+      return res.json({
+        success: true,
+        response: response,
+        rawData: scrapedData
+      });
+    }
+
+    // If old scraper failed, try Google/Wikipedia as fallback
+    console.log('⚠️ Legal sites scraper failed, trying Google/Wikipedia...');
     const webResponse = await scrapeGoogleForQuery(message);
     
     if (webResponse) {
       // Add LegalIQ consultation message
       const responseWithConsultation = webResponse + '\n\n💡 **Need Expert Advice?**\nFor personalized guidance on "' + message + '", consult our verified professionals on LegalIQ (https://legaliq.in):\n• Lawyers for legal matters\n• Tax Consultants for tax-related queries\n• Auditors for financial audits';
       
-      console.log('✅ Answered from Google search');
+      console.log('✅ Answered from Google/Wikipedia search');
       return res.json({
         success: true,
         response: responseWithConsultation
       });
     }
 
-    // Fallback response
-    console.log('⚠️ No web results, using fallback');
+    // Final fallback response
+    console.log('⚠️ All scraping methods failed, using fallback');
     res.json({
       success: true,
       response: `I couldn't find specific information about "${message}" at the moment.\n\n💡 **Get Expert Help:**\nFor accurate information about "${message}", consult our verified professionals on LegalIQ (https://legaliq.in):\n• Lawyers for legal matters\n• Tax Consultants for tax-related queries\n• Auditors for financial audits`
@@ -108,7 +124,7 @@ exports.getChatResponse = async (req, res) => {
 };
 
 /**
- * Scrape Google search results
+ * Scrape Google search results (fallback when legal sites fail)
  */
 async function scrapeGoogleForQuery(query) {
   try {
@@ -121,7 +137,7 @@ async function scrapeGoogleForQuery(query) {
     const response = await axios.get(searchUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.9',
         'Accept-Encoding': 'gzip, deflate, br',
         'Connection': 'keep-alive',
@@ -140,20 +156,10 @@ async function scrapeGoogleForQuery(query) {
     const $ = cheerio.load(response.data);
     const results = [];
 
-    console.log('📄 Parsing Google HTML response...');
-
     // Extract featured snippet/answer box first
     const featuredSelectors = [
-      '.IZ6rdc',                    // Featured snippet content
-      '.hgKElc',                    // Alternative featured snippet
-      '.kno-rdesc span',            // Knowledge panel description
-      '.LGOjhe',                    // Another featured format
-      '.iKJnec',                    // Mobile featured snippet
-      '.Z0LcW',                     // Answer box
-      'div[data-attrid="wa:/description"] span',  // Knowledge graph
-      '.kno-ftr span',              // Knowledge graph footer
-      '.wDYxhc span',               // Featured snippet span
-      '.hgKElc span'                // Featured snippet alternative
+      '.IZ6rdc', '.hgKElc', '.kno-rdesc span', '.LGOjhe', '.iKJnec', '.Z0LcW',
+      'div[data-attrid="wa:/description"] span', '.kno-ftr span', '.wDYxhc span', '.hgKElc span'
     ];
 
     for (const selector of featuredSelectors) {
@@ -171,8 +177,6 @@ async function scrapeGoogleForQuery(query) {
     // Extract regular organic search results
     const resultContainers = $('.g, .tF2Cxc, .Gx5Zad, div[data-sokoban-container], .hlcw0c');
     
-    console.log(`Found ${resultContainers.length} potential result containers`);
-    
     resultContainers.each((index, element) => {
       if (results.length >= 3) return false;
       
@@ -185,17 +189,9 @@ async function scrapeGoogleForQuery(query) {
       // Extract snippet
       let snippet = '';
       const snippetSelectors = [
-        '.VwiC3b',                    // Standard snippet
-        '.lEBKkf',                    // Mobile snippet
-        '.yXK7lf',                    // Alternative snippet
-        '.s',                         // Old format
-        '.st',                        // Older format
-        '.aCOpRe',                    // Another format
-        'div[data-content-feature="1"]',  // Featured content
-        'span[data-dobid]',           // Data-driven snippet
-        '.IsZvec',                    // New format
-        'div[style*="-webkit-line-clamp"]',  // Line-clamped content
-        '.lyLwlc'                     // Another snippet format
+        '.VwiC3b', '.lEBKkf', '.yXK7lf', '.s', '.st', '.aCOpRe',
+        'div[data-content-feature="1"]', 'span[data-dobid]', '.IsZvec',
+        'div[style*="-webkit-line-clamp"]', '.lyLwlc'
       ];
       
       for (const snippetSelector of snippetSelectors) {
@@ -205,7 +201,6 @@ async function scrapeGoogleForQuery(query) {
       
       if (title && snippet && snippet.length > 30) {
         results.push({ title, snippet });
-        console.log(`✅ Extracted result ${results.length}: ${title}`);
       }
     });
 
@@ -333,15 +328,20 @@ async function searchWikipediaWithIndiaFilter(query) {
 }
 
 /**
- * Clear scraper cache (no-op since we don't cache anymore)
+ * Clear scraper cache
  * DELETE /api/scraper/cache
  */
 exports.clearCache = async (req, res) => {
   try {
+    const { query } = req.body;
+
+    webScraperService.clearCache(query);
+
     res.json({
       success: true,
-      message: 'Cache cleared (no caching in new implementation)'
+      message: query ? `Cache cleared for: ${query}` : 'All cache cleared'
     });
+
   } catch (error) {
     console.error('Cache clear error:', error);
     res.status(500).json({
@@ -353,18 +353,18 @@ exports.clearCache = async (req, res) => {
 };
 
 /**
- * Get cache statistics (no-op since we don't cache anymore)
+ * Get cache statistics
  * GET /api/scraper/cache/stats
  */
 exports.getCacheStats = async (req, res) => {
   try {
+    const stats = webScraperService.getCacheStats();
+
     res.json({
       success: true,
-      stats: {
-        keys: 0,
-        message: 'No caching in new implementation - real-time search only'
-      }
+      stats: stats
     });
+
   } catch (error) {
     console.error('Cache stats error:', error);
     res.status(500).json({
@@ -383,14 +383,17 @@ exports.healthCheck = async (req, res) => {
   try {
     res.json({
       success: true,
-      service: 'Google Web Scraper Service',
+      service: 'Web Scraper Service with Google/Wikipedia Fallback',
       status: 'operational',
       features: [
-        'Google Search Scraping',
-        'Wikipedia API Fallback',
-        'India-specific filtering',
-        'Real-time search (no caching)'
+        'IPC Section Scraping (devgan.in, legalserviceindia.com)',
+        'Act Information Scraping',
+        'Case Law Scraping',
+        'Legal Procedure Scraping',
+        'Google Search Fallback',
+        'Wikipedia API Fallback'
       ],
+      cache: webScraperService.getCacheStats(),
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -400,5 +403,147 @@ exports.healthCheck = async (req, res) => {
     });
   }
 };
+
+/**
+ * Format scraped data into chatbot response
+ * @param {Object} scrapedData - Data from web scraper
+ * @param {string} query - Original user query
+ * @returns {string} - Formatted response
+ */
+function formatChatResponse(scrapedData, query) {
+  if (!scrapedData.success) {
+    return `I apologize, but I couldn't fetch live information for your query: "${query}". ${scrapedData.message || 'Please try again or consult a verified lawyer on LegalIQ for accurate legal advice.'}`;
+  }
+
+  let response = '';
+
+  switch (scrapedData.queryType) {
+    case 'ipc':
+      response = formatIPCResponse(scrapedData);
+      break;
+    case 'act':
+      response = formatActResponse(scrapedData);
+      break;
+    case 'case_law':
+      response = formatCaseLawResponse(scrapedData);
+      break;
+    case 'legal_procedure':
+      response = formatProcedureResponse(scrapedData);
+      break;
+    default:
+      response = formatGeneralResponse(scrapedData);
+  }
+
+  response += '\n\n---\n*For personalized legal advice, consult a verified lawyer on LegalIQ.*';
+
+  return response;
+}
+
+function formatIPCResponse(data) {
+  let response = `**IPC Section ${data.section} - Legal Information**\n\n`;
+
+  if (data.results && data.results.length > 0) {
+    response += 'Here\'s what I found:\n\n';
+    data.results.forEach((result, index) => {
+      response += `${index + 1}. **${result.title}**\n`;
+      response += `   ${result.snippet}\n`;
+      if (result.link) {
+        response += `   [Read more](${result.link})\n`;
+      }
+      response += '\n';
+    });
+  } else {
+    response += 'No specific information found for this IPC section.\n';
+  }
+
+  return response;
+}
+
+function formatActResponse(data) {
+  let response = `**Legal Act Information**\n\n`;
+  response += `Query: "${data.query}"\n\n`;
+
+  if (data.results && data.results.length > 0) {
+    response += 'Relevant information:\n\n';
+    data.results.forEach((result, index) => {
+      response += `${index + 1}. **${result.title}**\n`;
+      response += `   ${result.snippet}\n`;
+      if (result.link) {
+        response += `   [Read more](${result.link})\n`;
+      }
+      response += '\n';
+    });
+  } else {
+    response += 'No information found for this Act.\n';
+  }
+
+  return response;
+}
+
+function formatCaseLawResponse(data) {
+  let response = `**Case Law Information**\n\n`;
+  response += `Query: "${data.query}"\n\n`;
+
+  if (data.cases && data.cases.length > 0) {
+    response += 'Relevant cases:\n\n';
+    data.cases.forEach((caseInfo, index) => {
+      response += `${index + 1}. **${caseInfo.title}**\n`;
+      if (caseInfo.court) {
+        response += `   Court: ${caseInfo.court}\n`;
+      }
+      response += `   ${caseInfo.snippet}\n`;
+      if (caseInfo.link) {
+        response += `   [Read full judgment](${caseInfo.link})\n`;
+      }
+      response += '\n';
+    });
+  } else {
+    response += 'No case law found for this query.\n';
+  }
+
+  return response;
+}
+
+function formatProcedureResponse(data) {
+  let response = `**Legal Procedure Information**\n\n`;
+  response += `Query: "${data.query}"\n\n`;
+
+  if (data.procedures && data.procedures.length > 0) {
+    response += 'Here\'s what I found:\n\n';
+    data.procedures.forEach((proc, index) => {
+      response += `${index + 1}. **${proc.title}**\n`;
+      response += `   ${proc.description}\n`;
+      if (proc.link) {
+        response += `   [Read more](${proc.link})\n`;
+      }
+      response += '\n';
+    });
+  } else {
+    response += 'No procedure information found.\n';
+  }
+
+  return response;
+}
+
+function formatGeneralResponse(data) {
+  let response = `**Legal Information**\n\n`;
+  response += `Query: "${data.query}"\n\n`;
+
+  if (data.results && data.results.length > 0) {
+    response += 'Here\'s what I found:\n\n';
+    data.results.forEach((result, index) => {
+      response += `${index + 1}. **${result.title}**\n`;
+      response += `   ${result.snippet}\n`;
+      if (result.link) {
+        response += `   [Read more](${result.link})\n`;
+      }
+      response += '\n';
+    });
+  } else {
+    response += 'No information found for this query.\n';
+  }
+
+  return response;
+}
 
 module.exports = exports;

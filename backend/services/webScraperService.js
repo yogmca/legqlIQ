@@ -389,6 +389,7 @@ class WebScraperService {
     try {
       const lowerQuery = query.toLowerCase();
 
+      // Only handle fundamental rights - everything else should use Google/Wikipedia
       if (lowerQuery.includes('fundamental right') || lowerQuery.includes('constitutional right')) {
         return {
           success: true,
@@ -403,16 +404,13 @@ class WebScraperService {
         };
       }
 
+      // For all other general queries, return false so Google/Wikipedia scraping is used
+      console.log('General query - will use Google/Wikipedia fallback');
       return {
-        success: true,
+        success: false,
         queryType: 'general',
         query: query,
-        results: [{
-          title: `Legal Information: ${query}`,
-          snippet: `For comprehensive information about "${query}", we recommend consulting with a verified lawyer on LegalIQ (https://legaliq.in) who can provide accurate legal advice tailored to your specific circumstances. Our lawyers are available 24/7 for video consultations and can help you understand the legal aspects, procedures, and implications related to your query.`
-        }],
-        source: 'LegalIQ Platform',
-        timestamp: new Date().toISOString()
+        message: 'No specific legal database match - will try web search'
       };
     } catch (error) {
       return {
