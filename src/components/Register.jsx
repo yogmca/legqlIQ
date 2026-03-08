@@ -26,10 +26,11 @@ const Register = ({ onRegister }) => {
     },
     // Professional-specific fields
     professionalType: '', // 'lawyer', 'tax-consultant', or 'auditor'
-    barRegistrationNo: '', // For lawyers only
+    barRegistrationNo: '', // For lawyers only (optional)
     registrationNo: '', // For tax consultants and auditors
     specialization: [], // Array for lawyers, single text for others
     specializationText: '', // Free text for tax consultants and auditors
+    otherSpecialization: '', // For "Other" specialization option
     experience: '',
     location: '',
     court: '',
@@ -123,18 +124,7 @@ const Register = ({ onRegister }) => {
   };
 
   const validateProfessionalFields = () => {
-    // Validate registration number based on professional type
-    if (userType === 'lawyer') {
-      if (!formData.barRegistrationNo.trim()) {
-        setError('Please enter your Bar Registration Number');
-        return false;
-      }
-    } else if (userType === 'tax-consultant' || userType === 'auditor') {
-      if (!formData.registrationNo.trim()) {
-        setError('Please enter your Registration Number');
-        return false;
-      }
-    }
+    // Registration numbers are now optional for all professionals
     
     // Validate specialization based on professional type
     if (userType === 'lawyer') {
@@ -513,38 +503,43 @@ const Register = ({ onRegister }) => {
               <div className="form-step">
                 <h3 style={{ marginBottom: '20px', color: '#333' }}>Professional Information</h3>
                 
-                {/* Registration Number - Different for each type */}
-                <div className="form-group">
-                  {userType === 'lawyer' ? (
-                    <>
-                      <label htmlFor="barRegistrationNo">Bar Registration Number *</label>
-                      <input
-                        type="text"
-                        id="barRegistrationNo"
-                        name="barRegistrationNo"
-                        value={formData.barRegistrationNo}
-                        onChange={handleChange}
-                        placeholder="e.g., KAR/2015/12345"
-                        required
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <label htmlFor="registrationNo">
-                        {userType === 'tax-consultant' ? 'Tax Consultant Registration Number *' : 'Auditor Registration Number *'}
-                      </label>
-                      <input
-                        type="text"
-                        id="registrationNo"
-                        name="registrationNo"
-                        value={formData.registrationNo}
-                        onChange={handleChange}
-                        placeholder={userType === 'tax-consultant' ? 'e.g., TC/2020/12345' : 'e.g., AUD/2020/12345'}
-                        required
-                      />
-                    </>
-                  )}
-                </div>
+                {/* Registration Number - Only for lawyers (optional) */}
+                {userType === 'lawyer' && (
+                  <div className="form-group">
+                    <label htmlFor="barRegistrationNo">Bar Council Registration Number (Optional)</label>
+                    <input
+                      type="text"
+                      id="barRegistrationNo"
+                      name="barRegistrationNo"
+                      value={formData.barRegistrationNo}
+                      onChange={handleChange}
+                      placeholder="e.g., KAR/2015/12345"
+                    />
+                    <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                      You can add this later from your profile
+                    </small>
+                  </div>
+                )}
+
+                {/* Registration Number for Tax Consultants and Auditors */}
+                {(userType === 'tax-consultant' || userType === 'auditor') && (
+                  <div className="form-group">
+                    <label htmlFor="registrationNo">
+                      {userType === 'tax-consultant' ? 'Tax Consultant Registration Number (Optional)' : 'Auditor Registration Number (Optional)'}
+                    </label>
+                    <input
+                      type="text"
+                      id="registrationNo"
+                      name="registrationNo"
+                      value={formData.registrationNo}
+                      onChange={handleChange}
+                      placeholder={userType === 'tax-consultant' ? 'e.g., TC/2020/12345' : 'e.g., AUD/2020/12345'}
+                    />
+                    <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                      You can add this later from your profile
+                    </small>
+                  </div>
+                )}
 
                 {/* Specialization - Dropdown for lawyers, text for others */}
                 <div className="form-group">
@@ -562,6 +557,23 @@ const Register = ({ onRegister }) => {
                           </div>
                         ))}
                       </div>
+                      {/* Show text field when "Other" is selected */}
+                      {selectedSpecializations.includes('Other') && (
+                        <div style={{ marginTop: '15px' }}>
+                          <input
+                            type="text"
+                            id="otherSpecialization"
+                            name="otherSpecialization"
+                            value={formData.otherSpecialization}
+                            onChange={handleChange}
+                            placeholder="Please specify your other specialization"
+                            style={{ width: '100%' }}
+                          />
+                          <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                            Describe your other area of specialization
+                          </small>
+                        </div>
+                      )}
                     </>
                   ) : (
                     <>
