@@ -70,6 +70,10 @@ const userSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  lastActive: {
+    type: Date,
+    default: Date.now
   }
 });
 

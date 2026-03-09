@@ -123,7 +123,8 @@ app.get('/api/lawyers', async (req, res) => {
       education: professional.education,
       description: professional.description,
       rating: professional.rating || 0,
-      totalReviews: professional.totalReviews || 0
+      totalReviews: professional.totalReviews || 0,
+      lastActive: professional.lastActive
     }));
     
     console.log(`✅ Found ${dbProfessionals.length} verified ${professionalType}s in MongoDB`);
@@ -181,7 +182,8 @@ app.get('/api/lawyers/search', async (req, res) => {
       education: professional.education,
       description: professional.description,
       rating: professional.rating || 0,
-      totalReviews: professional.totalReviews || 0
+      totalReviews: professional.totalReviews || 0,
+      lastActive: professional.lastActive
     }));
 
     console.log(`✅ Searching ${dbProfessionals.length} ${professionalType}s in MongoDB`);

@@ -73,14 +73,27 @@
       }
     };
 
+    // Check if professional is online (active within last 5 minutes)
+    const isOnline = lawyer.lastActive &&
+      (new Date() - new Date(lawyer.lastActive)) < 5 * 60 * 1000;
+
     return (
       <div className="lawyer-card">
         <div className="lawyer-card-header">
           <div className="lawyer-avatar">
             {lawyer.name.split(' ')[1]?.[0] || lawyer.name[0]}
+            {/* Online status indicator */}
+            {isOnline && (
+              <span className="online-status" title="Online now">
+                <span className="online-dot"></span>
+              </span>
+            )}
           </div>
           <div className="lawyer-title">
-            <h3>{lawyer.name}</h3>
+            <h3>
+              {lawyer.name}
+              {isOnline && <span className="online-badge">● Online</span>}
+            </h3>
             {/* Hidden for privacy - Bar Registration Number not allowed to display publicly */}
             <p className="bar-registration" style={{display: 'none'}}>Bar Reg: {lawyer.barRegistrationNo}</p>
           </div>

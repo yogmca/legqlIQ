@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Lawyer = require('../models/Lawyer');
 
 exports.protect = async (req, res, next) => {
   try {
@@ -29,6 +30,17 @@ exports.protect = async (req, res, next) => {
           success: false,
           message: 'User not found'
         });
+      }
+
+      // Update last active timestamp for user
+      await User.findByIdAndUpdate(decoded.id, { lastActive: new Date() });
+
+      // If user is a professional, update their Lawyer record too
+      if (req.user.role === 'lawyer' || req.user.role === 'tax-consultant' || req.user.role === 'auditor') {
+        await Lawyer.findOneAndUpdate(
+          { userId: decoded.id },
+          { lastActive: new Date() }
+        );
       }
 
       next();

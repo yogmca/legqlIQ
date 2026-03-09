@@ -132,6 +132,10 @@ const lawyerSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  lastActive: {
+    type: Date,
+    default: Date.now
   }
 });
 
@@ -163,7 +167,8 @@ lawyerSchema.methods.getPublicProfile = function() {
     totalReviews: this.totalReviews,
     consultationFee: this.consultationFee,
     availability: this.availability,
-    isVerified: this.isVerified
+    isVerified: this.isVerified,
+    lastActive: this.lastActive
   };
 };
 
