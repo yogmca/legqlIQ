@@ -179,9 +179,29 @@ exports.updateProfile = async (req, res) => {
     if (dateOfBirth) user.dateOfBirth = dateOfBirth;
     if (gender) user.gender = gender;
     if (address) user.address = address;
-    if (profilePicture) user.profilePicture = profilePicture;
+    
+    // Handle profile picture (including deletion when empty string is passed)
+    if (profilePicture !== undefined) {
+      user.profilePicture = profilePicture;
+    }
 
     await user.save();
+
+    // If user is a professional (lawyer, tax-consultant, or auditor), update their Lawyer profile too
+    if (user.role === 'lawyer' || user.role === 'tax-consultant' || user.role === 'auditor') {
+      const professionalProfile = await Lawyer.findOne({ userId: user._id });
+      
+      if (professionalProfile) {
+        // Update professional profile with same data
+        if (name) professionalProfile.name = name;
+        if (phone) professionalProfile.phone = phone;
+        if (profilePicture !== undefined) {
+          professionalProfile.profilePicture = profilePicture;
+        }
+        
+        await professionalProfile.save();
+      }
+    }
 
     res.status(200).json({
       success: true,

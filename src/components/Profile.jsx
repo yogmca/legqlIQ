@@ -147,13 +147,20 @@ const Profile = () => {
       }
 
       const token = localStorage.getItem('token');
+      
+      // Prepare data to send (include profileImage)
+      const updateData = {
+        ...formData,
+        profilePicture: formData.profileImage // Map profileImage to profilePicture for backend
+      };
+      
       const response = await fetch(`${API_URL}/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(updateData)
       });
 
       const data = await response.json();
@@ -313,12 +320,51 @@ const Profile = () => {
     }
   };
 
-  const removeImage = () => {
+  const removeImage = async () => {
+    // Immediately update UI
     setFormData({
       ...formData,
       profileImage: ''
     });
     setImagePreview(null);
+    
+    // Save the deletion to backend
+    try {
+      setSaving(true);
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${API_URL}/auth/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          ...formData,
+          profilePicture: '' // Send empty string to delete photo
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update local storage with new user data
+        const updatedUser = { ...user, ...data.user };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        setSuccess('Profile photo removed successfully!');
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        setError(data.message || 'Failed to remove photo');
+      }
+    } catch (err) {
+      console.error('Error removing photo:', err);
+      setError('Unable to remove photo. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
