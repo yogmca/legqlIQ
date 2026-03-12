@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const emailService = require('../services/emailService');
+const multer = require('multer');
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
@@ -873,6 +874,399 @@ exports.rescheduleConsultation = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to reschedule consultation'
+    });
+  }
+};
+
+// Configure multer for memory storage (base64 encoding)
+const storage = multer.memoryStorage();
+
+const fileFilter = (req, file, cb) => {
+  // Allow common document types
+  const allowedMimetypes = [
+    // PDF
+    'application/pdf',
+    // Word documents
+    'application/msword', // .doc
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    // Excel spreadsheets
+    'application/vnd.ms-excel', // .xls
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+    // PowerPoint presentations
+    'application/vnd.ms-powerpoint', // .ppt
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+    // Text files
+    'text/plain', // .txt
+    'text/csv', // .csv
+    // Images
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'image/bmp',
+    'image/webp',
+    'image/svg+xml',
+    // Other common formats
+    'application/zip',
+    'application/x-zip-compressed',
+    'application/x-rar-compressed'
+  ];
+
+  if (allowedMimetypes.includes(file.mimetype)) {
+    return cb(null, true);
+  } else {
+    cb(new Error('File type not supported. Allowed: PDF, Word, Excel, PowerPoint, Text, Images, ZIP, RAR'));
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB max (will be checked against user-specific limit)
+  },
+  fileFilter: fileFilter
+});
+
+// Middleware for handling file upload
+exports.uploadDocument = upload.single('document');
+
+// Upload document to consultation (stored as base64 in database)
+exports.addDocument = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      });
+    }
+
+    const consultation = await Consultation.findById(id);
+
+    if (!consultation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Consultation not found'
+      });
+    }
+
+    // Check if user is authorized (either client or lawyer)
+    const user = await User.findById(userId);
+    
+    // Check if document upload feature is enabled for this user
+    if (user.features && user.features.documentUpload === false) {
+      return res.status(403).json({
+        success: false,
+        message: 'Document upload feature is disabled for your account. Please contact support.'
+      });
+    }
+
+    const lawyer = user && (user.role === 'lawyer' || user.role === 'tax-consultant' || user.role === 'auditor')
+      ? await Lawyer.findOne({ userId: userId })
+      : null;
+    
+    const isClient = consultation.clientId.toString() === userId;
+    const isProfessional = lawyer && consultation.lawyerId.toString() === lawyer._id.toString();
+
+    if (!isClient && !isProfessional) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to upload documents to this consultation'
+      });
+    }
+
+    // Get user's storage limits from database
+    const userMaxFileSize = user.storageLimit?.maxFileSize || (5 * 1024 * 1024);
+    const userMaxConsultationStorage = user.storageLimit?.maxConsultationStorage || (50 * 1024 * 1024);
+    const userMaxTotalStorage = user.storageLimit?.maxTotalStorage || (500 * 1024 * 1024);
+
+    // Check file size limit against user's limit
+    if (req.file.size > userMaxFileSize) {
+      const maxFileSizeMB = (userMaxFileSize / (1024 * 1024)).toFixed(2);
+      return res.status(400).json({
+        success: false,
+        message: `File size exceeds your ${maxFileSizeMB}MB per file limit`
+      });
+    }
+
+    // Calculate total storage used by this consultation
+    const currentConsultationStorage = consultation.documents.reduce((total, doc) => total + doc.size, 0);
+    const newConsultationStorage = currentConsultationStorage + req.file.size;
+
+    if (newConsultationStorage > userMaxConsultationStorage) {
+      const remainingSpace = userMaxConsultationStorage - currentConsultationStorage;
+      const remainingMB = (remainingSpace / (1024 * 1024)).toFixed(2);
+      const maxMB = (userMaxConsultationStorage / (1024 * 1024)).toFixed(2);
+      return res.status(400).json({
+        success: false,
+        message: `Consultation storage limit exceeded. This consultation has ${remainingMB}MB remaining of ${maxMB}MB total storage.`,
+        currentStorage: currentConsultationStorage,
+        maxStorage: userMaxConsultationStorage,
+        remainingStorage: remainingSpace
+      });
+    }
+
+    // Calculate total storage used across all user's consultations
+    const allUserConsultations = await Consultation.find({ clientId: userId });
+    const totalUserStorage = allUserConsultations.reduce((total, cons) => {
+      return total + cons.documents.reduce((docTotal, doc) => docTotal + doc.size, 0);
+    }, 0);
+    const newTotalUserStorage = totalUserStorage + req.file.size;
+
+    if (newTotalUserStorage > userMaxTotalStorage) {
+      const remainingSpace = userMaxTotalStorage - totalUserStorage;
+      const remainingMB = (remainingSpace / (1024 * 1024)).toFixed(2);
+      const maxMB = (userMaxTotalStorage / (1024 * 1024)).toFixed(2);
+      return res.status(400).json({
+        success: false,
+        message: `Total storage limit exceeded. You have ${remainingMB}MB remaining of ${maxMB}MB total storage across all consultations.`,
+        currentTotalStorage: totalUserStorage,
+        maxTotalStorage: userMaxTotalStorage,
+        remainingTotalStorage: remainingSpace
+      });
+    }
+
+    // Convert file buffer to base64
+    const base64Data = req.file.buffer.toString('base64');
+
+    // Add document to consultation
+    const document = {
+      originalName: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      uploadedBy: isProfessional ? 'professional' : 'client',
+      uploadedAt: Date.now(),
+      data: base64Data,
+      visibleTo: 'both',
+      isHidden: false
+    };
+
+    consultation.documents.push(document);
+    await consultation.save();
+
+    // Return document without base64 data (too large for response)
+    const documentResponse = {
+      _id: consultation.documents[consultation.documents.length - 1]._id,
+      originalName: document.originalName,
+      mimetype: document.mimetype,
+      size: document.size,
+      uploadedBy: document.uploadedBy,
+      uploadedAt: document.uploadedAt
+    };
+
+    // Calculate updated storage info
+    const updatedConsultationStorage = currentConsultationStorage + req.file.size;
+    const remainingConsultationStorage = userMaxConsultationStorage - updatedConsultationStorage;
+    const updatedTotalStorage = totalUserStorage + req.file.size;
+    const remainingTotalStorage = userMaxTotalStorage - updatedTotalStorage;
+
+    res.status(200).json({
+      success: true,
+      message: 'Document uploaded successfully',
+      document: documentResponse,
+      storageInfo: {
+        consultation: {
+          used: updatedConsultationStorage,
+          remaining: remainingConsultationStorage,
+          total: userMaxConsultationStorage,
+          usedMB: (updatedConsultationStorage / (1024 * 1024)).toFixed(2),
+          remainingMB: (remainingConsultationStorage / (1024 * 1024)).toFixed(2)
+        },
+        total: {
+          used: updatedTotalStorage,
+          remaining: remainingTotalStorage,
+          total: userMaxTotalStorage,
+          usedMB: (updatedTotalStorage / (1024 * 1024)).toFixed(2),
+          remainingMB: (remainingTotalStorage / (1024 * 1024)).toFixed(2)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Upload document error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to upload document'
+    });
+  }
+};
+
+// Download document from consultation (retrieve base64 from database)
+exports.downloadDocument = async (req, res) => {
+  try {
+    const { id, documentId } = req.params;
+    const userId = req.user.id;
+
+    const consultation = await Consultation.findById(id);
+
+    if (!consultation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Consultation not found'
+      });
+    }
+
+    // Check if user is authorized (either client or lawyer)
+    const user = await User.findById(userId);
+    const lawyer = user && (user.role === 'lawyer' || user.role === 'tax-consultant' || user.role === 'auditor')
+      ? await Lawyer.findOne({ userId: userId })
+      : null;
+    
+    const isClient = consultation.clientId.toString() === userId;
+    const isProfessional = lawyer && consultation.lawyerId.toString() === lawyer._id.toString();
+
+    if (!isClient && !isProfessional) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to access documents from this consultation'
+      });
+    }
+
+    // Find document in consultation
+    const document = consultation.documents.id(documentId);
+    if (!document) {
+      return res.status(404).json({
+        success: false,
+        message: 'Document not found'
+      });
+    }
+
+    // Send base64 data
+    res.status(200).json({
+      success: true,
+      document: {
+        originalName: document.originalName,
+        mimetype: document.mimetype,
+        size: document.size,
+        data: document.data
+      }
+    });
+  } catch (error) {
+    console.error('Download document error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to download document'
+    });
+  }
+};
+
+// Delete document from consultation
+exports.deleteDocument = async (req, res) => {
+  try {
+    const { id, documentId } = req.params;
+    const userId = req.user.id;
+
+    const consultation = await Consultation.findById(id);
+
+    if (!consultation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Consultation not found'
+      });
+    }
+
+    // Check if user is authorized (either client or lawyer)
+    const user = await User.findById(userId);
+    const lawyer = user && (user.role === 'lawyer' || user.role === 'tax-consultant' || user.role === 'auditor')
+      ? await Lawyer.findOne({ userId: userId })
+      : null;
+    
+    const isClient = consultation.clientId.toString() === userId;
+    const isProfessional = lawyer && consultation.lawyerId.toString() === lawyer._id.toString();
+
+    if (!isClient && !isProfessional) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to delete documents from this consultation'
+      });
+    }
+
+    // Find document in consultation
+    const document = consultation.documents.id(documentId);
+    if (!document) {
+      return res.status(404).json({
+        success: false,
+        message: 'Document not found'
+      });
+    }
+
+    // Check if user uploaded this document (only uploader can delete)
+    const userType = isProfessional ? 'professional' : 'client';
+    if (document.uploadedBy !== userType) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only delete documents you uploaded'
+      });
+    }
+
+    // Remove document from consultation using pull
+    consultation.documents.pull(documentId);
+    await consultation.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Document deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete document error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete document'
+    });
+  }
+};
+
+// Get all documents for a consultation (without base64 data for performance)
+exports.getDocuments = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const consultation = await Consultation.findById(id);
+
+    if (!consultation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Consultation not found'
+      });
+    }
+
+    // Check if user is authorized (either client or lawyer)
+    const user = await User.findById(userId);
+    const lawyer = user && (user.role === 'lawyer' || user.role === 'tax-consultant' || user.role === 'auditor')
+      ? await Lawyer.findOne({ userId: userId })
+      : null;
+    
+    const isClient = consultation.clientId.toString() === userId;
+    const isProfessional = lawyer && consultation.lawyerId.toString() === lawyer._id.toString();
+
+    if (!isClient && !isProfessional) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to access documents from this consultation'
+      });
+    }
+
+    // Return documents without base64 data (for performance)
+    const documents = consultation.documents.map(doc => ({
+      _id: doc._id,
+      originalName: doc.originalName,
+      mimetype: doc.mimetype,
+      size: doc.size,
+      uploadedBy: doc.uploadedBy,
+      uploadedAt: doc.uploadedAt
+    }));
+
+    res.status(200).json({
+      success: true,
+      documents: documents
+    });
+  } catch (error) {
+    console.error('Get documents error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch documents'
     });
   }
 };

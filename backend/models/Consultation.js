@@ -132,6 +132,44 @@ const consultationSchema = new mongoose.Schema({
     type: String
   },
   reviewedAt: Date,
+  // Documents (stored as base64 in database)
+  documents: [{
+    originalName: {
+      type: String,
+      required: true
+    },
+    mimetype: {
+      type: String,
+      required: true
+    },
+    size: {
+      type: Number,
+      required: true
+    },
+    uploadedBy: {
+      type: String,
+      enum: ['client', 'professional'],
+      required: true
+    },
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    },
+    data: {
+      type: String, // base64 encoded file data
+      required: true
+    },
+    // Visibility control - who can see this document
+    visibleTo: {
+      type: String,
+      enum: ['both', 'client-only', 'professional-only'],
+      default: 'both'
+    },
+    isHidden: {
+      type: Boolean,
+      default: false // If true, document is hidden from all users
+    }
+  }],
   // Timestamps
   createdAt: {
     type: Date,

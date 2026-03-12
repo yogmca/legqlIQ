@@ -36,4 +36,13 @@ router.post('/:id/accept', consultationController.acceptConsultation);
 router.post('/:id/reject', consultationController.rejectConsultation);
 router.post('/:id/reschedule', consultationController.rescheduleConsultation);
 
+// Document management routes
+// File size limits are configurable via environment variables:
+// - MAX_FILE_SIZE_MB (default: 5MB per file)
+// - MAX_CONSULTATION_STORAGE_MB (default: 50MB total per consultation)
+router.get('/:id/documents', consultationController.getDocuments);
+router.post('/:id/documents', consultationController.uploadDocument, consultationController.addDocument);
+router.get('/:id/documents/:documentId', consultationController.downloadDocument);
+router.delete('/:id/documents/:documentId', consultationController.deleteDocument);
+
 module.exports = router;

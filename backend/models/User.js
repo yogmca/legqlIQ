@@ -74,6 +74,21 @@ const userSchema = new mongoose.Schema({
   lastActive: {
     type: Date,
     default: Date.now
+  },
+  // Document storage limits (in bytes)
+  storageLimit: {
+    maxFileSize: {
+      type: Number,
+      default: 5 * 1024 * 1024 // 5MB per file
+    },
+    maxConsultationStorage: {
+      type: Number,
+      default: 50 * 1024 * 1024 // 50MB per consultation
+    },
+    maxTotalStorage: {
+      type: Number,
+      default: 500 * 1024 * 1024 // 500MB total for all consultations
+    }
   }
 });
 

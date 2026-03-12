@@ -11,10 +11,38 @@ const AppointmentManager = ({ userEmail }) => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('upcoming');
   const [activeVideoCall, setActiveVideoCall] = useState(null);
+  const [uploadingDoc, setUploadingDoc] = useState(null);
+  const [documents, setDocuments] = useState({});
+  const [showDocuments, setShowDocuments] = useState({});
+  const [documentUploadEnabled, setDocumentUploadEnabled] = useState(true);
   
   // Check if current user is a lawyer
   const currentUser = authService.getUser();
   const isLawyer = currentUser?.role === 'lawyer';
+
+  // Fetch user's document upload feature flag from database
+  useEffect(() => {
+    const checkDocumentFeature = async () => {
+      try {
+        const response = await fetch(`${API_URL}/auth/profile`, {
+          headers: {
+            'Authorization': `Bearer ${authService.getToken()}`
+          }
+        });
+        const data = await response.json();
+        if (data.success && data.user) {
+          // Get features.documentUpload from database (default true if not set)
+          const isEnabled = data.user.features?.documentUpload !== false;
+          setDocumentUploadEnabled(isEnabled);
+          console.log('Document upload feature enabled:', isEnabled);
+        }
+      } catch (error) {
+        console.error('Error fetching user features from database:', error);
+        setDocumentUploadEnabled(true); // Default to enabled on error
+      }
+    };
+    checkDocumentFeature();
+  }, []);
 
   useEffect(() => {
     fetchAppointments();
@@ -113,6 +141,153 @@ const AppointmentManager = ({ userEmail }) => {
       console.error('Error ending video call:', error);
       alert('Failed to update consultation status');
     }
+  };
+
+  // Document upload functions
+  const handleFileUpload = async (appointmentId, file) => {
+    if (!file) return;
+
+    // Validate file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      alert('File size exceeds 5MB limit');
+      return;
+    }
+
+    setUploadingDoc(appointmentId);
+
+    try {
+      const formData = new FormData();
+      formData.append('document', file);
+
+      const response = await fetch(`${API_URL}/consultations/${appointmentId}/documents`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authService.getToken()}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Document uploaded successfully!');
+        fetchDocuments(appointmentId);
+      } else {
+        alert(data.message || 'Failed to upload document');
+      }
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      alert('Failed to upload document');
+    } finally {
+      setUploadingDoc(null);
+    }
+  };
+
+  const fetchDocuments = async (appointmentId) => {
+    try {
+      const response = await fetch(`${API_URL}/consultations/${appointmentId}/documents`, {
+        headers: {
+          'Authorization': `Bearer ${authService.getToken()}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setDocuments(prev => ({
+          ...prev,
+          [appointmentId]: data.documents
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    }
+  };
+
+  const handleDownloadDocument = async (appointmentId, documentId, filename) => {
+    try {
+      const response = await fetch(`${API_URL}/consultations/${appointmentId}/documents/${documentId}`, {
+        headers: {
+          'Authorization': `Bearer ${authService.getToken()}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.document) {
+        // Convert base64 to blob and download
+        const byteCharacters = atob(data.document.data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: data.document.mimetype });
+
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        alert(data.message || 'Failed to download document');
+      }
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      alert('Failed to download document');
+    }
+  };
+
+  const handleDeleteDocument = async (appointmentId, documentId) => {
+    if (!window.confirm('Are you sure you want to delete this document?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/consultations/${appointmentId}/documents/${documentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authService.getToken()}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Document deleted successfully!');
+        fetchDocuments(appointmentId);
+      } else {
+        alert(data.message || 'Failed to delete document');
+      }
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      alert('Failed to delete document');
+    }
+  };
+
+  const toggleDocuments = (appointmentId) => {
+    setShowDocuments(prev => ({
+      ...prev,
+      [appointmentId]: !prev[appointmentId]
+    }));
+
+    // Fetch documents if showing for the first time
+    if (!showDocuments[appointmentId] && !documents[appointmentId]) {
+      fetchDocuments(appointmentId);
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
 
   const handleAcceptAppointment = async (appointmentId) => {
@@ -398,6 +573,197 @@ const AppointmentManager = ({ userEmail }) => {
                 <strong>Case Description:</strong>
                 <p>{appointment.caseDescription}</p>
               </div>
+
+              {/* Document Upload Section */}
+              {documentUploadEnabled && (
+                <div className="document-section">
+                  <button
+                    className="btn-toggle-documents"
+                    onClick={() => toggleDocuments(appointment._id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 12px',
+                      background: '#f3f4f6',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '10px'
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8" stroke="white" strokeWidth="2" fill="none"/>
+                    </svg>
+                    {showDocuments[appointment._id] ? '📂 Hide Documents' : '📁 Show Documents'}
+                    {documents[appointment._id] && documents[appointment._id].length > 0 && (
+                      <span style={{
+                        background: '#3b82f6',
+                        color: 'white',
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                      }}>
+                        {documents[appointment._id].length}
+                      </span>
+                    )}
+                  </button>
+
+                  {showDocuments[appointment._id] && (
+                    <div className="documents-container" style={{
+                      background: '#f9fafb',
+                      padding: '15px',
+                      borderRadius: '8px',
+                      border: '1px solid #e5e7eb',
+                      marginBottom: '10px'
+                    }}>
+                      {/* Upload Button */}
+                      <div style={{ marginBottom: '15px' }}>
+                        <label
+                          htmlFor={`file-upload-${appointment._id}`}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 16px',
+                            background: '#3b82f6',
+                            color: 'white',
+                            borderRadius: '6px',
+                            cursor: uploadingDoc === appointment._id ? 'not-allowed' : 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            opacity: uploadingDoc === appointment._id ? 0.6 : 1
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8" stroke="white" strokeWidth="2" fill="none"/>
+                            <line x1="12" y1="3" x2="12" y2="15" stroke="white" strokeWidth="2"/>
+                          </svg>
+                          {uploadingDoc === appointment._id ? 'Uploading...' : '📎 Upload Document'}
+                        </label>
+                        <input
+                          id={`file-upload-${appointment._id}`}
+                          type="file"
+                          onChange={(e) => {
+                            if (e.target.files[0]) {
+                              handleFileUpload(appointment._id, e.target.files[0]);
+                              e.target.value = ''; // Reset input
+                            }
+                          }}
+                          disabled={uploadingDoc === appointment._id}
+                          style={{ display: 'none' }}
+                          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar"
+                        />
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6b7280',
+                          marginTop: '5px',
+                          marginLeft: '5px'
+                        }}>
+                          Max file size: 5MB. Supported: PDF, Word, Excel, PowerPoint, Images, Archives
+                        </p>
+                      </div>
+
+                      {/* Documents List */}
+                      {documents[appointment._id] && documents[appointment._id].length > 0 ? (
+                        <div className="documents-list">
+                          <h4 style={{
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#374151',
+                            marginBottom: '10px'
+                          }}>
+                            📄 Uploaded Documents ({documents[appointment._id].length})
+                          </h4>
+                          {documents[appointment._id].map((doc) => (
+                            <div
+                              key={doc._id}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '10px',
+                                background: 'white',
+                                border: '1px solid #e5e7eb',
+                                borderRadius: '6px',
+                                marginBottom: '8px'
+                              }}
+                            >
+                              <div style={{ flex: 1 }}>
+                                <div style={{
+                                  fontSize: '14px',
+                                  fontWeight: '500',
+                                  color: '#111827',
+                                  marginBottom: '4px'
+                                }}>
+                                  📎 {doc.originalName}
+                                </div>
+                                <div style={{
+                                  fontSize: '12px',
+                                  color: '#6b7280'
+                                }}>
+                                  {formatFileSize(doc.size)} • Uploaded by {doc.uploadedBy?.name || 'Unknown'} • {new Date(doc.uploadedAt).toLocaleDateString()}
+                                </div>
+                              </div>
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                <button
+                                  onClick={() => handleDownloadDocument(appointment._id, doc._id, doc.originalName)}
+                                  style={{
+                                    padding: '6px 12px',
+                                    background: '#10b981',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    fontSize: '12px',
+                                    fontWeight: '500'
+                                  }}
+                                  title="Download"
+                                >
+                                  ⬇️ Download
+                                </button>
+                                {doc.uploadedBy?._id === currentUser?._id && (
+                                  <button
+                                    onClick={() => handleDeleteDocument(appointment._id, doc._id)}
+                                    style={{
+                                      padding: '6px 12px',
+                                      background: '#ef4444',
+                                      color: 'white',
+                                      border: 'none',
+                                      borderRadius: '4px',
+                                      cursor: 'pointer',
+                                      fontSize: '12px',
+                                      fontWeight: '500'
+                                    }}
+                                    title="Delete"
+                                  >
+                                    🗑️ Delete
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div style={{
+                          textAlign: 'center',
+                          padding: '20px',
+                          color: '#6b7280',
+                          fontSize: '14px'
+                        }}>
+                          📭 No documents uploaded yet
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="appointment-actions">
                 {/* Lawyer Actions for Pending Consultations */}
