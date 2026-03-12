@@ -43,6 +43,8 @@ router.get('/google/callback',
 router.get('/profile', protect, authController.getProfile);
 router.put('/profile', protect, authController.updateProfile);
 router.put('/change-password', protect, authController.changePassword);
+router.get('/professional-profile', protect, authController.getProfessionalProfile);
+router.put('/professional-profile', protect, authController.updateProfessionalProfile);
 router.post('/logout', protect, authController.logout);
 
 module.exports = router;

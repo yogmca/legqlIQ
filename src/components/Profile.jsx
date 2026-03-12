@@ -12,9 +12,10 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [activeTab, setActiveTab] = useState('basic'); // 'basic' or 'password'
+  const [activeTab, setActiveTab] = useState('basic'); // 'basic', 'professional', or 'password'
   const [isGoogleUser, setIsGoogleUser] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
+  const [isProfessional, setIsProfessional] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -28,6 +29,17 @@ const Profile = () => {
       pincode: ''
     },
     profileImage: ''
+  });
+
+  const [professionalData, setProfessionalData] = useState({
+    specialization: [],
+    experience: '',
+    location: '',
+    court: '',
+    education: '',
+    consultationFee: '',
+    description: '',
+    languages: []
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -52,7 +64,14 @@ const Profile = () => {
     setUser(currentUser);
     // Check if user logged in via Google (they won't have a password)
     setIsGoogleUser(currentUser.googleId ? true : false);
+    // Check if user is a professional
+    const professional = currentUser.role === 'lawyer' || currentUser.role === 'tax-consultant' || currentUser.role === 'auditor';
+    setIsProfessional(professional);
+    
     fetchUserProfile();
+    if (professional) {
+      fetchProfessionalProfile();
+    }
   }, [navigate]);
 
   const fetchUserProfile = async () => {
@@ -100,6 +119,35 @@ const Profile = () => {
     }
   };
 
+  const fetchProfessionalProfile = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/auth/professional-profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        const prof = data.professional;
+        setProfessionalData({
+          specialization: prof.specialization || [],
+          experience: prof.experience || '',
+          location: prof.location || '',
+          court: prof.court || '',
+          education: prof.education || '',
+          consultationFee: prof.consultationFee || '',
+          description: prof.description || '',
+          languages: prof.languages || []
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching professional profile:', err);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     
@@ -122,6 +170,16 @@ const Profile = () => {
     setSuccess('');
   };
 
+  const handleProfessionalChange = (e) => {
+    const { name, value } = e.target;
+    setProfessionalData({
+      ...professionalData,
+      [name]: value
+    });
+    setError('');
+    setSuccess('');
+  };
+
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordData({
@@ -130,6 +188,40 @@ const Profile = () => {
     });
     setError('');
     setSuccess('');
+  };
+
+  const handleProfessionalInfoSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${API_URL}/auth/professional-profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(professionalData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccess('Professional profile updated successfully!');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        setError(data.message || 'Failed to update professional profile');
+      }
+    } catch (err) {
+      console.error('Error updating professional profile:', err);
+      setError('Unable to connect to server. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleBasicInfoSubmit = async (e) => {
@@ -438,6 +530,17 @@ const Profile = () => {
               </svg>
               Basic Information
             </button>
+            {isProfessional && (
+              <button
+                className={`profile-nav-item ${activeTab === 'professional' ? 'active' : ''}`}
+                onClick={() => setActiveTab('professional')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6H16V4C16 2.89 15.11 2 14 2H10C8.89 2 8 2.89 8 4V6H4C2.89 6 2.01 6.89 2.01 8L2 19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V8C22 6.89 21.11 6 20 6ZM10 4H14V6H10V4ZM20 19H4V8H20V19Z" fill="currentColor"/>
+                </svg>
+                Professional Info
+              </button>
+            )}
             {!isGoogleUser && (
               <button
                 className={`profile-nav-item ${activeTab === 'password' ? 'active' : ''}`}
@@ -636,6 +739,142 @@ const Profile = () => {
                     placeholder="6-digit pincode"
                   />
                 </div>
+              </div>
+
+              <div className="form-actions">
+                <button type="submit" className="save-button" disabled={saving}>
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {activeTab === 'professional' && isProfessional && (
+            <form onSubmit={handleProfessionalInfoSubmit} className="profile-form">
+              <h2>Professional Information</h2>
+              <p className="form-description">
+                Update your professional details to help clients find and connect with you.
+              </p>
+
+              <div className="form-group">
+                <label htmlFor="specialization">Specialization *</label>
+                <input
+                  type="text"
+                  id="specialization"
+                  name="specialization"
+                  value={professionalData.specialization.join(', ')}
+                  onChange={(e) => setProfessionalData({
+                    ...professionalData,
+                    specialization: e.target.value.split(',').map(s => s.trim()).filter(s => s)
+                  })}
+                  placeholder="e.g., Criminal Law, Family Law, Corporate Law"
+                  required
+                />
+                <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                  Separate multiple specializations with commas
+                </small>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="experience">Years of Experience *</label>
+                  <input
+                    type="number"
+                    id="experience"
+                    name="experience"
+                    value={professionalData.experience}
+                    onChange={handleProfessionalChange}
+                    placeholder="Years"
+                    min="0"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="consultationFee">Consultation Fee (₹) *</label>
+                  <input
+                    type="number"
+                    id="consultationFee"
+                    name="consultationFee"
+                    value={professionalData.consultationFee}
+                    onChange={handleProfessionalChange}
+                    placeholder="Amount in rupees"
+                    min="0"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="location">Location *</label>
+                <input
+                  type="text"
+                  id="location"
+                  name="location"
+                  value={professionalData.location}
+                  onChange={handleProfessionalChange}
+                  placeholder="City, State"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="court">
+                  {user?.role === 'lawyer' ? 'Court/Practice Area *' : 'Office/Firm Name *'}
+                </label>
+                <input
+                  type="text"
+                  id="court"
+                  name="court"
+                  value={professionalData.court}
+                  onChange={handleProfessionalChange}
+                  placeholder={user?.role === 'lawyer' ? 'e.g., High Court, District Court' : 'Your office or firm name'}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="education">Education *</label>
+                <input
+                  type="text"
+                  id="education"
+                  name="education"
+                  value={professionalData.education}
+                  onChange={handleProfessionalChange}
+                  placeholder="Your educational qualifications"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="languages">Languages</label>
+                <input
+                  type="text"
+                  id="languages"
+                  name="languages"
+                  value={professionalData.languages.join(', ')}
+                  onChange={(e) => setProfessionalData({
+                    ...professionalData,
+                    languages: e.target.value.split(',').map(s => s.trim()).filter(s => s)
+                  })}
+                  placeholder="e.g., English, Hindi, Kannada"
+                />
+                <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                  Separate multiple languages with commas
+                </small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="description">Professional Description</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={professionalData.description}
+                  onChange={handleProfessionalChange}
+                  placeholder="Brief description of your practice and expertise"
+                  rows="4"
+                  style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
+                />
               </div>
 
               <div className="form-actions">

@@ -557,6 +557,116 @@ exports.changePassword = async (req, res) => {
   }
 };
 
+// Update professional profile (for lawyers, tax consultants, auditors)
+exports.updateProfessionalProfile = async (req, res) => {
+  try {
+    const {
+      specialization,
+      experience,
+      location,
+      court,
+      education,
+      consultationFee,
+      description,
+      languages
+    } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if user is a professional
+    if (user.role !== 'lawyer' && user.role !== 'tax-consultant' && user.role !== 'auditor') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only professionals can update professional profile'
+      });
+    }
+
+    // Find professional profile
+    const professionalProfile = await Lawyer.findOne({ userId: user._id });
+
+    if (!professionalProfile) {
+      return res.status(404).json({
+        success: false,
+        message: 'Professional profile not found'
+      });
+    }
+
+    // Update professional fields
+    if (specialization) professionalProfile.specialization = specialization;
+    if (experience !== undefined) professionalProfile.experience = parseInt(experience);
+    if (location) professionalProfile.location = location;
+    if (court) professionalProfile.court = court;
+    if (education) professionalProfile.education = education;
+    if (consultationFee !== undefined) professionalProfile.consultationFee = parseInt(consultationFee);
+    if (description) professionalProfile.description = description;
+    if (languages) professionalProfile.languages = languages;
+
+    await professionalProfile.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Professional profile updated successfully',
+      professional: professionalProfile.getPublicProfile()
+    });
+  } catch (error) {
+    console.error('Update professional profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update professional profile'
+    });
+  }
+};
+
+// Get professional profile
+exports.getProfessionalProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if user is a professional
+    if (user.role !== 'lawyer' && user.role !== 'tax-consultant' && user.role !== 'auditor') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only professionals have professional profiles'
+      });
+    }
+
+    // Find professional profile
+    const professionalProfile = await Lawyer.findOne({ userId: user._id });
+
+    if (!professionalProfile) {
+      return res.status(404).json({
+        success: false,
+        message: 'Professional profile not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      professional: professionalProfile.getPublicProfile()
+    });
+  } catch (error) {
+    console.error('Get professional profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch professional profile'
+    });
+  }
+};
+
 // Logout user (client-side token removal)
 exports.logout = async (req, res) => {
   res.status(200).json({
