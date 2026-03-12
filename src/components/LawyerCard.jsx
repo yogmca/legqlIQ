@@ -81,7 +81,17 @@
       <div className="lawyer-card">
         <div className="lawyer-card-header">
           <div className="lawyer-avatar">
-            {lawyer.name.split(' ')[1]?.[0] || lawyer.name[0]}
+            {lawyer.profilePicture ? (
+              <img
+                src={lawyer.profilePicture}
+                alt={lawyer.name}
+                className="lawyer-avatar-image"
+              />
+            ) : (
+              <span className="lawyer-avatar-initials">
+                {lawyer.name.split(' ')[1]?.[0] || lawyer.name[0]}
+              </span>
+            )}
             {/* Online status indicator */}
             {isOnline && (
               <span className="online-status" title="Online now">

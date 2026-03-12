@@ -14,6 +14,7 @@ const Profile = () => {
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState('basic'); // 'basic' or 'password'
   const [isGoogleUser, setIsGoogleUser] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -25,7 +26,8 @@ const Profile = () => {
       city: '',
       state: '',
       pincode: ''
-    }
+    },
+    profileImage: ''
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -76,8 +78,14 @@ const Profile = () => {
             city: userData.address?.city || '',
             state: userData.address?.state || '',
             pincode: userData.address?.pincode || ''
-          }
+          },
+          profileImage: userData.profilePicture || ''
         });
+        
+        // Set image preview if profile picture exists
+        if (userData.profilePicture) {
+          setImagePreview(userData.profilePicture);
+        }
         
         // Update isGoogleUser based on fetched data
         if (userData.googleId) {
@@ -242,6 +250,77 @@ const Profile = () => {
     });
   };
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please upload an image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB before compression)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size should be less than 5MB');
+        return;
+      }
+      
+      // Resize and compress image
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          // Create canvas for resizing
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Calculate new dimensions (max 400x400)
+          let width = img.width;
+          let height = img.height;
+          const maxSize = 400;
+          
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Draw resized image
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Convert to base64 with compression (0.8 quality)
+          const base64String = canvas.toDataURL('image/jpeg', 0.8);
+          
+          setFormData({
+            ...formData,
+            profileImage: base64String
+          });
+          setImagePreview(base64String);
+          setError('');
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setFormData({
+      ...formData,
+      profileImage: ''
+    });
+    setImagePreview(null);
+  };
+
   if (loading) {
     return (
       <div className="profile-container">
@@ -269,7 +348,17 @@ const Profile = () => {
         <div className="profile-sidebar">
           <div className="profile-user-info">
             <div className="profile-avatar">
-              {user?.name?.charAt(0).toUpperCase()}
+              {imagePreview || user?.profilePicture ? (
+                <img
+                  src={imagePreview || user?.profilePicture}
+                  alt={user?.name}
+                  className="profile-avatar-image"
+                />
+              ) : (
+                <span className="profile-avatar-initials">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </span>
+              )}
             </div>
             <h3>{user?.name}</h3>
             <p className="user-email">{user?.email}</p>
@@ -339,6 +428,48 @@ const Profile = () => {
           {activeTab === 'basic' && (
             <form onSubmit={handleBasicInfoSubmit} className="profile-form">
               <h2>Basic Information</h2>
+              
+              {/* Profile Photo Upload */}
+              <div className="form-group">
+                <label>Profile Photo (Optional)</label>
+                <div className="profile-image-upload-container">
+                  {imagePreview ? (
+                    <div className="profile-image-preview-wrapper">
+                      <img src={imagePreview} alt="Profile preview" className="profile-image-preview" />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="remove-profile-image-btn"
+                        title="Remove image"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <label htmlFor="profileImageUpload" className="profile-image-upload-label">
+                      <div className="profile-upload-placeholder">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="currentColor"/>
+                        </svg>
+                        <p>Click to upload photo</p>
+                        <small>JPG, PNG or GIF (Max 5MB)</small>
+                      </div>
+                    </label>
+                  )}
+                  <input
+                    type="file"
+                    id="profileImageUpload"
+                    name="profileImageUpload"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{ display: 'none' }}
+                  />
+                </div>
+                <small style={{ color: '#666', fontSize: '12px', marginTop: '8px', display: 'block' }}>
+                  Upload a professional photo to help others recognize you
+                </small>
+              </div>
+              
               {isGoogleUser && (
                 <div className="info-banner">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

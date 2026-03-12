@@ -655,3 +655,97 @@
   width: 20px;
   height: 20px;
 }
+
+/* Profile Image Upload */
+.image-upload-container {
+  margin-top: 8px;
+}
+
+.image-upload-label {
+  display: block;
+  cursor: pointer;
+}
+
+.upload-placeholder {
+  border: 2px dashed #e0e0e0;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.upload-placeholder:hover {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.upload-placeholder svg {
+  color: #667eea;
+  margin-bottom: 12px;
+}
+
+.upload-placeholder p {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.upload-placeholder small {
+  font-size: 13px;
+  color: #666;
+}
+
+.image-preview-wrapper {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.remove-image-btn:hover {
+  background: rgba(255, 0, 0, 1);
+  transform: scale(1.1);
+}
+
+@media (max-width: 480px) {
+  .upload-placeholder {
+    padding: 30px 15px;
+  }
+  
+  .image-preview-wrapper {
+    width: 120px;
+    height: 120px;
+  }
+}

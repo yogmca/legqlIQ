@@ -13,18 +13,18 @@ const generateToken = (id) => {
 // Register new user
 exports.register = async (req, res) => {
   try {
-    const { name, email, phone, password, dateOfBirth, gender, address } = req.body;
+    const { name, email, phone, password, dateOfBirth, gender, address, profileImage } = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ 
-      $or: [{ email }, { phone }] 
+    const existingUser = await User.findOne({
+      $or: [{ email }, { phone }]
     });
 
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: existingUser.email === email 
-          ? 'Email already registered' 
+        message: existingUser.email === email
+          ? 'Email already registered'
           : 'Phone number already registered'
       });
     }
@@ -37,7 +37,8 @@ exports.register = async (req, res) => {
       password,
       dateOfBirth,
       gender,
-      address
+      address,
+      profilePicture: profileImage || ''
     });
 
     // Generate token
@@ -202,7 +203,7 @@ exports.registerLawyer = async (req, res) => {
     const {
       name, email, phone, password, dateOfBirth, gender, address,
       professionalType, barRegistrationNo, registrationNo, specialization,
-      experience, location, court, education, consultationFee
+      experience, location, court, education, consultationFee, profileImage
     } = req.body;
 
     // Determine the professional type (default to 'lawyer' for backward compatibility)
@@ -252,7 +253,8 @@ exports.registerLawyer = async (req, res) => {
       dateOfBirth,
       gender,
       address,
-      role: profType // 'lawyer', 'tax-consultant', or 'auditor'
+      role: profType, // 'lawyer', 'tax-consultant', or 'auditor'
+      profilePicture: profileImage || ''
     });
 
     // Create professional profile
@@ -268,7 +270,8 @@ exports.registerLawyer = async (req, res) => {
       education,
       consultationFee: consultationFee ? parseInt(consultationFee) : 500,
       isVerified: true, // Auto-verify professionals upon registration
-      source: 'registration'
+      source: 'registration',
+      profilePicture: profileImage || ''
     };
 
     // Add registration number based on professional type

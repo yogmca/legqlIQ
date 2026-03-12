@@ -440,3 +440,116 @@
     font-size: 20px;
   }
 }
+
+/* Profile Image Upload Styles */
+.profile-avatar {
+  overflow: hidden;
+}
+
+.profile-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-avatar-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.profile-image-upload-container {
+  margin-top: 8px;
+}
+
+.profile-image-upload-label {
+  display: block;
+  cursor: pointer;
+}
+
+.profile-upload-placeholder {
+  border: 2px dashed #e0e0e0;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.profile-upload-placeholder:hover {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.profile-upload-placeholder svg {
+  color: #667eea;
+  margin-bottom: 12px;
+}
+
+.profile-upload-placeholder p {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.profile-upload-placeholder small {
+  font-size: 13px;
+  color: #666;
+}
+
+.profile-image-preview-wrapper {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.profile-image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-profile-image-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.remove-profile-image-btn:hover {
+  background: rgba(255, 0, 0, 1);
+  transform: scale(1.1);
+}
+
+@media (max-width: 480px) {
+  .profile-upload-placeholder {
+    padding: 30px 15px;
+  }
+  
+  .profile-image-preview-wrapper {
+    width: 120px;
+    height: 120px;
+  }
+}
