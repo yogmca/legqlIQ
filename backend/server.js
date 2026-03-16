@@ -192,17 +192,17 @@ app.get('/api/lawyers/search', async (req, res) => {
     const filtered = dbProfessionals.filter(professional => {
       const searchLower = q.toLowerCase();
       const matchesSearch = !q ||
-        professional.name.toLowerCase().includes(searchLower) ||
-        professional.location.toLowerCase().includes(searchLower) ||
-        (Array.isArray(professional.specialization) && professional.specialization.some(spec => spec.toLowerCase().includes(searchLower))) ||
-        professional.description.toLowerCase().includes(searchLower) ||
-        professional.court.toLowerCase().includes(searchLower);
+        (professional.name && professional.name.toLowerCase().includes(searchLower)) ||
+        (professional.location && professional.location.toLowerCase().includes(searchLower)) ||
+        (Array.isArray(professional.specialization) && professional.specialization.some(spec => spec && spec.toLowerCase().includes(searchLower))) ||
+        (professional.description && professional.description.toLowerCase().includes(searchLower)) ||
+        (professional.court && professional.court.toLowerCase().includes(searchLower));
 
       const matchesSpecialization = specialization === 'All Specializations' ||
         (Array.isArray(professional.specialization) && professional.specialization.includes(specialization));
 
       const matchesLocation = location === 'All Locations' ||
-        professional.location === location;
+        (professional.location && professional.location === location);
 
       return matchesSearch && matchesSpecialization && matchesLocation;
     });
