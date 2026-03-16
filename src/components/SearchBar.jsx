@@ -19,6 +19,45 @@ const GEOCODING_CONFIG = {
   }
 };
 
+// ============================================
+// CITY NAME MAPPING
+// ============================================
+// Map official city names to common database names
+const CITY_NAME_MAPPING = {
+  'Bengaluru': 'Bangalore',
+  'Mumbai': 'Bombay',
+  'Kolkata': 'Calcutta',
+  'Chennai': 'Madras',
+  'Thiruvananthapuram': 'Trivandrum',
+  'Kochi': 'Cochin',
+  'Kozhikode': 'Calicut',
+  'Mysuru': 'Mysore',
+  'Hubballi': 'Hubli',
+  'Belagavi': 'Belgaum',
+  'Mangaluru': 'Mangalore',
+  'Shivamogga': 'Shimoga',
+  'Tumakuru': 'Tumkur',
+  'Ballari': 'Bellary',
+  'Vijayapura': 'Bijapur',
+  'Kalaburagi': 'Gulbarga',
+  'Puducherry': 'Pondicherry',
+  'Visakhapatnam': 'Vizag',
+  'Thiruchirapalli': 'Trichy',
+  'Coimbatore': 'Coimbatore',
+  'Pune': 'Poona'
+};
+
+// Normalize city name to match database
+const normalizeCityName = (cityName) => {
+  if (!cityName) return '';
+  
+  // Check if city has a common name mapping
+  const normalizedName = CITY_NAME_MAPPING[cityName] || cityName;
+  
+  console.log(`🗺️ City normalized: "${cityName}" → "${normalizedName}"`);
+  return normalizedName;
+};
+
 const SearchBar = ({ searchTerm, onSearchChange }) => {
   const [detectedCity, setDetectedCity] = useState('');
   const [isDetecting, setIsDetecting] = useState(false);
@@ -51,12 +90,15 @@ const SearchBar = ({ searchTerm, onSearchChange }) => {
           const city = await reverseGeocode(latitude, longitude);
           
           if (city) {
-            setDetectedCity(city);
-            // Auto-fill search with detected city
+            // Normalize city name to match database (e.g., Bengaluru → Bangalore)
+            const normalizedCity = normalizeCityName(city);
+            
+            setDetectedCity(normalizedCity);
+            // Auto-fill search with normalized city name
             if (!searchTerm) {
-              onSearchChange(city);
+              onSearchChange(normalizedCity);
             }
-            console.log('🏙️ Detected city:', city);
+            console.log('🏙️ Detected city:', city, '→ Normalized:', normalizedCity);
           }
           
           setIsDetecting(false);
