@@ -1,0 +1,242 @@
+[
+  {
+    "name": "P CHANDRASEKAR LLP",
+    "email": "PARTNER@PCHANDRASEKAR.COM",
+    "location": "Bangalore",
+    "type": "CA Firm"
+  },
+  {
+    "name": "Asija & associates LLP",
+    "email": "kamal.ferwani@asija.in",
+    "location": "Lucknow",
+    "type": "CA Firm"
+  },
+  {
+    "name": "SURAJIT ROY AND ASSOCIATES",
+    "email": "surajit.roy@sraca.com",
+    "location": "Kolkata",
+    "type": "CA Firm"
+  },
+  {
+    "name": "N H AGRWAL AND ASSOCIATES",
+    "email": "nitinagrawalca@gmail.com",
+    "location": "Kolkata",
+    "type": "CA Firm"
+  },
+  {
+    "name": "LOKESH BHANDARI & ASSOCIATES",
+    "email": "lbaoffice108@gmail.com",
+    "location": "Ahmedabad",
+    "type": "CA Firm"
+  },
+  {
+    "name": "VIJAY GARG & ASSOCIATES",
+    "email": "vijaygarg.asso@gmail.com",
+    "location": "Jaipur",
+    "type": "CA Firm"
+  },
+  {
+    "name": "VINOD SINGHAL AND CO. LLP",
+    "email": "tender@vsc.co.in",
+    "location": "Jaipur",
+    "type": "CA Firm"
+  },
+  {
+    "name": "J K S S & ASSOCIATES",
+    "email": "DELHI@JKSCO.IN",
+    "location": "New Delhi",
+    "type": "CA Firm"
+  },
+  {
+    "name": "Ambani & Associates LLP",
+    "email": "ca.manish.bubna@gmail.com",
+    "location": "Delhi",
+    "type": "CA Firm"
+  },
+  {
+    "name": "KOCHAR & ASSOCIATES",
+    "email": "ravi.khandelwal@kocharassociates.com",
+    "location": "Mumbai",
+    "type": "CA Firm"
+  },
+  {
+    "name": "GOPAL SHARMA & COMPANY",
+    "email": "akhil@gopalsharmaco.com",
+    "location": "Jaipur",
+    "type": "CA Firm"
+  },
+  {
+    "name": "PARESH RAKESH & ASSOCIATES LLP",
+    "email": "mail@pareshrakesh.in",
+    "location": "Mumbai",
+    "type": "CA Firm"
+  },
+  {
+    "name": "Jain Jagawat Kamdar & Co",
+    "email": "jjk@jjkandco.com",
+    "location": "Mumbai",
+    "type": "CA Firm"
+  },
+  {
+    "name": "STRG AND ASSOCIATES",
+    "email": "RG@STRGGROUP.COM",
+    "location": "Delhi",
+    "type": "CA Firm"
+  },
+  {
+    "name": "Mamta Binani & Associates",
+    "email": "mamtabinaniandassociates@gmail.com",
+    "location": "Kolkata",
+    "type": "CA Firm"
+  },
+  {
+    "name": "S K AGRAWAL AND CO",
+    "email": "sarat@skagrawal.co.in",
+    "location": "Kolkata",
+    "type": "CA Firm"
+  },
+  {
+    "name": "Ravi B Gupta & Co LLP",
+    "email": "suraj@caravigupta.com",
+    "location": "Thane",
+    "type": "CA Firm"
+  },
+  {
+    "name": "GOKHALE AND SATHE",
+    "email": "office@gokhalesathe.in",
+    "location": "Mumbai",
+    "type": "CA Firm"
+  },
+  {
+    "name": "AMIT RAY & CO",
+    "email": "jitendra@amitrayco.in",
+    "location": "Prayagraj",
+    "type": "CA Firm"
+  },
+  {
+    "name": "Suraj Garg & Associates",
+    "email": "info@casurajgarg.com",
+    "location": "Delhi",
+    "type": "CA Firm"
+  },
+  {
+    "name": "Satya Prakash Natani & Co",
+    "email": "spnatani@gmail.com",
+    "location": "Mumbai",
+    "type": "CA Firm"
+  },
+  {
+    "name": "NYS & Company",
+    "email": "niitesh@nys.co.in",
+    "location": "New Delhi",
+    "type": "CA Firm"
+  },
+  {
+    "name": "M/s. T R CHADHA & CO LLP",
+    "email": "shilpabajaj@trchadha.com",
+    "location": "New Delhi",
+    "type": "CA Firm"
+  },
+  {
+    "name": "M. Srinivasan and Associates",
+    "email": "srini@msaca.com",
+    "location": "Chennai",
+    "type": "CA Firm"
+  },
+  {
+    "name": "Kheria and Company",
+    "email": "kheriaandcompany@gmail.com",
+    "location": "Mumbai",
+    "type": "CA Firm"
+  },
+  {
+    "name": "KEDIA SINGHANIA & CO",
+    "email": "ksncoca@yahoo.com",
+    "location": "Thane",
+    "type": "CA Firm"
+  },
+  {
+    "name": "Jethani and Associates",
+    "email": "jethanica@gmail.com",
+    "location": "Jaipur",
+    "type": "CA Firm"
+  },
+  {
+    "name": "H J & Associates",
+    "email": "himanij@hotmail.com",
+    "location": "Jaipur",
+    "type": "CA Firm"
+  },
+  {
+    "name": "Allied Boston Consultants India Pvt. Ltd.",
+    "email": "itsec@alliedboston.com",
+    "location": "Noida",
+    "type": "IT Security Auditor"
+  },
+  {
+    "name": "AIMS EnCon Consultant",
+    "email": "rc.aimsencon@gmail.com",
+    "location": "India",
+    "type": "Energy Auditor"
+  },
+  {
+    "name": "Energy Sridhar",
+    "email": "energysridhar@gmail.com",
+    "location": "Bangalore",
+    "type": "Energy Auditor"
+  },
+  {
+    "name": "EY India",
+    "email": "manav.chatterjee@in.ey.com",
+    "location": "India",
+    "type": "Major Audit Firm"
+  },
+  {
+    "name": "EY India",
+    "email": "dishani.banerjee@in.ey.com",
+    "location": "India",
+    "type": "Major Audit Firm"
+  },
+  {
+    "name": "BDO India",
+    "email": "teamhr@bdo.in",
+    "location": "India",
+    "type": "Major Audit Firm"
+  },
+  {
+    "name": "BDO India",
+    "email": "shefalikale@bdo.in",
+    "location": "India",
+    "type": "Major Audit Firm"
+  },
+  {
+    "name": "RSM India",
+    "email": "hr.delhi@rsmindia.in",
+    "location": "Delhi",
+    "type": "Major Audit Firm"
+  },
+  {
+    "name": "NANGIA & Co.",
+    "email": "hrd@nangia.com",
+    "location": "India",
+    "type": "Major Audit Firm"
+  },
+  {
+    "name": "Cla Global",
+    "email": "sahitya.shetty@claivc.com",
+    "location": "India",
+    "type": "Major Audit Firm"
+  },
+  {
+    "name": "Lochana B - Karnataka Social Audit Unit",
+    "email": "srpmys1@gmail.com",
+    "location": "Karnataka",
+    "type": "Social Audit"
+  },
+  {
+    "name": "Narasareddy. R.Warangal - Karnataka Social Audit Unit",
+    "email": "srp2mgnreg@gmail.com",
+    "location": "Karnataka",
+    "type": "Social Audit"
+  }
+]
