@@ -74,6 +74,13 @@
   cursor: pointer;
   transition: all 0.3s ease;
   outline: none;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for select dropdown */
+.filter-select option {
+  padding: 8px 12px;
 }
 
 .filter-select:hover {
