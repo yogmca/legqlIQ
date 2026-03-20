@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import './LocationAutocomplete.css';
 import { indianCities } from '../data/lawyersData';
 
-const LocationAutocomplete = ({ 
-  value, 
-  onChange, 
+const LocationAutocomplete = ({
+  value,
+  onChange,
   placeholder = "Enter city name...",
   defaultValue = "Bangalore",
   required = false,
@@ -15,8 +15,35 @@ const LocationAutocomplete = ({
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [allCities, setAllCities] = useState(indianCities);
   const wrapperRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Fetch database locations and merge with Indian cities
+  useEffect(() => {
+    fetchAndMergeLocations();
+  }, []);
+
+  const fetchAndMergeLocations = async () => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const baseURL = API_URL.replace(/\/$/, '');
+      const endpoint = baseURL.includes('/api') ? `${baseURL}/locations` : `${baseURL}/api/locations`;
+      const response = await fetch(endpoint);
+      const data = await response.json();
+      
+      if (data.success && data.locations && data.locations.length > 0) {
+        // Merge database locations with Indian cities, removing duplicates
+        const merged = [...new Set([...data.locations, ...indianCities])];
+        merged.sort();
+        setAllCities(merged);
+        console.log(`✅ LocationAutocomplete: Merged ${data.locations.length} DB locations with ${indianCities.length} Indian cities`);
+      }
+    } catch (error) {
+      console.error('Error fetching locations for autocomplete:', error);
+      // Keep using indianCities as fallback
+    }
+  };
 
   // Update input value when prop changes
   useEffect(() => {
@@ -51,7 +78,7 @@ const LocationAutocomplete = ({
     }
 
     // Filter cities based on input
-    const filtered = indianCities.filter(city =>
+    const filtered = allCities.filter(city =>
       city.toLowerCase().includes(newValue.toLowerCase())
     );
 
@@ -99,7 +126,7 @@ const LocationAutocomplete = ({
 
   const handleFocus = () => {
     if (inputValue.trim() !== '') {
-      const filtered = indianCities.filter(city =>
+      const filtered = allCities.filter(city =>
         city.toLowerCase().includes(inputValue.toLowerCase())
       );
       setSuggestions(filtered);
