@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
 const path = require('path');
 
-// Load environment variables from parent directory
+// Load environment variables - try multiple locations
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
+require('dotenv').config(); // Also try current directory
 
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/legaliq';
