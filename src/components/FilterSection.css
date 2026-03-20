@@ -30,17 +30,12 @@
 .location-filter-wrapper {
   display: flex;
   gap: 8px;
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 .location-filter-wrapper .filter-select,
 .location-filter-wrapper .location-autocomplete {
   flex: 1;
-}
-
-.location-filter-wrapper .toggle-autocomplete-btn {
-  align-self: flex-start;
-  flex-shrink: 0;
 }
 
 .toggle-autocomplete-btn {
@@ -79,39 +74,11 @@
   cursor: pointer;
   transition: all 0.3s ease;
   outline: none;
-  max-height: 300px;
-  overflow-y: auto;
 }
 
-/* Scrollable select with size attribute */
-.location-select-scrollable {
-  height: auto !important;
-  max-height: 200px;
-  min-height: 150px;
-}
-
-/* Custom scrollbar for select dropdown */
+/* Better option padding */
 .filter-select option {
-  padding: 8px 12px;
-}
-
-/* Scrollbar styling for the select list */
-.location-select-scrollable::-webkit-scrollbar {
-  width: 8px;
-}
-
-.location-select-scrollable::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.location-select-scrollable::-webkit-scrollbar-thumb {
-  background: #667eea;
-  border-radius: 4px;
-}
-
-.location-select-scrollable::-webkit-scrollbar-thumb:hover {
-  background: #5568d3;
+  padding: 10px 12px;
 }
 
 .filter-select:hover {
