@@ -1,11 +1,58 @@
 const mongoose = require('mongoose');
-require('dotenv').config({ path: '../.env' });
+const path = require('path');
 
-const Lawyer = require('../models/Lawyer');
-const Location = require('../models/Location');
+// Load environment variables from parent directory
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/legaliq';
+
+// Define Location Schema inline to avoid model loading issues
+const locationSchema = new mongoose.Schema({
+  city: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true
+  },
+  state: {
+    type: String,
+    default: 'Karnataka',
+    trim: true
+  },
+  country: {
+    type: String,
+    default: 'India',
+    trim: true
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  professionalCount: {
+    type: Number,
+    default: 0
+  },
+  addedBy: {
+    type: String,
+    enum: ['system', 'professional', 'admin'],
+    default: 'professional'
+  }
+}, {
+  timestamps: true
+});
+
+// Define Lawyer Schema inline
+const lawyerSchema = new mongoose.Schema({
+  location: String,
+  professionalType: String,
+  name: String,
+  isVerified: Boolean
+});
+
+// Get or create models
+const Location = mongoose.models.Location || mongoose.model('Location', locationSchema);
+const Lawyer = mongoose.models.Lawyer || mongoose.model('Lawyer', lawyerSchema);
 
 async function initializeLocations() {
   try {
