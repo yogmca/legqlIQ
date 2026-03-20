@@ -30,12 +30,17 @@
 .location-filter-wrapper {
   display: flex;
   gap: 8px;
-  align-items: stretch;
+  align-items: flex-start;
 }
 
 .location-filter-wrapper .filter-select,
 .location-filter-wrapper .location-autocomplete {
   flex: 1;
+}
+
+.location-filter-wrapper .toggle-autocomplete-btn {
+  align-self: flex-start;
+  flex-shrink: 0;
 }
 
 .toggle-autocomplete-btn {
@@ -81,7 +86,8 @@
 /* Scrollable select with size attribute */
 .location-select-scrollable {
   height: auto !important;
-  min-height: 200px;
+  max-height: 200px;
+  min-height: 150px;
 }
 
 /* Custom scrollbar for select dropdown */
