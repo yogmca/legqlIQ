@@ -78,9 +78,34 @@
   overflow-y: auto;
 }
 
+/* Scrollable select with size attribute */
+.location-select-scrollable {
+  height: auto !important;
+  min-height: 200px;
+}
+
 /* Custom scrollbar for select dropdown */
 .filter-select option {
   padding: 8px 12px;
+}
+
+/* Scrollbar styling for the select list */
+.location-select-scrollable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.location-select-scrollable::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.location-select-scrollable::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 4px;
+}
+
+.location-select-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #5568d3;
 }
 
 .filter-select:hover {

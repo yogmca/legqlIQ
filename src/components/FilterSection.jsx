@@ -117,9 +117,10 @@ const FilterSection = ({
           {!useAutocomplete ? (
             <select
               id="location-filter"
-              className="filter-select"
+              className="filter-select location-select-scrollable"
               value={selectedLocation}
               onChange={(e) => onLocationChange(e.target.value)}
+              size="8"
             >
               {locations.map((loc, index) => (
                 <option key={index} value={loc}>
