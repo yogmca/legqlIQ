@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './FilterSection.css';
 import { specializations, locations as defaultLocations, indianCities } from '../data/lawyersData';
 import LocationAutocomplete from './LocationAutocomplete';
+import CustomDropdown from './CustomDropdown';
 
 const FilterSection = ({
   selectedSpecialization,
@@ -115,18 +116,13 @@ const FilterSection = ({
         </label>
         <div className="location-filter-wrapper">
           {!useAutocomplete ? (
-            <select
+            <CustomDropdown
               id="location-filter"
-              className="filter-select"
               value={selectedLocation}
-              onChange={(e) => onLocationChange(e.target.value)}
-            >
-              {locations.map((loc, index) => (
-                <option key={index} value={loc}>
-                  {loc}
-                </option>
-              ))}
-            </select>
+              onChange={onLocationChange}
+              options={locations}
+              placeholder="Select location..."
+            />
           ) : (
             <LocationAutocomplete
               value={selectedLocation === 'All Locations' ? '' : selectedLocation}
