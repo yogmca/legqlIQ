@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './FilterSection.css';
-import { specializations, locations as defaultLocations } from '../data/lawyersData';
+import { specializations, locations as defaultLocations, indianCities } from '../data/lawyersData';
 import LocationAutocomplete from './LocationAutocomplete';
 
 const FilterSection = ({
@@ -32,10 +32,15 @@ const FilterSection = ({
       const data = await response.json();
       
       if (data.success && data.locations && data.locations.length > 0) {
+        // Merge database locations with Indian cities, removing duplicates
+        const dbLocs = data.locations;
+        const allCities = [...new Set([...dbLocs, ...indianCities])];
+        // Sort alphabetically
+        allCities.sort();
         // Add "All Locations" at the beginning
-        const dbLocations = ['All Locations', ...data.locations];
-        setLocations(dbLocations);
-        console.log(`✅ Loaded ${data.locations.length} locations from database`);
+        const finalLocations = ['All Locations', ...allCities];
+        setLocations(finalLocations);
+        console.log(`✅ Loaded ${dbLocs.length} locations from database, merged with ${indianCities.length} Indian cities`);
       } else {
         // Use default locations if database fetch fails
         console.log('⚠️ Using default locations');
