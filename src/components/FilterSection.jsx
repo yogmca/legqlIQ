@@ -24,7 +24,11 @@ const FilterSection = ({
     setLoadingLocations(true);
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-      const response = await fetch(`${API_URL}/api/locations`);
+      // Remove trailing slash if present
+      const baseURL = API_URL.replace(/\/$/, '');
+      // Check if API_URL already includes /api
+      const endpoint = baseURL.includes('/api') ? `${baseURL}/locations` : `${baseURL}/api/locations`;
+      const response = await fetch(endpoint);
       const data = await response.json();
       
       if (data.success && data.locations && data.locations.length > 0) {
