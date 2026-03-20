@@ -227,6 +227,33 @@ app.get('/api/lawyers/search', async (req, res) => {
   }
 });
 
+// Get locations from database
+app.get('/api/locations', async (req, res) => {
+  try {
+    const Location = require('./models/Location');
+    
+    // Get all active locations from database
+    const locations = await Location.getActiveLocations();
+    
+    console.log(`✅ Found ${locations.length} locations in database`);
+    
+    res.json({
+      success: true,
+      locations: locations,
+      total: locations.length
+    });
+  } catch (error) {
+    console.error('❌ Error fetching locations from database:', error);
+    // Return empty array if error, frontend will use default locations
+    res.json({
+      success: false,
+      locations: [],
+      total: 0,
+      message: 'Failed to fetch locations from database'
+    });
+  }
+});
+
 // Health check
 app.get('/api/health', async (req, res) => {
   try {

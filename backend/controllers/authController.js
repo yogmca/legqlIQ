@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Lawyer = require('../models/Lawyer');
+const Location = require('../models/Location');
 const emailService = require('../services/emailService');
 
 // Generate JWT Token
@@ -305,6 +306,11 @@ exports.registerLawyer = async (req, res) => {
 
     const professional = await Lawyer.create(professionalData);
 
+    // Add or update location in database
+    if (location) {
+      await Location.addOrUpdateLocation(location);
+    }
+
     // Generate token
     const token = generateToken(user._id);
 
@@ -601,7 +607,18 @@ exports.updateProfessionalProfile = async (req, res) => {
     // Update professional fields
     if (specialization) professionalProfile.specialization = specialization;
     if (experience !== undefined) professionalProfile.experience = parseInt(experience);
-    if (location) professionalProfile.location = location;
+    if (location) {
+      // If location is changing, update the location counts
+      if (professionalProfile.location !== location) {
+        // Decrement old location count
+        if (professionalProfile.location) {
+          await Location.decrementCount(professionalProfile.location);
+        }
+        // Add or increment new location
+        await Location.addOrUpdateLocation(location);
+      }
+      professionalProfile.location = location;
+    }
     if (court) professionalProfile.court = court;
     if (education) professionalProfile.education = education;
     if (consultationFee !== undefined) professionalProfile.consultationFee = parseInt(consultationFee);

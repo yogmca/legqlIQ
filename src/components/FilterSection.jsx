@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './FilterSection.css';
-import { specializations, locations } from '../data/lawyersData';
+import { specializations, locations as defaultLocations } from '../data/lawyersData';
 import LocationAutocomplete from './LocationAutocomplete';
 
 const FilterSection = ({
@@ -12,6 +12,39 @@ const FilterSection = ({
   professionalType = 'lawyer'
 }) => {
   const [useAutocomplete, setUseAutocomplete] = useState(false);
+  const [locations, setLocations] = useState(defaultLocations);
+  const [loadingLocations, setLoadingLocations] = useState(false);
+
+  // Fetch locations from database on component mount
+  useEffect(() => {
+    fetchLocationsFromDB();
+  }, []);
+
+  const fetchLocationsFromDB = async () => {
+    setLoadingLocations(true);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const response = await fetch(`${API_URL}/api/locations`);
+      const data = await response.json();
+      
+      if (data.success && data.locations && data.locations.length > 0) {
+        // Add "All Locations" at the beginning
+        const dbLocations = ['All Locations', ...data.locations];
+        setLocations(dbLocations);
+        console.log(`✅ Loaded ${data.locations.length} locations from database`);
+      } else {
+        // Use default locations if database fetch fails
+        console.log('⚠️ Using default locations');
+        setLocations(defaultLocations);
+      }
+    } catch (error) {
+      console.error('Error fetching locations from database:', error);
+      // Use default locations on error
+      setLocations(defaultLocations);
+    } finally {
+      setLoadingLocations(false);
+    }
+  };
 
   // Get specializations based on professional type
   const getSpecializations = () => {
