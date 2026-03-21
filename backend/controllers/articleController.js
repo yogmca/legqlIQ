@@ -23,6 +23,11 @@ const upload = multer({
 // Create a new article
 exports.createArticle = async (req, res) => {
   try {
+    console.log('=== Creating Article ===');
+    console.log('Request body:', req.body);
+    console.log('Request file:', req.file);
+    console.log('Has file:', !!req.file);
+    
     const { title, content, summary, category, tags, isExternal, externalUrl, externalSource } = req.body;
     const userId = req.user._id;
 
@@ -46,7 +51,7 @@ exports.createArticle = async (req, res) => {
       tags: tags ? (Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim())) : [],
       author: {
         userId: user._id,
-        name: user.name,
+        name: user.role === 'admin' ? 'LegalIQ' : user.name,
         profession,
         profileImage: user.profileImage || null
       },
