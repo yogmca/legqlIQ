@@ -38,15 +38,6 @@ exports.createArticle = async (req, res) => {
     else if (user.role === 'tax_consultant') profession = 'tax_consultant';
     else if (user.role === 'auditor') profession = 'auditor';
 
-    // Convert image to Base64 if uploaded
-    let imageData = null;
-    if (req.file) {
-      imageData = {
-        data: req.file.buffer.toString('base64'),
-        contentType: req.file.mimetype
-      };
-    }
-
     const articleData = {
       title,
       content,
@@ -62,9 +53,16 @@ exports.createArticle = async (req, res) => {
       isExternal: isExternal || false,
       externalUrl: externalUrl || null,
       externalSource: externalSource || null,
-      image: imageData,
       status: user.role === 'admin' ? 'approved' : 'pending'
     };
+
+    // Convert image to Base64 if uploaded
+    if (req.file) {
+      articleData.image = {
+        data: req.file.buffer.toString('base64'),
+        contentType: req.file.mimetype
+      };
+    }
 
     // If admin creates article, auto-approve and set publish date
     if (user.role === 'admin') {
@@ -82,7 +80,10 @@ exports.createArticle = async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating article:', error);
-    res.status(500).json({ message: 'Error creating article', error: error.message });
+    console.error('Error stack:', error.stack);
+    console.error('Request body:', req.body);
+    console.error('Request file:', req.file);
+    res.status(500).json({ message: 'Error creating article', error: error.message, details: error.stack });
   }
 };
 
