@@ -17,6 +17,10 @@ import AboutUs from './components/AboutUs';
 import ContactUs from './components/ContactUs';
 import Logo from './components/Logo';
 import LegalChatbot from './components/LegalChatbot';
+import ArticlesPage from './components/ArticlesPage';
+import ArticleDetail from './components/ArticleDetail';
+import ArticleSubmission from './components/ArticleSubmission';
+import AdminDashboard from './components/AdminDashboard';
 import { lawyerService } from './services/lawyerService';
 import authService from './services/authService';
 
@@ -451,6 +455,24 @@ function App() {
           element={
             <ProtectedRoute>
               <AppointmentManager userEmail={user?.email || 'user@example.com'} />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/articles" element={<ArticlesPage />} />
+        <Route path="/articles/:id" element={<ArticleDetail />} />
+        <Route
+          path="/submit-article"
+          element={
+            <ProtectedRoute>
+              <ArticleSubmission />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />

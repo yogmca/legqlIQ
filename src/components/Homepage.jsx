@@ -1,12 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
 import './Homepage.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 const Homepage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [featuredArticles, setFeaturedArticles] = useState([]);
   const user = authService.getUser();
+
+  useEffect(() => {
+    fetchFeaturedArticles();
+  }, []);
+
+  const fetchFeaturedArticles = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/articles/featured`);
+      if (response.ok) {
+        const data = await response.json();
+        setFeaturedArticles(data.articles || []);
+      }
+    } catch (err) {
+      console.error('Error fetching featured articles:', err);
+    }
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -80,12 +99,19 @@ const Homepage = () => {
           </Link>
 
           <nav className="header-nav">
-            {(!user || (user.role !== 'lawyer' && user.role !== 'tax-consultant' && user.role !== 'auditor')) && (
+            {(!user || (user.role !== 'lawyer' && user.role !== 'tax-consultant' && user.role !== 'auditor' && user.role !== 'admin')) && (
               <>
                 <Link to="/lawyers" className="nav-link">Find Lawyers</Link>
                 <Link to="/lawyers?type=tax-consultant" className="nav-link">Tax Consultants</Link>
                 <Link to="/lawyers?type=auditor" className="nav-link">Auditors</Link>
               </>
+            )}
+            <Link to="/articles" className="nav-link">Articles</Link>
+            {user && user.role === 'admin' && (
+              <Link to="/admin/dashboard" className="nav-link">Admin Dashboard</Link>
+            )}
+            {user && (user.role === 'lawyer' || user.role === 'tax-consultant' || user.role === 'auditor') && (
+              <Link to="/submit-article" className="nav-link">Submit Article</Link>
             )}
             {user && <Link to="/appointments" className="nav-link">Appointments</Link>}
             {user && <Link to="/video-consultations" className="nav-link">Video Calls</Link>}
@@ -96,6 +122,9 @@ const Homepage = () => {
             {user ? (
               <div className="user-menu">
                 <span className="user-name">Hi, {user.name}</span>
+                {user.role === 'admin' && (
+                  <span className="role-badge">Admin</span>
+                )}
                 {(user.role === 'lawyer' || user.role === 'tax-consultant' || user.role === 'auditor') && (
                   <span className="role-badge">
                     {user.role === 'lawyer' ? 'Lawyer' : user.role === 'tax-consultant' ? 'Tax Consultant' : 'Auditor'}
@@ -222,6 +251,48 @@ const Homepage = () => {
           </div>
         </div>
       </section>
+
+      {/* Featured Articles Section - Only show if articles exist */}
+      {featuredArticles.length > 0 && (
+        <section className="articles-section">
+          <div className="section-container">
+            <div className="section-header">
+              <div>
+                <h2 className="section-title">📚 Latest Articles & Insights</h2>
+                <p className="section-subtitle">Expert knowledge from verified professionals</p>
+              </div>
+              <Link to="/articles" className="view-all-link">View All Articles →</Link>
+            </div>
+
+            <div className="articles-grid-home">
+              {featuredArticles.slice(0, 3).map((article) => (
+                <Link
+                  key={article._id}
+                  to={`/articles/${article._id}`}
+                  className="article-card-home"
+                >
+                  {article.image && (
+                    <div className="article-image-home">
+                      <img src={`${API_URL}${article.image}`} alt={article.title} />
+                      {article.featured && <span className="featured-badge-home">⭐ Featured</span>}
+                    </div>
+                  )}
+                  <div className="article-content-home">
+                    <div className="article-category-home">{article.category}</div>
+                    <h3>{article.title}</h3>
+                    <p>{article.summary}</p>
+                    <div className="article-meta-home">
+                      <span>By {article.author.name}</span>
+                      <span>•</span>
+                      <span>{article.readTime} min read</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="cta-section">

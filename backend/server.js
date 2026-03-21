@@ -66,6 +66,7 @@ const otpRoutes = require('./routes/otpRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const chatbotRoutes = require('./routes/chatbotRoutes');
 const scraperRoutes = require('./routes/scraperRoutes');
+const articleRoutes = require('./routes/articles');
 
 // Now using ONLY MongoDB database for lawyer data
 // No hardcoded fallback data or web scraping
@@ -89,6 +90,12 @@ app.use('/api/chatbot', chatbotRoutes);
 
 // Web Scraper routes
 app.use('/api/scraper', scraperRoutes);
+
+// Article routes
+app.use('/api/articles', articleRoutes);
+
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
 
 // Get initial lawyers - ONLY from MongoDB database
 app.get('/api/lawyers', async (req, res) => {
