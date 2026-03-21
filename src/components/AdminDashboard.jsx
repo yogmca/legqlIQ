@@ -279,8 +279,17 @@ const AdminDashboard = () => {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setArticleImage(e.target.files[0])}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  setArticleImage(file);
+                  console.log('Image selected:', file);
+                }}
               />
+              {articleImage && (
+                <div style={{marginTop: '10px', color: '#27ae60'}}>
+                  ✓ Image selected: {articleImage.name} ({(articleImage.size / 1024).toFixed(2)} KB)
+                </div>
+              )}
             </div>
 
             <div className="form-group checkbox-group">
@@ -379,7 +388,7 @@ const AdminDashboard = () => {
               <p className="article-summary">{article.summary}</p>
 
               {article.image && (
-                <img src={`http://localhost:4000${article.image}`} alt={article.title} className="article-thumbnail" />
+                <img src={article.image?.data ? `data:${article.image.contentType};base64,${article.image.data}` : '/placeholder-image.png'} alt={article.title} className="article-thumbnail" />
               )}
 
               {article.tags && article.tags.length > 0 && (

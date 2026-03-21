@@ -188,7 +188,7 @@ const ArticlesPage = () => {
                   >
                     {article.image && (
                       <div className="article-image">
-                        <img src={`http://localhost:4000${article.image}`} alt={article.title} />
+                        <img src={article.image?.data ? `data:${article.image.contentType};base64,${article.image.data}` : '/placeholder-image.png'} alt={article.title} />
                         {article.isExternal && (
                           <span className="external-badge">🔗 External</span>
                         )}

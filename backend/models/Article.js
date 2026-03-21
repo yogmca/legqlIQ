@@ -17,8 +17,8 @@ const articleSchema = new mongoose.Schema({
     maxlength: 500
   },
   image: {
-    type: String, // URL or path to uploaded image
-    default: null
+    data: String, // Base64 encoded image data
+    contentType: String // Image MIME type (image/jpeg, image/png, etc.)
   },
   author: {
     userId: {

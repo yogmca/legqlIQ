@@ -167,7 +167,7 @@ const ArticleDetail = () => {
 
           {article.image && (
             <div className="article-featured-image">
-              <img src={`${API_URL}${article.image}`} alt={article.title} />
+              <img src={article.image?.data ? `data:${article.image.contentType};base64,${article.image.data}` : '/placeholder-image.png'} alt={article.title} />
             </div>
           )}
         </header>
