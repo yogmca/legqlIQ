@@ -140,11 +140,10 @@ articleSchema.methods.calculateReadTime = function() {
 };
 
 // Pre-save middleware to calculate read time
-articleSchema.pre('save', function(next) {
+articleSchema.pre('save', async function() {
   if (this.isModified('content')) {
     this.calculateReadTime();
   }
-  next();
 });
 
 const Article = mongoose.model('Article', articleSchema);
