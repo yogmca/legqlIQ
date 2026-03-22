@@ -30,15 +30,26 @@ echo "   ✓ .env files restored"
 
 # Install new dependencies
 echo "5. Installing dependencies..."
-echo "   - Installing frontend dependencies (react-quill)..."
+echo "   - Installing react-quill for rich text editor..."
+npm install react-quill@^2.0.0 --legacy-peer-deps
+echo "   - Installing all frontend dependencies..."
 npm install --legacy-peer-deps
 echo "   - Installing backend dependencies (nodemailer, isomorphic-dompurify)..."
 cd backend
 npm install
 cd ..
 
+# Verify react-quill installation
+echo "6. Verifying react-quill installation..."
+if npm list react-quill > /dev/null 2>&1; then
+    echo "   ✓ react-quill installed successfully"
+else
+    echo "   ✗ react-quill installation failed!"
+    exit 1
+fi
+
 # Build frontend
-echo "6. Building frontend..."
+echo "7. Building frontend..."
 npm run build
 
 echo ""
