@@ -30,8 +30,8 @@ echo "   ✓ .env files restored"
 
 # Install new dependencies
 echo "5. Installing dependencies..."
-echo "   - Installing react-quill for rich text editor..."
-npm install react-quill@^2.0.0 --legacy-peer-deps
+echo "   - Installing react-quill@2.0.0-beta.4 for rich text editor (React 19 compatible)..."
+npm install react-quill@2.0.0-beta.4 --legacy-peer-deps
 echo "   - Installing all frontend dependencies..."
 npm install --legacy-peer-deps
 echo "   - Installing backend dependencies (nodemailer, isomorphic-dompurify)..."
