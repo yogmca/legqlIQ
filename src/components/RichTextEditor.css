@@ -18,6 +18,14 @@
 .rich-text-editor .ql-editor {
   min-height: 300px;
   padding: 20px;
+  color: #000000 !important; /* Ensure black text is visible */
+  background: white;
+}
+
+.rich-text-editor .ql-editor p,
+.rich-text-editor .ql-editor div,
+.rich-text-editor .ql-editor span {
+  color: inherit;
 }
 
 .rich-text-editor .ql-editor.ql-blank::before {
