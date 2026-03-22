@@ -338,6 +338,17 @@
   box-shadow: 0 4px 8px rgba(149, 165, 166, 0.3);
 }
 
+.btn-edit {
+  background: #3498db;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
 .btn-feature {
   background: #f39c12;
   color: white;

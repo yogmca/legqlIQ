@@ -180,7 +180,7 @@ const ArticleDetail = () => {
             <p>{article.summary}</p>
           </div>
 
-          <div className="article-content" dangerouslySetInnerHTML={{ __html: article.content.replace(/\n/g, '<br/>') }} />
+          <div className="article-content" dangerouslySetInnerHTML={{ __html: article.content }} />
 
           {article.tags && article.tags.length > 0 && (
             <div className="article-tags-section">

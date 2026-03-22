@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from './Logo';
+import RichTextEditor from './RichTextEditor';
 import './AdminDashboard.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
@@ -12,6 +13,7 @@ const AdminDashboard = () => {
   const [error, setError] = useState('');
   const [adminNotes, setAdminNotes] = useState({});
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingArticle, setEditingArticle] = useState(null);
   const navigate = useNavigate();
 
   const [newArticle, setNewArticle] = useState({
@@ -153,6 +155,40 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleEdit = (article) => {
+    setEditingArticle(article);
+    setNewArticle({
+      title: article.title,
+      content: article.content,
+      summary: article.summary,
+      category: article.category,
+      tags: Array.isArray(article.tags) ? article.tags.join(', ') : '',
+      isExternal: article.isExternal || false,
+      externalUrl: article.externalUrl || '',
+      externalSource: article.externalSource || '',
+      featured: article.featured || false
+    });
+    setShowCreateForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingArticle(null);
+    setShowCreateForm(false);
+    setNewArticle({
+      title: '',
+      content: '',
+      summary: '',
+      category: 'legal',
+      tags: '',
+      isExternal: false,
+      externalUrl: '',
+      externalSource: '',
+      featured: false
+    });
+    setArticleImage(null);
+  };
+
   const handleCreateArticle = async (e) => {
     e.preventDefault();
     
@@ -168,33 +204,27 @@ const AdminDashboard = () => {
         formData.append('image', articleImage);
       }
 
-      const response = await fetch(`${API_URL}/articles`, {
-        method: 'POST',
+      const url = editingArticle
+        ? `${API_URL}/articles/${editingArticle._id}`
+        : `${API_URL}/articles`;
+      
+      const method = editingArticle ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           'Authorization': `Bearer ${token}`
         },
         body: formData
       });
 
-      if (!response.ok) throw new Error('Failed to create article');
+      if (!response.ok) throw new Error(editingArticle ? 'Failed to update article' : 'Failed to create article');
       
-      alert('Article created and published successfully!');
-      setShowCreateForm(false);
-      setNewArticle({
-        title: '',
-        content: '',
-        summary: '',
-        category: 'legal',
-        tags: '',
-        isExternal: false,
-        externalUrl: '',
-        externalSource: '',
-        featured: false
-      });
-      setArticleImage(null);
+      alert(editingArticle ? 'Article updated successfully!' : 'Article created and published successfully!');
+      handleCancelEdit();
       fetchArticles();
     } catch (err) {
-      alert('Error creating article: ' + err.message);
+      alert('Error: ' + err.message);
     }
   };
 
@@ -206,14 +236,14 @@ const AdminDashboard = () => {
       
       <div className="admin-header">
         <h1>Admin Dashboard - Article Management</h1>
-        <button className="btn-create" onClick={() => setShowCreateForm(!showCreateForm)}>
+        <button className="btn-create" onClick={() => showCreateForm ? handleCancelEdit() : setShowCreateForm(true)}>
           {showCreateForm ? 'Cancel' : '+ Create Article'}
         </button>
       </div>
 
       {showCreateForm && (
         <div className="create-article-form">
-          <h2>Create New Article</h2>
+          <h2>{editingArticle ? 'Edit Article' : 'Create New Article'}</h2>
           <form onSubmit={handleCreateArticle}>
             <div className="form-group">
               <label>Title *</label>
@@ -239,11 +269,10 @@ const AdminDashboard = () => {
 
             <div className="form-group">
               <label>Content *</label>
-              <textarea
+              <RichTextEditor
                 value={newArticle.content}
-                onChange={(e) => setNewArticle({...newArticle, content: e.target.value})}
-                required
-                rows={10}
+                onChange={(value) => setNewArticle({...newArticle, content: value})}
+                placeholder="Write your article content with rich formatting..."
               />
             </div>
 
@@ -336,7 +365,9 @@ const AdminDashboard = () => {
               </label>
             </div>
 
-            <button type="submit" className="btn-submit">Publish Article</button>
+            <button type="submit" className="btn-submit">
+              {editingArticle ? 'Update Article' : 'Publish Article'}
+            </button>
           </form>
         </div>
       )}
@@ -424,7 +455,10 @@ const AdminDashboard = () => {
               {activeTab === 'approved' && (
                 <div className="admin-actions">
                   <div className="action-buttons">
-                    <button 
+                    <button className="btn-edit" onClick={() => handleEdit(article)}>
+                      Edit
+                    </button>
+                    <button
                       className={article.featured ? 'btn-unfeature' : 'btn-feature'}
                       onClick={() => handleToggleFeatured(article)}
                     >

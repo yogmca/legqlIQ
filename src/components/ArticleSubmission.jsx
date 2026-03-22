@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from './Logo';
+import RichTextEditor from './RichTextEditor';
 import './ArticleSubmission.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
@@ -202,14 +203,12 @@ const ArticleSubmission = () => {
 
             <div className="form-group">
               <label>Article Content *</label>
-              <textarea
+              <RichTextEditor
                 value={article.content}
-                onChange={(e) => setArticle({...article, content: e.target.value})}
-                required
-                rows={15}
+                onChange={(value) => setArticle({...article, content: value})}
                 placeholder="Write your article content here... (minimum 300 words recommended)"
               />
-              <small>{article.content.split(/\s+/).filter(w => w).length} words</small>
+              <small>{article.content.replace(/<[^>]*>/g, '').split(/\s+/).filter(w => w).length} words</small>
             </div>
 
             <div className="form-row">

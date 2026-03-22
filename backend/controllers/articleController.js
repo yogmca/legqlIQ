@@ -1,6 +1,7 @@
 const Article = require('../models/Article');
 const User = require('../models/User');
 const multer = require('multer');
+const DOMPurify = require('isomorphic-dompurify');
 
 // Configure multer for memory storage (Base64)
 const storage = multer.memoryStorage();
@@ -37,6 +38,14 @@ exports.createArticle = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Sanitize HTML content to prevent XSS attacks
+    const sanitizedContent = DOMPurify.sanitize(content, {
+      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                     'img', 'a', 'ul', 'ol', 'li', 'blockquote', 'code', 'pre',
+                     'table', 'thead', 'tbody', 'tr', 'td', 'th', 'span', 'div'],
+      ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'style', 'target', 'rel']
+    });
+
     // Determine profession
     let profession = 'admin';
     if (user.role === 'lawyer') profession = 'lawyer';
@@ -45,7 +54,7 @@ exports.createArticle = async (req, res) => {
 
     const articleData = {
       title,
-      content,
+      content: sanitizedContent,
       summary,
       category,
       tags: tags ? (Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim())) : [],
@@ -284,7 +293,15 @@ exports.updateArticle = async (req, res) => {
 
     // Update fields
     if (title) article.title = title;
-    if (content) article.content = content;
+    if (content) {
+      // Sanitize HTML content to prevent XSS attacks
+      article.content = DOMPurify.sanitize(content, {
+        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                       'img', 'a', 'ul', 'ol', 'li', 'blockquote', 'code', 'pre',
+                       'table', 'thead', 'tbody', 'tr', 'td', 'th', 'span', 'div'],
+        ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'style', 'target', 'rel']
+      });
+    }
     if (summary) article.summary = summary;
     if (category) article.category = category;
     if (tags) article.tags = Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim());
