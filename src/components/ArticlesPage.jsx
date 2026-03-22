@@ -215,7 +215,9 @@ const ArticlesPage = () => {
                           )}
                           <div>
                             <div className="author-name">{article.author.name}</div>
-                            <div className="author-profession">{article.author.profession}</div>
+                            {article.author.profession !== 'admin' && (
+                              <div className="author-profession">{article.author.profession}</div>
+                            )}
                           </div>
                         </div>
                       </div>
