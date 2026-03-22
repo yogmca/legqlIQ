@@ -17,7 +17,7 @@ const Homepage = () => {
 
   const fetchFeaturedArticles = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/articles/featured`);
+      const response = await fetch(`${API_URL}/articles/featured`);
       if (response.ok) {
         const data = await response.json();
         setFeaturedArticles(data.articles || []);
