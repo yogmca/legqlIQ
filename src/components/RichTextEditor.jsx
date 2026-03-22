@@ -1,9 +1,22 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './RichTextEditor.css';
 
 const RichTextEditor = ({ value, onChange, placeholder = 'Write your article content here...' }) => {
+  const quillRef = useRef(null);
+
+  // Fix for React 19 compatibility with react-quill
+  useEffect(() => {
+    if (quillRef.current) {
+      const editor = quillRef.current.getEditor();
+      if (editor && editor.root) {
+        // Ensure the editor is properly initialized
+        editor.root.setAttribute('data-placeholder', placeholder);
+      }
+    }
+  }, [placeholder]);
+
   const modules = {
     toolbar: [
       [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
@@ -37,8 +50,9 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Write your article con
   return (
     <div className="rich-text-editor-wrapper">
       <ReactQuill
+        ref={quillRef}
         theme="snow"
-        value={value}
+        value={value || ''}
         onChange={onChange}
         modules={modules}
         formats={formats}
