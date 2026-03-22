@@ -234,6 +234,55 @@ const Homepage = () => {
         </div>
       </section>
 
+      {/* Top Articles Section - Only show if articles exist */}
+      {featuredArticles.length > 0 && (
+        <section className="top-articles-section">
+          <div className="section-container">
+            <h2 className="section-title">📖 Read Top Articles from Legal Experts</h2>
+            <p className="section-subtitle">Stay informed with expert insights on legal, tax, and audit matters</p>
+
+            <div className="top-articles-grid">
+              {featuredArticles.slice(0, 2).map((article) => (
+                <div
+                  key={article._id}
+                  className="top-article-card"
+                  onClick={() => navigate(`/articles/${article._id}`)}
+                >
+                  {article.image && (
+                    <div className="top-article-image">
+                      <img
+                        src={article.image?.data ? `data:${article.image.contentType};base64,${article.image.data}` : '/placeholder-image.png'}
+                        alt={article.title}
+                      />
+                    </div>
+                  )}
+                  <div className="top-article-content">
+                    <div className="top-article-category">{article.category}</div>
+                    <h3 className="top-article-title">{article.title}</h3>
+                    <p className="top-article-summary">{article.summary}</p>
+                    <div className="top-article-meta">
+                      <div className="article-author-info">
+                        <span className="author-name">By {article.author.name}</span>
+                        {article.author.profession !== 'admin' && (
+                          <span className="author-profession"> • {article.author.profession}</span>
+                        )}
+                      </div>
+                      <span className="read-time">⏱️ {article.readTime} min read</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="see-articles-button-container">
+              <Link to="/articles" className="see-articles-button">
+                See All Articles →
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Features */}
       <section className="features-section">
         <div className="section-container">
@@ -251,48 +300,6 @@ const Homepage = () => {
           </div>
         </div>
       </section>
-
-      {/* Featured Articles Section - Only show if articles exist */}
-      {featuredArticles.length > 0 && (
-        <section className="articles-section">
-          <div className="section-container">
-            <div className="section-header">
-              <div>
-                <h2 className="section-title">📚 Latest Articles & Insights</h2>
-                <p className="section-subtitle">Expert knowledge from verified professionals</p>
-              </div>
-              <Link to="/articles" className="view-all-link">View All Articles →</Link>
-            </div>
-
-            <div className="articles-grid-home">
-              {featuredArticles.slice(0, 3).map((article) => (
-                <Link
-                  key={article._id}
-                  to={`/articles/${article._id}`}
-                  className="article-card-home"
-                >
-                  {article.image && (
-                    <div className="article-image-home">
-                      <img src={`${API_URL}${article.image}`} alt={article.title} />
-                      {article.featured && <span className="featured-badge-home">⭐ Featured</span>}
-                    </div>
-                  )}
-                  <div className="article-content-home">
-                    <div className="article-category-home">{article.category}</div>
-                    <h3>{article.title}</h3>
-                    <p>{article.summary}</p>
-                    <div className="article-meta-home">
-                      <span>By {article.author.name}</span>
-                      <span>•</span>
-                      <span>{article.readTime} min read</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* CTA Section */}
       <section className="cta-section">
