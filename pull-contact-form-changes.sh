@@ -29,26 +29,33 @@ mv backend/.env.backup backend/.env 2>/dev/null
 echo "   ✓ .env files restored"
 
 # Install new dependencies
-echo "5. Installing nodemailer..."
+echo "5. Installing dependencies..."
+echo "   - Installing frontend dependencies (react-quill)..."
+npm install --legacy-peer-deps
+echo "   - Installing backend dependencies (nodemailer, isomorphic-dompurify)..."
 cd backend
-npm install nodemailer
+npm install
 cd ..
+
+# Build frontend
+echo "6. Building frontend..."
+npm run build
 
 echo ""
 echo "=== Pull Complete! ==="
 echo ""
+echo "✓ Installed react-quill (rich text editor)"
+echo "✓ Installed isomorphic-dompurify (HTML sanitization)"
+echo "✓ Frontend built successfully"
+echo ""
 echo "Next steps:"
-echo "1. Configure email in backend/.env:"
-echo "   EMAIL_USER=your-gmail@gmail.com"
-echo "   EMAIL_PASSWORD=your-gmail-app-password"
-echo "   CONTACT_EMAIL=yogmca@gmail.com"
+echo "1. Restart services:"
+echo "   pm2 restart all"
 echo ""
-echo "2. Get Gmail App Password:"
-echo "   https://myaccount.google.com/apppasswords"
+echo "2. Verify rich text editor:"
+echo "   - Admin Dashboard: Create/edit articles with formatting"
+echo "   - Article Submission: Professionals can use rich text editor"
+echo "   - Articles display with proper formatting"
 echo ""
-echo "3. Restart services:"
-echo "   pm2 restart legaliq-backend"
-echo "   ./deploy-frontend.sh"
-echo ""
-echo "4. Test contact form:"
+echo "3. Test contact form:"
 echo "   https://legaliq.in/contact"
