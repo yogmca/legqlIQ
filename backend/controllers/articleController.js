@@ -29,7 +29,7 @@ exports.createArticle = async (req, res) => {
     console.log('Request file:', req.file);
     console.log('Has file:', !!req.file);
     
-    const { title, content, summary, category, tags, isExternal, externalUrl, externalSource } = req.body;
+    const { title, content, summary, category, tags, isExternal, externalUrl, externalSource, featured } = req.body;
     const userId = req.user._id;
 
     // Get user details
@@ -67,7 +67,8 @@ exports.createArticle = async (req, res) => {
       isExternal: isExternal || false,
       externalUrl: externalUrl || null,
       externalSource: externalSource || null,
-      status: user.role === 'admin' ? 'approved' : 'pending'
+      status: user.role === 'admin' ? 'approved' : 'pending',
+      featured: user.role === 'admin' && featured === 'true' ? true : false
     };
 
     // Convert image to Base64 if uploaded
