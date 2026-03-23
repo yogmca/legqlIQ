@@ -254,46 +254,47 @@ const PaymentDetails = () => {
             </div>
           </div>
         </div>
+      </form>
 
-        {/* Action Buttons */}
-        <div className="payment-details-actions">
-          {!isEditing ? (
+      {/* Action Buttons - Outside form to prevent accidental submission */}
+      <div className="payment-details-actions">
+        {!isEditing ? (
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
+            className="btn-edit-payment"
+          >
+            ✏️ Edit Payment Details
+          </button>
+        ) : (
+          <>
             <button
               type="button"
-              onClick={() => setIsEditing(true)}
-              className="btn-edit-payment"
+              onClick={handleSubmit}
+              disabled={saving}
+              className="btn-save-payment"
             >
-              ✏️ Edit Payment Details
+              {saving ? 'Saving...' : '💾 Save Payment Details'}
             </button>
-          ) : (
-            <>
-              <button
-                type="submit"
-                disabled={saving}
-                className="btn-save-payment"
-              >
-                {saving ? 'Saving...' : '💾 Save Payment Details'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsEditing(false);
-                  fetchPaymentDetails();
-                  setMessage({ type: '', text: '' });
-                }}
-                className="btn-cancel-payment"
-                disabled={saving}
-              >
-                Cancel
-              </button>
-            </>
-          )}
-        </div>
+            <button
+              type="button"
+              onClick={() => {
+                setIsEditing(false);
+                fetchPaymentDetails();
+                setMessage({ type: '', text: '' });
+              }}
+              className="btn-cancel-payment"
+              disabled={saving}
+            >
+              Cancel
+            </button>
+          </>
+        )}
+      </div>
 
-        <div className="payment-security-note">
-          <p>🔒 <strong>Security Note:</strong> Your payment details are securely stored and encrypted. Bank account numbers are masked and only visible to authorized LegalIQ administrators for settlement processing.</p>
-        </div>
-      </form>
+      <div className="payment-security-note">
+        <p>🔒 <strong>Security Note:</strong> Your payment details are securely stored and encrypted. Bank account numbers are masked and only visible to authorized LegalIQ administrators for settlement processing.</p>
+      </div>
     </div>
   );
 };
