@@ -208,12 +208,14 @@ const ArticleDetail = () => {
         </div>
 
         <div className="article-actions">
-          <button 
-            className={`like-button ${isLiked ? 'liked' : ''}`}
-            onClick={handleLike}
-          >
-            {isLiked ? '❤️' : '🤍'} {likeCount} {likeCount === 1 ? 'Like' : 'Likes'}
-          </button>
+          {!article.isExternal && (
+            <button
+              className={`like-button ${isLiked ? 'liked' : ''}`}
+              onClick={handleLike}
+            >
+              {isLiked ? '❤️' : '🤍'} {likeCount} {likeCount === 1 ? 'Like' : 'Likes'}
+            </button>
+          )}
           <button className="share-button" onClick={() => {
             navigator.clipboard.writeText(window.location.href);
             alert('Link copied to clipboard!');
@@ -222,10 +224,11 @@ const ArticleDetail = () => {
           </button>
         </div>
 
-        <div className="comments-section">
-          <h3>💬 Comments ({article.comments?.length || 0})</h3>
-          
-          {localStorage.getItem('token') && (
+        {!article.isExternal && (
+          <div className="comments-section">
+            <h3>💬 Comments ({article.comments?.length || 0})</h3>
+            
+            {localStorage.getItem('token') && (
             <form onSubmit={handleComment} className="comment-form">
               <textarea
                 value={comment}
@@ -261,8 +264,9 @@ const ArticleDetail = () => {
             ) : (
               <p className="no-comments">No comments yet. Be the first to comment!</p>
             )}
+            </div>
           </div>
-        </div>
+        )}
       </article>
     </div>
   );
