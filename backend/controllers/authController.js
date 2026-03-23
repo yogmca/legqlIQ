@@ -715,6 +715,15 @@ exports.updatePaymentDetails = async (req, res) => {
       });
     }
 
+    // Validate that at least one payment method is provided
+    const hasPaymentInfo = bankAccountNumber || upiId || phonePeNumber || googlePayNumber;
+    if (!hasPaymentInfo) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide at least one payment method (Bank Account, UPI, PhonePe, or Google Pay)'
+      });
+    }
+
     // Find professional profile
     const professionalProfile = await Lawyer.findOne({ userId: user._id }).select('+paymentDetails.bankAccountNumber');
 
