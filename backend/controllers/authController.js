@@ -684,6 +684,151 @@ exports.getProfessionalProfile = async (req, res) => {
   }
 };
 
+// Update payment details (for professionals only)
+exports.updatePaymentDetails = async (req, res) => {
+  try {
+    const {
+      bankAccountNumber,
+      bankName,
+      ifscCode,
+      accountHolderName,
+      upiId,
+      phonePeNumber,
+      googlePayNumber,
+      preferredPaymentMethod
+    } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if user is a professional
+    if (user.role !== 'lawyer' && user.role !== 'tax-consultant' && user.role !== 'auditor') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only professionals can update payment details'
+      });
+    }
+
+    // Find professional profile
+    const professionalProfile = await Lawyer.findOne({ userId: user._id }).select('+paymentDetails.bankAccountNumber');
+
+    if (!professionalProfile) {
+      return res.status(404).json({
+        success: false,
+        message: 'Professional profile not found'
+      });
+    }
+
+    // Initialize paymentDetails if it doesn't exist
+    if (!professionalProfile.paymentDetails) {
+      professionalProfile.paymentDetails = {};
+    }
+
+    // Update payment details fields
+    if (bankAccountNumber !== undefined) professionalProfile.paymentDetails.bankAccountNumber = bankAccountNumber;
+    if (bankName !== undefined) professionalProfile.paymentDetails.bankName = bankName;
+    if (ifscCode !== undefined) professionalProfile.paymentDetails.ifscCode = ifscCode?.toUpperCase();
+    if (accountHolderName !== undefined) professionalProfile.paymentDetails.accountHolderName = accountHolderName;
+    if (upiId !== undefined) professionalProfile.paymentDetails.upiId = upiId?.toLowerCase();
+    if (phonePeNumber !== undefined) professionalProfile.paymentDetails.phonePeNumber = phonePeNumber;
+    if (googlePayNumber !== undefined) professionalProfile.paymentDetails.googlePayNumber = googlePayNumber;
+    if (preferredPaymentMethod !== undefined) professionalProfile.paymentDetails.preferredPaymentMethod = preferredPaymentMethod;
+
+    await professionalProfile.save();
+
+    // Return payment details without sensitive bank account number
+    const paymentDetailsResponse = {
+      bankName: professionalProfile.paymentDetails.bankName,
+      ifscCode: professionalProfile.paymentDetails.ifscCode,
+      accountHolderName: professionalProfile.paymentDetails.accountHolderName,
+      upiId: professionalProfile.paymentDetails.upiId,
+      phonePeNumber: professionalProfile.paymentDetails.phonePeNumber,
+      googlePayNumber: professionalProfile.paymentDetails.googlePayNumber,
+      preferredPaymentMethod: professionalProfile.paymentDetails.preferredPaymentMethod,
+      // Mask bank account number for security
+      bankAccountNumber: professionalProfile.paymentDetails.bankAccountNumber
+        ? '****' + professionalProfile.paymentDetails.bankAccountNumber.slice(-4)
+        : null
+    };
+
+    res.status(200).json({
+      success: true,
+      message: 'Payment details updated successfully',
+      paymentDetails: paymentDetailsResponse
+    });
+  } catch (error) {
+    console.error('Update payment details error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update payment details'
+    });
+  }
+};
+
+// Get payment details (for professionals only)
+exports.getPaymentDetails = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if user is a professional
+    if (user.role !== 'lawyer' && user.role !== 'tax-consultant' && user.role !== 'auditor') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only professionals have payment details'
+      });
+    }
+
+    // Find professional profile with payment details
+    const professionalProfile = await Lawyer.findOne({ userId: user._id }).select('+paymentDetails.bankAccountNumber');
+
+    if (!professionalProfile) {
+      return res.status(404).json({
+        success: false,
+        message: 'Professional profile not found'
+      });
+    }
+
+    // Return payment details without full bank account number
+    const paymentDetailsResponse = professionalProfile.paymentDetails ? {
+      bankName: professionalProfile.paymentDetails.bankName,
+      ifscCode: professionalProfile.paymentDetails.ifscCode,
+      accountHolderName: professionalProfile.paymentDetails.accountHolderName,
+      upiId: professionalProfile.paymentDetails.upiId,
+      phonePeNumber: professionalProfile.paymentDetails.phonePeNumber,
+      googlePayNumber: professionalProfile.paymentDetails.googlePayNumber,
+      preferredPaymentMethod: professionalProfile.paymentDetails.preferredPaymentMethod,
+      // Mask bank account number for security
+      bankAccountNumber: professionalProfile.paymentDetails.bankAccountNumber
+        ? '****' + professionalProfile.paymentDetails.bankAccountNumber.slice(-4)
+        : null
+    } : null;
+
+    res.status(200).json({
+      success: true,
+      paymentDetails: paymentDetailsResponse
+    });
+  } catch (error) {
+    console.error('Get payment details error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch payment details'
+    });
+  }
+};
+
 // Logout user (client-side token removal)
 exports.logout = async (req, res) => {
   res.status(200).json({

@@ -45,6 +45,8 @@ router.put('/profile', protect, authController.updateProfile);
 router.put('/change-password', protect, authController.changePassword);
 router.get('/professional-profile', protect, authController.getProfessionalProfile);
 router.put('/professional-profile', protect, authController.updateProfessionalProfile);
+router.get('/payment-details', protect, authController.getPaymentDetails);
+router.put('/payment-details', protect, authController.updatePaymentDetails);
 router.post('/logout', protect, authController.logout);
 
 module.exports = router;

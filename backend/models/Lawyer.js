@@ -136,6 +136,49 @@ const lawyerSchema = new mongoose.Schema({
   lastActive: {
     type: Date,
     default: Date.now
+  },
+  // Payment Settlement Details
+  paymentDetails: {
+    // Bank Account Details
+    bankAccountNumber: {
+      type: String,
+      trim: true,
+      select: false // Don't include in regular queries for security
+    },
+    bankName: {
+      type: String,
+      trim: true
+    },
+    ifscCode: {
+      type: String,
+      trim: true,
+      uppercase: true
+    },
+    accountHolderName: {
+      type: String,
+      trim: true
+    },
+    // UPI Details
+    upiId: {
+      type: String,
+      trim: true,
+      lowercase: true
+    },
+    // Payment App Numbers
+    phonePeNumber: {
+      type: String,
+      trim: true
+    },
+    googlePayNumber: {
+      type: String,
+      trim: true
+    },
+    // Preferred payment method
+    preferredPaymentMethod: {
+      type: String,
+      enum: ['bank_transfer', 'upi', 'phonepe', 'googlepay'],
+      default: 'upi'
+    }
   }
 });
 
