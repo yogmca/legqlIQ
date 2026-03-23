@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import authService from '../services/authService';
+import PaymentDetails from './PaymentDetails';
 import './Profile.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
@@ -12,7 +13,7 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [activeTab, setActiveTab] = useState('basic'); // 'basic', 'professional', or 'password'
+  const [activeTab, setActiveTab] = useState('basic'); // 'basic', 'professional', 'payment', or 'password'
   const [isGoogleUser, setIsGoogleUser] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [isProfessional, setIsProfessional] = useState(false);
@@ -541,6 +542,17 @@ const Profile = () => {
                 Professional Info
               </button>
             )}
+            {isProfessional && (
+              <button
+                className={`profile-nav-item ${activeTab === 'payment' ? 'active' : ''}`}
+                onClick={() => setActiveTab('payment')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 4H4C2.89 4 2.01 4.89 2.01 6L2 18C2 19.11 2.89 20 4 20H20C21.11 20 22 19.11 22 18V6C22 4.89 21.11 4 20 4ZM20 18H4V12H20V18ZM20 8H4V6H20V8Z" fill="currentColor"/>
+                </svg>
+                Payment Details
+              </button>
+            )}
             {!isGoogleUser && (
               <button
                 className={`profile-nav-item ${activeTab === 'password' ? 'active' : ''}`}
@@ -883,6 +895,12 @@ const Profile = () => {
                 </button>
               </div>
             </form>
+          )}
+
+          {activeTab === 'payment' && isProfessional && (
+            <div className="payment-details-wrapper">
+              <PaymentDetails />
+            </div>
           )}
 
           {activeTab === 'password' && !isGoogleUser && (
