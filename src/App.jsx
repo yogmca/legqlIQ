@@ -7,6 +7,7 @@ import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import Profile from './components/Profile';
+import PaymentDetails from './components/PaymentDetails';
 import SearchBar from './components/SearchBar';
 import FilterSection from './components/FilterSection';
 import LawyerCard from './components/LawyerCard';
@@ -431,6 +432,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payment-details"
+          element={
+            <ProtectedRoute>
+              <PaymentDetails />
             </ProtectedRoute>
           }
         />
