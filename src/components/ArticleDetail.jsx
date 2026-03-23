@@ -45,14 +45,14 @@ const ArticleDetail = () => {
   };
 
   const handleLike = async () => {
-    if (!user._id) {
+    const token = localStorage.getItem('token');
+    if (!token) {
       alert('Please login to like articles');
       navigate('/login');
       return;
     }
 
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/articles/${id}/like`, {
         method: 'POST',
         headers: {
@@ -73,7 +73,8 @@ const ArticleDetail = () => {
   const handleComment = async (e) => {
     e.preventDefault();
     
-    if (!user._id) {
+    const token = localStorage.getItem('token');
+    if (!token) {
       alert('Please login to comment');
       navigate('/login');
       return;
@@ -82,7 +83,6 @@ const ArticleDetail = () => {
     if (!comment.trim()) return;
 
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/articles/${id}/comment`, {
         method: 'POST',
         headers: {
@@ -225,7 +225,7 @@ const ArticleDetail = () => {
         <div className="comments-section">
           <h3>💬 Comments ({article.comments?.length || 0})</h3>
           
-          {user._id && (
+          {localStorage.getItem('token') && (
             <form onSubmit={handleComment} className="comment-form">
               <textarea
                 value={comment}
