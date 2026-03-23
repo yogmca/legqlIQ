@@ -59,7 +59,9 @@ const PaymentDetails = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
     setSaving(true);
     setMessage({ type: '', text: '' });
 
