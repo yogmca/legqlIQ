@@ -21,6 +21,8 @@ import ArticlesPage from './components/ArticlesPage';
 import ArticleDetail from './components/ArticleDetail';
 import ArticleSubmission from './components/ArticleSubmission';
 import AdminDashboard from './components/AdminDashboard';
+import ChatList from './components/ChatList';
+import Chat from './components/Chat';
 import { lawyerService } from './services/lawyerService';
 import authService from './services/authService';
 
@@ -473,6 +475,22 @@ function App() {
           element={
             <ProtectedRoute>
               <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chats"
+          element={
+            <ProtectedRoute>
+              <ChatList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chat/:chatId"
+          element={
+            <ProtectedRoute>
+              <Chat />
             </ProtectedRoute>
           }
         />

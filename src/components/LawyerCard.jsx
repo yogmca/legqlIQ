@@ -3,6 +3,7 @@
   import './LawyerCard.css';
   import ConsultationForm from './ConsultationForm';
   import authService from '../services/authService';
+  import chatService from '../services/chatService';
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
@@ -22,6 +23,32 @@
         return;
       }
       navigate('/video-consultations');
+    };
+
+    const handleStartChat = async () => {
+      const user = authService.getUser();
+      if (!user) {
+        alert('Please login to start a chat');
+        navigate('/login');
+        return;
+      }
+
+      try {
+        // Check if lawyer has a userId (registered as user)
+        if (!lawyer.userId) {
+          alert('This professional has not enabled chat yet. Please contact them via phone or email.');
+          return;
+        }
+        
+        // Get or create chat with the lawyer using their userId
+        const chat = await chatService.getOrCreateChat(lawyer.userId);
+        
+        // Navigate to the chat
+        navigate(`/chat/${chat.id}`);
+      } catch (error) {
+        console.error('Error starting chat:', error);
+        alert('Failed to start chat. This professional may not have chat enabled yet.');
+      }
     };
 
     const handleCloseForm = () => {
@@ -165,6 +192,9 @@
           </button>
           <button className="btn-video-consultation" onClick={handleBookVideoConsultation}>
             📹 Book Video Consultation
+          </button>
+          <button className="btn-chat" onClick={handleStartChat}>
+            💬 Start Chat
           </button>
         </div>
 

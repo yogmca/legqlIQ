@@ -115,6 +115,7 @@ const Homepage = () => {
             )}
             {user && <Link to="/appointments" className="nav-link">Appointments</Link>}
             {user && <Link to="/video-consultations" className="nav-link">Video Calls</Link>}
+            {user && <Link to="/chats" className="nav-link">💬 Messages</Link>}
             {user && <Link to="/profile" className="nav-link">Profile</Link>}
             <Link to="/about" className="nav-link">About</Link>
             <Link to="/contact" className="nav-link">Contact</Link>

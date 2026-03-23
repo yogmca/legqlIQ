@@ -9,6 +9,7 @@ const passport = require('./config/passport'); // Now passport can access env va
 const http = require('http');
 const { Server } = require('socket.io');
 const SignalingService = require('./services/signalingService');
+const ChatService = require('./services/chatService');
 
 const app = express();
 const server = http.createServer(app);
@@ -25,6 +26,11 @@ const PORT = process.env.PORT || 4000;
 const signalingService = new SignalingService(io);
 signalingService.initialize();
 console.log('✅ WebRTC Signaling Service initialized');
+
+// Initialize Chat service
+const chatService = new ChatService(io);
+chatService.initialize();
+console.log('✅ Chat Service initialized');
 
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/legaliq';
@@ -68,6 +74,7 @@ const contactRoutes = require('./routes/contactRoutes');
 const chatbotRoutes = require('./routes/chatbotRoutes');
 const scraperRoutes = require('./routes/scraperRoutes');
 const articleRoutes = require('./routes/articles');
+const chatRoutes = require('./routes/chatRoutes');
 
 // Now using ONLY MongoDB database for lawyer data
 // No hardcoded fallback data or web scraping
@@ -95,6 +102,9 @@ app.use('/api/scraper', scraperRoutes);
 // Article routes
 app.use('/api/articles', articleRoutes);
 
+// Chat routes
+app.use('/api/chats', chatRoutes);
+
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));
 
@@ -116,6 +126,7 @@ app.get('/api/lawyers', async (req, res) => {
       
     const dbProfessionals = professionalsFromDB.map(professional => ({
       id: professional._id.toString(),
+      userId: professional.userId, // Include userId for chat functionality
       name: professional.name,
       professionalType: professional.professionalType,
       barRegistrationNo: professional.barRegistrationNo,
@@ -175,6 +186,7 @@ app.get('/api/lawyers/search', async (req, res) => {
       
     const dbProfessionals = professionalsFromDB.map(professional => ({
       id: professional._id.toString(),
+      userId: professional.userId, // Include userId for chat functionality
       name: professional.name,
       professionalType: professional.professionalType,
       barRegistrationNo: professional.barRegistrationNo,
@@ -288,6 +300,7 @@ app.get('/api/health', async (req, res) => {
 server.listen(PORT, () => {
   console.log(`🚀 Backend server running on http://localhost:${PORT}`);
   console.log('🔌 WebSocket server ready for video consultations');
+  console.log('💬 Chat service ready for real-time messaging');
   console.log('📊 Using MongoDB database ONLY for lawyer data');
   console.log('✅ No hardcoded fallback data - lawyers must register through the system');
 });
