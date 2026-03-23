@@ -27,7 +27,7 @@ const PaymentDetails = () => {
   const fetchPaymentDetails = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/auth/payment-details`, {
+      const response = await fetch(`${API_URL}/auth/payment-details`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -74,7 +74,7 @@ const PaymentDetails = () => {
         }
       });
 
-      const response = await fetch(`${API_URL}/api/auth/payment-details`, {
+      const response = await fetch(`${API_URL}/auth/payment-details`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
