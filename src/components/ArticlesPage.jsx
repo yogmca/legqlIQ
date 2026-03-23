@@ -232,7 +232,7 @@ const ArticlesPage = () => {
                         <span>📅 {formatDate(article.publishedAt || article.createdAt)}</span>
                         <span>👁️ {article.views} views</span>
                         {!article.isExternal && <span>❤️ {article.likes?.length || 0}</span>}
-                        <span>⏱️ {article.readTime} min read</span>
+                        {!article.isExternal && <span>⏱️ {article.readTime} min read</span>}
                       </div>
 
                       {article.tags && article.tags.length > 0 && (

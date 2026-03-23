@@ -162,7 +162,7 @@ const ArticleDetail = () => {
             
             <div className="article-meta-info">
               <span>📅 {formatDate(article.publishedAt || article.createdAt)}</span>
-              <span>⏱️ {article.readTime} min read</span>
+              {!article.isExternal && <span>⏱️ {article.readTime} min read</span>}
               <span>👁️ {article.views} views</span>
             </div>
           </div>
