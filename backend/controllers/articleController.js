@@ -370,6 +370,11 @@ exports.toggleLike = async (req, res) => {
       return res.status(404).json({ message: 'Article not found' });
     }
 
+    // Prevent liking external articles
+    if (article.isExternal) {
+      return res.status(403).json({ message: 'Cannot like external articles' });
+    }
+
     const likeIndex = article.likes.indexOf(userId);
     
     if (likeIndex > -1) {
@@ -382,7 +387,7 @@ exports.toggleLike = async (req, res) => {
 
     await article.save();
 
-    res.json({ 
+    res.json({
       message: likeIndex > -1 ? 'Article unliked' : 'Article liked',
       likeCount: article.likes.length,
       isLiked: likeIndex === -1
@@ -409,6 +414,11 @@ exports.addComment = async (req, res) => {
       return res.status(404).json({ message: 'Article not found' });
     }
 
+    // Prevent commenting on external articles
+    if (article.isExternal) {
+      return res.status(403).json({ message: 'Cannot comment on external articles' });
+    }
+
     article.comments.push({
       user: userId,
       name: req.user.name,
@@ -420,7 +430,7 @@ exports.addComment = async (req, res) => {
     // Populate the new comment
     await article.populate('comments.user', 'name profileImage');
 
-    res.json({ 
+    res.json({
       message: 'Comment added successfully',
       comment: article.comments[article.comments.length - 1]
     });

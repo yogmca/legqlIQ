@@ -69,8 +69,14 @@ const ArticlesPage = () => {
     setPage(prev => prev + 1);
   };
 
-  const handleArticleClick = (article) => {
+  const handleArticleClick = async (article) => {
     if (article.isExternal && article.externalUrl) {
+      // Increment view count for external articles before opening
+      try {
+        await fetch(`${API_URL}/articles/${article._id}`);
+      } catch (err) {
+        console.error('Failed to track view:', err);
+      }
       window.open(article.externalUrl, '_blank');
     } else {
       navigate(`/articles/${article._id}`);
@@ -225,7 +231,7 @@ const ArticlesPage = () => {
                       <div className="article-meta">
                         <span>📅 {formatDate(article.publishedAt || article.createdAt)}</span>
                         <span>👁️ {article.views} views</span>
-                        <span>❤️ {article.likes?.length || 0}</span>
+                        {!article.isExternal && <span>❤️ {article.likes?.length || 0}</span>}
                         <span>⏱️ {article.readTime} min read</span>
                       </div>
 

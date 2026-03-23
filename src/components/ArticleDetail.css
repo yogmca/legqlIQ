@@ -278,6 +278,21 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
+.like-count-display {
+  flex: 1;
+  padding: 14px 24px;
+  border: 2px solid #e0e0e0;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #e74c3c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
 .like-button,
 .share-button {
   flex: 1;
