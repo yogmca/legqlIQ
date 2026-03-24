@@ -81,6 +81,7 @@
   color: #1e3a8a !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #1e3a8a;
 }
 
 .tagline {
@@ -146,11 +147,17 @@
   font-weight: 700;
   color: #1a1a1a;
   margin-bottom: 10px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #1a1a1a;
 }
 
 .login-header p {
   font-size: 16px;
   color: #666;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #666;
 }
 
 .error-message {
@@ -186,6 +193,9 @@
   font-size: 14px;
   font-weight: 600;
   color: #333;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #333;
 }
 
 .form-group input {
@@ -195,6 +205,14 @@
   font-size: 15px;
   transition: all 0.3s ease;
   outline: none;
+  color: #333;
+  background-color: #ffffff;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #333;
 }
 
 .form-group input:focus {
@@ -204,6 +222,23 @@
 
 .form-group input::placeholder {
   color: #999;
+  opacity: 1;
+  -webkit-text-fill-color: #999;
+}
+
+.form-group input::-webkit-input-placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.form-group input::-moz-placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.form-group input:-ms-input-placeholder {
+  color: #999;
+  opacity: 1;
 }
 
 .password-input-wrapper {
@@ -280,6 +315,9 @@
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 10px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: white;
 }
 
 .login-button:hover:not(:disabled) {
@@ -336,6 +374,10 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  color: #333;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #333;
 }
 
 .social-button:hover {
@@ -348,12 +390,18 @@
   margin-top: 30px;
   font-size: 15px;
   color: #666;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #666;
 }
 
 .signup-link a {
   color: #667eea;
   text-decoration: none;
   font-weight: 600;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #667eea;
 }
 
 .signup-link a:hover {

@@ -157,11 +157,17 @@
   font-weight: 700;
   color: #1a1a1a;
   margin-bottom: 10px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #1a1a1a;
 }
 
 .register-header p {
   font-size: 16px;
   color: #666;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #666;
 }
 
 .progress-indicator {
@@ -197,17 +203,24 @@
   font-size: 16px;
   color: #666;
   transition: all 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #666;
 }
 
 .progress-step.active .step-number {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  -webkit-text-fill-color: white;
 }
 
 .progress-step span {
   font-size: 13px;
   font-weight: 600;
   color: #666;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #666;
 }
 
 .progress-line {
@@ -243,6 +256,8 @@
   font-size: 14px;
   font-weight: 600;
   color: #333;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .form-group input,
@@ -254,6 +269,13 @@
   transition: all 0.3s ease;
   outline: none;
   font-family: inherit;
+  color: #333;
+  background-color: #ffffff;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .form-group input:focus,
@@ -264,10 +286,34 @@
 
 .form-group input::placeholder {
   color: #999;
+  opacity: 1;
+  -webkit-text-fill-color: #999;
+}
+
+.form-group input::-webkit-input-placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.form-group input::-moz-placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.form-group input:-ms-input-placeholder {
+  color: #999;
+  opacity: 1;
 }
 
 .form-group select {
   cursor: pointer;
+  background: white;
+  color: #333;
+  -webkit-text-fill-color: #333;
+}
+
+.form-group select option {
+  color: #333;
   background: white;
 }
 
@@ -281,12 +327,15 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .next-button,
 .register-button {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  -webkit-text-fill-color: white;
 }
 
 .next-button:hover:not(:disabled),
@@ -299,11 +348,13 @@
   background: white;
   border: 2px solid #e0e0e0;
   color: #666;
+  -webkit-text-fill-color: #666;
 }
 
 .back-button:hover {
   border-color: #667eea;
   color: #667eea;
+  -webkit-text-fill-color: #667eea;
 }
 
 .register-button:disabled {
@@ -323,12 +374,18 @@
   margin-top: 30px;
   font-size: 15px;
   color: #666;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #666;
 }
 
 .login-link a {
   color: #667eea;
   text-decoration: none;
   font-weight: 600;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #667eea;
 }
 
 .login-link a:hover {
@@ -532,16 +589,23 @@
   font-weight: 700;
   color: #333;
   margin-bottom: 8px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #333;
 }
 
 .user-type-card p {
   font-size: 14px;
   color: #666;
   margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #666;
 }
 
 .user-type-card.selected h4 {
   color: #667eea;
+  -webkit-text-fill-color: #667eea;
 }
 
 /* Specialization Grid */
@@ -564,12 +628,16 @@
   transition: all 0.3s ease;
   background: white;
   user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #666;
 }
 
 .specialization-chip:hover {
   border-color: #667eea;
   color: #667eea;
   transform: translateY(-2px);
+  -webkit-text-fill-color: #667eea;
 }
 
 .specialization-chip.selected {
@@ -577,6 +645,7 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  -webkit-text-fill-color: white;
 }
 
 .next-button:disabled {
@@ -690,11 +759,17 @@
   font-weight: 600;
   color: #333;
   margin: 0 0 8px 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #333;
 }
 
 .upload-placeholder small {
   font-size: 13px;
   color: #666;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-fill-color: #666;
 }
 
 .image-preview-wrapper {
