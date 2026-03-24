@@ -122,7 +122,16 @@ app.get('/api/lawyers', async (req, res) => {
     
     const professionalsFromDB = await Lawyer.find(query)
       .sort({ createdAt: -1 }) // Sort by newest first
-      .lean();
+      .exec(); // Use exec() instead of lean() to get full documents
+    
+    // Debug: Check if profilePicture exists in raw data
+    if (professionalsFromDB.length > 0) {
+      console.log('DEBUG: First professional from DB:', {
+        name: professionalsFromDB[0].name,
+        hasProfilePicture: !!professionalsFromDB[0].profilePicture,
+        profilePictureLength: professionalsFromDB[0].profilePicture?.length || 0
+      });
+    }
       
     const dbProfessionals = professionalsFromDB.map(professional => ({
       id: professional._id.toString(),
@@ -141,6 +150,7 @@ app.get('/api/lawyers', async (req, res) => {
       languages: professional.languages,
       education: professional.education,
       description: professional.description,
+      profilePicture: professional.profilePicture, // Include profile picture
       rating: professional.rating || 0,
       totalReviews: professional.totalReviews || 0,
       lastActive: professional.lastActive
@@ -182,7 +192,7 @@ app.get('/api/lawyers/search', async (req, res) => {
     
     const professionalsFromDB = await Lawyer.find(query)
       .sort({ createdAt: -1 })
-      .lean();
+      .exec(); // Use exec() instead of lean() to get full documents
       
     const dbProfessionals = professionalsFromDB.map(professional => ({
       id: professional._id.toString(),
@@ -201,6 +211,7 @@ app.get('/api/lawyers/search', async (req, res) => {
       languages: professional.languages,
       education: professional.education,
       description: professional.description,
+      profilePicture: professional.profilePicture, // Include profile picture
       rating: professional.rating || 0,
       totalReviews: professional.totalReviews || 0,
       lastActive: professional.lastActive
