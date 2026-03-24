@@ -45,7 +45,7 @@
 }
 
 .logo-text {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
@@ -67,7 +67,7 @@
   color: #333;
   text-decoration: none;
   font-weight: 500;
-  font-size: 15px;
+  font-size: 14px;
   transition: color 0.3s ease;
 }
 
@@ -168,7 +168,7 @@
 .hero-section {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 80px 24px;
+  padding: 60px 24px;
   position: relative;
   overflow: hidden;
 }
@@ -200,17 +200,17 @@
 }
 
 .hero-title {
-  font-size: 40px;
+  font-size: 32px;
   font-weight: 800;
   line-height: 1.2;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .gradient-text {
   display: block !important;
   color: #FFFFFF !important;
   font-weight: 700 !important;
-  font-size: 44px !important;
+  font-size: 36px !important;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5) !important;
   filter: none !important;
   letter-spacing: 1px !important;
@@ -228,10 +228,10 @@
 }
 
 .hero-subtitle {
-  font-size: 18px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.5;
   opacity: 0.95;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
 .search-form {
@@ -255,7 +255,7 @@
   flex: 1;
   border: none;
   outline: none;
-  font-size: 16px;
+  font-size: 15px;
   padding: 12px 8px;
   color: #333;
 }
@@ -271,7 +271,7 @@
   border: none;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -292,12 +292,12 @@
 }
 
 .stat strong {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
 }
 
 .stat span {
-  font-size: 14px;
+  font-size: 13px;
   opacity: 0.9;
 }
 
@@ -309,11 +309,11 @@
 .floating-card {
   position: absolute;
   background: white;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 10px;
+  padding: 16px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   display: flex;
-  gap: 16px;
+  gap: 12px;
   align-items: center;
   animation: float 3s ease-in-out infinite;
 }
@@ -342,11 +342,11 @@
 }
 
 .card-icon {
-  font-size: 32px;
-  width: 50px;
-  height: 50px;
+  font-size: 28px;
+  width: 44px;
+  height: 44px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -354,13 +354,13 @@
 
 .card-content h4 {
   color: #333;
-  font-size: 16px;
+  font-size: 14px;
   margin: 0 0 4px 0;
 }
 
 .card-content p {
   color: #666;
-  font-size: 13px;
+  font-size: 12px;
   margin: 0;
 }
 
@@ -368,22 +368,22 @@
 .section-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 80px 24px;
+  padding: 40px 24px;
 }
 
 .section-title {
-  font-size: 36px;
+  font-size: 20px !important;
   font-weight: 700;
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
   color: #1a1a1a;
 }
 
 .section-subtitle {
-  font-size: 18px;
+  font-size: 13px !important;
   text-align: center;
   color: #666;
-  margin-bottom: 60px;
+  margin-bottom: 32px;
 }
 
 /* Specializations */
@@ -399,8 +399,8 @@
 
 .specialization-card {
   background: white;
-  border-radius: 12px;
-  padding: 32px;
+  border-radius: 10px;
+  padding: 24px;
   text-align: center;
   text-decoration: none;
   color: #333;
@@ -415,12 +415,12 @@
 }
 
 .spec-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
+  font-size: 40px;
+  margin-bottom: 12px;
 }
 
 .specialization-card h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   margin: 0;
 }
@@ -434,25 +434,25 @@
 
 .feature-card {
   text-align: center;
-  padding: 32px;
+  padding: 24px;
 }
 
 .feature-icon {
-  font-size: 56px;
-  margin-bottom: 20px;
+  font-size: 48px;
+  margin-bottom: 16px;
 }
 
 .feature-card h3 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   color: #1a1a1a;
 }
 
 .feature-card p {
-  font-size: 15px;
+  font-size: 14px;
   color: #666;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 /* Top Articles Section */
@@ -469,7 +469,7 @@
 
 .top-article-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   transition: all 0.3s ease;
@@ -485,7 +485,7 @@
 
 .top-article-image {
   width: 100%;
-  height: 280px;
+  height: 220px;
   overflow: hidden;
   background: #f0f0f0;
 }
@@ -502,7 +502,7 @@
 }
 
 .top-article-content {
-  padding: 28px;
+  padding: 20px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -510,23 +510,23 @@
 
 .top-article-category {
   display: inline-block;
-  padding: 8px 16px;
+  padding: 6px 14px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  border-radius: 20px;
-  font-size: 13px;
+  border-radius: 16px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: capitalize;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   width: fit-content;
 }
 
 .top-article-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: #1a1a1a;
-  margin: 0 0 16px 0;
-  line-height: 1.4;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -534,10 +534,10 @@
 }
 
 .top-article-summary {
-  font-size: 15px;
+  font-size: 14px;
   color: #555;
-  line-height: 1.7;
-  margin-bottom: 20px;
+  line-height: 1.6;
+  margin-bottom: 16px;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -549,7 +549,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 16px;
+  padding-top: 12px;
   border-top: 1px solid #e0e0e0;
 }
 
@@ -557,7 +557,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
+  font-size: 13px;
   color: #666;
 }
 
@@ -584,13 +584,13 @@
 
 .see-articles-button {
   display: inline-block;
-  padding: 16px 48px;
+  padding: 14px 40px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   text-decoration: none;
-  border-radius: 30px;
+  border-radius: 24px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
@@ -651,7 +651,7 @@
 .article-image-home {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 180px;
   overflow: hidden;
   background: #f0f0f0;
 }
@@ -681,7 +681,7 @@
 }
 
 .article-content-home {
-  padding: 24px;
+  padding: 20px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -701,10 +701,10 @@
 }
 
 .article-content-home h3 {
-  margin: 0 0 12px 0;
+  margin: 0 0 10px 0;
   color: #2c3e50;
-  font-size: 20px;
-  line-height: 1.4;
+  font-size: 18px;
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -713,9 +713,9 @@
 
 .article-content-home p {
   color: #34495e;
-  font-size: 14px;
-  line-height: 1.6;
-  margin-bottom: 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 14px;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -735,20 +735,20 @@
 .cta-section {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 80px 24px;
+  padding: 50px 24px;
   text-align: center;
 }
 
 .cta-container h2 {
-  font-size: 40px;
+  font-size: 24px;
   font-weight: 700;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .cta-container p {
-  font-size: 18px;
+  font-size: 14px;
   opacity: 0.95;
-  margin-bottom: 40px;
+  margin-bottom: 28px;
 }
 
 .cta-buttons {
@@ -758,10 +758,10 @@
 }
 
 .cta-primary, .cta-secondary {
-  padding: 16px 40px;
+  padding: 14px 36px;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
   text-decoration: none;
   transition: all 0.3s ease;
 }
@@ -895,7 +895,7 @@
   }
 
   .hero-title {
-    font-size: 36px;
+    font-size: 28px;
   }
 
   .specializations-grid {
@@ -915,11 +915,11 @@
 
 @media (max-width: 640px) {
   .hero-title {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .hero-subtitle {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .quick-stats {
@@ -937,7 +937,7 @@
   }
 
   .section-title {
-    font-size: 28px;
+    font-size: 18px;
   }
 
   .cta-buttons {

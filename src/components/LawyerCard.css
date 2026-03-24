@@ -1,8 +1,8 @@
 .lawyer-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding: 16px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -17,22 +17,22 @@
 .lawyer-card-header {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
-  padding-bottom: 15px;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
   border-bottom: 2px solid #f0f0f0;
 }
 
 .lawyer-avatar {
-  width: 60px;
-  height: 60px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   flex-shrink: 0;
   position: relative;
@@ -90,21 +90,21 @@
 
 .lawyer-title h3 {
   margin: 0;
-  font-size: 20px;
+  font-size: 17px;
   color: #2d3748;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* Online badge next to name */
 .online-badge {
-  font-size: 12px;
+  font-size: 11px;
   color: #10b981;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   animation: fadeIn 0.3s ease-in;
 }
 
@@ -118,8 +118,8 @@
 }
 
 .bar-registration {
-  margin: 5px 0 0 0;
-  font-size: 12px;
+  margin: 4px 0 0 0;
+  font-size: 11px;
   color: #718096;
   font-weight: 500;
 }
@@ -128,22 +128,22 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
 }
 
 .specialization-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 5px;
+  gap: 6px;
+  margin-bottom: 4px;
 }
 
 .tag {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 16px;
+  font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -151,7 +151,7 @@
 .lawyer-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .lawyer-card .info-row {
@@ -159,17 +159,17 @@
   flex-direction: row !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  gap: 8px !important;
-  font-size: 14px !important;
-  line-height: 1.6 !important;
+  gap: 6px !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
   width: 100% !important;
 }
 
 .lawyer-card .info-row .info-label {
   font-weight: 600 !important;
   color: #4a5568 !important;
-  min-width: 130px !important;
-  max-width: 130px !important;
+  min-width: 120px !important;
+  max-width: 120px !important;
   flex-shrink: 0 !important;
   white-space: nowrap !important;
   display: inline-block !important;
@@ -183,17 +183,17 @@
 }
 
 .lawyer-description {
-  font-size: 14px;
+  font-size: 13px;
   color: #4a5568;
-  line-height: 1.6;
+  line-height: 1.5;
   margin: 0;
 }
 
 .contact-info {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 15px;
+  gap: 8px;
+  padding: 12px;
   background: #f7fafc;
   border-radius: 8px;
   margin-top: auto;
@@ -202,14 +202,14 @@
 .contact-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
+  gap: 8px;
+  font-size: 13px;
   word-break: break-word;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .contact-icon {
-  font-size: 16px;
+  font-size: 14px;
   flex-shrink: 0;
 }
 
@@ -231,9 +231,9 @@
 
 .lawyer-card-footer {
   display: flex;
-  gap: 10px;
-  margin-top: 15px;
-  padding-top: 15px;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 2px solid #f0f0f0;
   flex-wrap: wrap;
 }
@@ -242,11 +242,11 @@
 .btn-video-consultation,
 .btn-chat {
   flex: 1;
-  min-width: 150px;
-  padding: 10px 16px;
+  min-width: 140px;
+  padding: 9px 14px;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -284,7 +284,7 @@
 
 @media (max-width: 768px) {
   .lawyer-card {
-    padding: 15px;
+    padding: 14px;
   }
 
   .lawyer-card-footer {
@@ -292,6 +292,6 @@
   }
 
   .info-label {
-    min-width: 100px;
+    min-width: 90px;
   }
 }
