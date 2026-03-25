@@ -276,6 +276,11 @@
   appearance: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  touch-action: manipulation;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
 .form-group input:focus,
@@ -506,6 +511,9 @@
   .form-group select {
     padding: 12px 14px;
     font-size: 16px; /* Prevents zoom on iOS */
+    touch-action: manipulation;
+    -webkit-user-select: text;
+    user-select: text;
   }
 
   .password-input-wrapper input {
@@ -627,10 +635,14 @@
   cursor: pointer;
   transition: all 0.3s ease;
   background: white;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-fill-color: #666;
+  touch-action: manipulation;
 }
 
 .specialization-chip:hover {

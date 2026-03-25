@@ -213,6 +213,11 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-fill-color: #333;
+  touch-action: manipulation;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
 .form-group input:focus {
@@ -502,6 +507,9 @@
   .form-group input {
     padding: 12px 14px;
     font-size: 16px; /* Prevents zoom on iOS */
+    touch-action: manipulation;
+    -webkit-user-select: text;
+    user-select: text;
   }
 
   .password-input-wrapper input {
