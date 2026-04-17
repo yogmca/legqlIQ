@@ -238,6 +238,23 @@ const PaymentModal = ({ lawyer, onClose }) => {
     });
   };
 
+  // Cancel pending payment consultation on backend
+  const cancelPendingPayment = async (consultationId) => {
+    try {
+      await fetch(`${API_URL}/consultations/cancel-pending-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authService.getToken()}`
+        },
+        body: JSON.stringify({ consultationId })
+      });
+      console.log('Pending payment cancelled for consultation:', consultationId);
+    } catch (err) {
+      console.error('Failed to cancel pending payment:', err);
+    }
+  };
+
   const handlePayment = async () => {
     // Validate all required fields
     const missingFields = [];
@@ -273,7 +290,7 @@ const PaymentModal = ({ lawyer, onClose }) => {
         return;
       }
 
-      // Create order on backend
+      // Create order on backend (backend auto-cancels any previous pending payments)
       console.log('Creating order with data:', {
         amount: consultationFee,
         lawyerId: lawyer.id,
@@ -320,7 +337,7 @@ const PaymentModal = ({ lawyer, onClose }) => {
 
       // Razorpay options
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_dummy_key',
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: orderData.amount,
         currency: orderData.currency,
         name: 'LegalIQ',
@@ -370,12 +387,26 @@ const PaymentModal = ({ lawyer, onClose }) => {
         },
         modal: {
           ondismiss: function() {
+            // User closed the Razorpay modal without completing payment
+            // Keep consultation as pending_payment so user can retry from Appointments page
+            console.log('Razorpay modal dismissed - consultation kept as pending_payment for retry');
+            alert('Payment not completed. You can complete the payment from the Appointments page.');
             setLoading(false);
+            onClose();
           }
         }
       };
 
       const razorpay = new window.Razorpay(options);
+      
+      // Handle payment failure
+      razorpay.on('payment.failed', function (response) {
+        console.error('Payment failed:', response.error);
+        // Keep consultation as pending_payment so user can retry from Appointments page
+        alert(`Payment failed: ${response.error.description || 'Unknown error'}\n\nYou can retry the payment from the Appointments page.`);
+        setLoading(false);
+      });
+
       razorpay.open();
       setLoading(false);
 

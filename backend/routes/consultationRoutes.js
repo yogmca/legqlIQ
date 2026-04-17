@@ -9,6 +9,8 @@ router.use(protect);
 // Payment routes for video consultations
 router.post('/create-order', consultationController.createRazorpayOrder);
 router.post('/verify-payment', consultationController.verifyPayment);
+router.post('/cancel-pending-payment', consultationController.cancelPendingPayment);
+router.post('/retry-payment', consultationController.retryPayment);
 
 // Create new consultation
 router.post('/', consultationController.createConsultation);

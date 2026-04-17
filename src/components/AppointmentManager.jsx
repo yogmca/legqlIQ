@@ -397,6 +397,157 @@ const AppointmentManager = ({ userEmail }) => {
     }
   };
 
+  // State for tracking payment in progress
+  const [payingAppointmentId, setPayingAppointmentId] = useState(null);
+
+  // Load Razorpay script
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  // Complete payment for a pending_payment consultation
+  const handleCompletePayment = async (appointment) => {
+    const user = authService.getUser();
+    const token = authService.getToken();
+
+    if (!user || !token) {
+      alert('Please login to continue.');
+      return;
+    }
+
+    // Check if consultation date has passed
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const aptDate = new Date(appointment.preferredDate);
+    aptDate.setHours(0, 0, 0, 0);
+
+    if (aptDate < now) {
+      alert('This consultation date has already passed. Please book a new consultation.');
+      // Cancel the expired appointment
+      try {
+        await fetch(`${API_URL}/consultations/cancel-pending-payment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ consultationId: appointment._id })
+        });
+        fetchAppointments();
+      } catch (err) {
+        console.error('Failed to cancel expired appointment:', err);
+      }
+      return;
+    }
+
+    setPayingAppointmentId(appointment._id);
+
+    try {
+      // Load Razorpay script
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        alert('Failed to load payment gateway. Please try again.');
+        setPayingAppointmentId(null);
+        return;
+      }
+
+      // Call retry-payment endpoint to create a new Razorpay order for existing consultation
+      const orderResponse = await fetch(`${API_URL}/consultations/retry-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ consultationId: appointment._id })
+      });
+
+      if (!orderResponse.ok) {
+        const errorData = await orderResponse.json().catch(() => ({ message: 'Failed to create payment order' }));
+        throw new Error(errorData.message || 'Failed to create payment order');
+      }
+
+      const orderData = await orderResponse.json();
+
+      // Open Razorpay checkout
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'LegalIQ',
+        description: `Video Consultation with ${orderData.lawyerName || appointment.lawyerInfo?.name || 'Lawyer'}`,
+        order_id: orderData.orderId,
+        handler: async function (response) {
+          try {
+            // Verify payment on backend
+            const verifyResponse = await fetch(`${API_URL}/consultations/verify-payment`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authService.getToken()}`
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                consultationId: orderData.consultationId
+              })
+            });
+
+            if (!verifyResponse.ok) {
+              throw new Error('Payment verification failed');
+            }
+
+            alert('Payment successful! Your consultation is now confirmed.');
+            fetchAppointments(); // Refresh to show updated status
+          } catch (error) {
+            console.error('Payment verification error:', error);
+            alert('Payment verification failed. Please contact support.');
+          }
+        },
+        prefill: {
+          name: user.name,
+          email: user.email,
+          contact: user.phone || ''
+        },
+        theme: {
+          color: '#2563eb'
+        },
+        modal: {
+          ondismiss: function() {
+            console.log('Razorpay modal dismissed');
+            setPayingAppointmentId(null);
+          }
+        }
+      };
+
+      const razorpayInstance = new window.Razorpay(options);
+
+      razorpayInstance.on('payment.failed', function (response) {
+        console.error('Payment failed:', response.error);
+        alert(`Payment failed: ${response.error.description || 'Unknown error'}\n\nYou can try again from the Appointments page.`);
+        setPayingAppointmentId(null);
+      });
+
+      razorpayInstance.open();
+      setPayingAppointmentId(null);
+
+    } catch (error) {
+      console.error('Complete payment error:', error);
+      alert(`Payment failed: ${error.message}\n\nPlease try again.`);
+      setPayingAppointmentId(null);
+    }
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', {
@@ -838,8 +989,28 @@ const AppointmentManager = ({ userEmail }) => {
                   </div>
                 )}
 
+                {/* Complete Payment button for pending_payment appointments */}
+                {appointment.status === 'pending_payment' && activeTab === 'upcoming' && !rescheduleData && (
+                  <>
+                    <button
+                      className="btn-start-call"
+                      onClick={() => handleCompletePayment(appointment)}
+                      disabled={payingAppointmentId === appointment._id}
+                      style={{backgroundColor: '#16a34a', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px'}}
+                    >
+                      💳 {payingAppointmentId === appointment._id ? 'Processing...' : 'Complete Payment'}
+                    </button>
+                    <button
+                      className="btn-cancel"
+                      onClick={() => handleCancelAppointment(appointment._id)}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                )}
+
                 {/* Video Call and Cancel for Confirmed/Rescheduled Appointments */}
-                {(appointment.status === 'confirmed' || appointment.status === 'rescheduled' || appointment.status === 'pending_payment') && activeTab === 'upcoming' && !rescheduleData && (
+                {(appointment.status === 'confirmed' || appointment.status === 'rescheduled') && activeTab === 'upcoming' && !rescheduleData && (
                   <>
                     {/* Show video call button ONLY for video consultations */}
                     {appointment.consultationType === 'video' && (

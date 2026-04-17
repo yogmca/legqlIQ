@@ -531,6 +531,37 @@ exports.createRazorpayOrder = async (req, res) => {
       });
     }
 
+    // *** FIX: Only cancel EXPIRED pending_payment consultations (past date) ***
+    // Keep valid pending payments so user can complete them from Appointments page
+    const pendingPayments = await Consultation.find({
+      clientId,
+      status: 'pending_payment',
+      paymentStatus: 'pending'
+    });
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Start of today
+
+    if (pendingPayments.length > 0) {
+      console.log(`Found ${pendingPayments.length} pending payment consultation(s) for user ${clientId}`);
+      for (const pending of pendingPayments) {
+        const consultDate = new Date(pending.preferredDate);
+        consultDate.setHours(0, 0, 0, 0);
+        
+        if (consultDate < now) {
+          // Consultation date has passed - auto-cancel
+          pending.status = 'cancelled';
+          pending.paymentStatus = 'failed';
+          pending.cancelledAt = Date.now();
+          pending.notes = 'Auto-cancelled: Consultation date has passed without payment';
+          await pending.save();
+          console.log(`  ✓ Auto-cancelled expired pending consultation: ${pending._id} (date: ${pending.preferredDate})`);
+        } else {
+          console.log(`  ℹ Keeping valid pending consultation: ${pending._id} (date: ${pending.preferredDate})`);
+        }
+      }
+    }
+
     // Find or create lawyer in database
     let lawyer;
     if (lawyerData) {
@@ -543,7 +574,9 @@ exports.createRazorpayOrder = async (req, res) => {
       });
     } else {
       // Try to find existing lawyer
-      lawyer = await Lawyer.findById(lawyerId);
+      if (mongoose.Types.ObjectId.isValid(lawyerId)) {
+        lawyer = await Lawyer.findById(lawyerId);
+      }
       
       // If not found and we have basic info, create minimal record
       if (!lawyer && lawyerName) {
@@ -683,6 +716,150 @@ exports.verifyPayment = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to verify payment'
+    });
+  }
+};
+
+// Cancel pending payment consultation (when user dismisses Razorpay modal)
+exports.cancelPendingPayment = async (req, res) => {
+  try {
+    const { consultationId } = req.body;
+    const clientId = req.user.id;
+
+    if (consultationId) {
+      // Cancel specific consultation
+      const consultation = await Consultation.findById(consultationId);
+      if (consultation && consultation.clientId.toString() === clientId && consultation.status === 'pending_payment') {
+        consultation.status = 'cancelled';
+        consultation.paymentStatus = 'failed';
+        consultation.cancelledAt = Date.now();
+        consultation.notes = 'Payment dismissed by user';
+        await consultation.save();
+        console.log(`✓ Cancelled pending payment consultation: ${consultationId}`);
+      }
+    } else {
+      // Cancel all pending payment consultations for this user
+      const result = await Consultation.updateMany(
+        { clientId, status: 'pending_payment', paymentStatus: 'pending' },
+        { 
+          $set: { 
+            status: 'cancelled', 
+            paymentStatus: 'failed', 
+            cancelledAt: Date.now(),
+            notes: 'Payment dismissed by user'
+          } 
+        }
+      );
+      console.log(`✓ Cancelled ${result.modifiedCount} pending payment consultation(s) for user ${clientId}`);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Pending payment cancelled successfully'
+    });
+  } catch (error) {
+    console.error('Cancel pending payment error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to cancel pending payment'
+    });
+  }
+};
+
+// Retry payment for an existing pending_payment consultation
+exports.retryPayment = async (req, res) => {
+  try {
+    const { consultationId } = req.body;
+    const clientId = req.user.id;
+
+    if (!consultationId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Consultation ID is required'
+      });
+    }
+
+    const consultation = await Consultation.findById(consultationId);
+
+    if (!consultation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Consultation not found'
+      });
+    }
+
+    // Verify the user owns this consultation
+    if (consultation.clientId.toString() !== clientId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to pay for this consultation'
+      });
+    }
+
+    // Check consultation is in pending_payment status
+    if (consultation.status !== 'pending_payment') {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot retry payment for consultation with status: ${consultation.status}`
+      });
+    }
+
+    // Check consultation date is not in the past
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const consultDate = new Date(consultation.preferredDate);
+    consultDate.setHours(0, 0, 0, 0);
+
+    if (consultDate < now) {
+      // Auto-cancel expired consultation
+      consultation.status = 'cancelled';
+      consultation.paymentStatus = 'failed';
+      consultation.cancelledAt = Date.now();
+      consultation.notes = 'Auto-cancelled: Consultation date has passed without payment';
+      await consultation.save();
+
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot complete payment - consultation date has already passed. Please book a new consultation.'
+      });
+    }
+
+    const amount = consultation.amount || 500; // Default fee if not set
+
+    // Create a new Razorpay order for the existing consultation
+    const options = {
+      amount: amount * 100, // amount in paise
+      currency: 'INR',
+      receipt: `retry_${consultation._id}`,
+      notes: {
+        consultationId: consultation._id.toString(),
+        clientId: clientId,
+        lawyerId: consultation.lawyerId.toString(),
+        retry: 'true'
+      }
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    // Update consultation with new order ID
+    consultation.razorpayOrderId = order.id;
+    await consultation.save();
+
+    console.log(`✓ Created retry payment order for consultation: ${consultation._id}, order: ${order.id}`);
+
+    res.status(200).json({
+      success: true,
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      consultationId: consultation._id,
+      lawyerName: consultation.lawyerInfo?.name || 'Lawyer'
+    });
+  } catch (error) {
+    console.error('Retry payment error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to create retry payment order'
     });
   }
 };
