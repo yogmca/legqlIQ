@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const emailService = require('../services/emailService');
+const whatsappService = require('../services/whatsappService');
 const multer = require('multer');
 
 // Initialize Razorpay
@@ -180,6 +181,31 @@ exports.createConsultation = async (req, res) => {
       preferredTime: consultation.preferredTime,
       consultationType: 'in-person'
     }).catch(err => console.error('Failed to send consultation notification:', err));
+
+    // Send WhatsApp notifications for in-person consultation booking (non-blocking)
+    const professionalPhone = lawyer ? lawyer.phone : null;
+    const whatsappData = {
+      clientPhone: consultation.clientInfo.phone,
+      clientName: consultation.clientInfo.name,
+      professionalPhone: professionalPhone,
+      lawyerName: consultation.lawyerInfo.name,
+      caseType: consultation.caseType,
+      preferredDate: consultation.preferredDate,
+      preferredTime: consultation.preferredTime,
+      consultationType: 'in-person'
+    };
+
+    // Notify client
+    whatsappService.sendConsultationBookedToClient(whatsappData)
+      .catch(err => console.error('Failed to send WhatsApp consultation booked to client:', err));
+
+    // Notify professional
+    whatsappService.sendConsultationBookedToProfessional(whatsappData)
+      .catch(err => console.error('Failed to send WhatsApp consultation booked to professional:', err));
+
+    // Notify admin
+    whatsappService.sendConsultationBookedToAdmin(whatsappData)
+      .catch(err => console.error('Failed to send WhatsApp consultation booked to admin:', err));
 
     console.log('=== End Create Consultation ===');
 
@@ -382,6 +408,26 @@ exports.cancelConsultation = async (req, res) => {
     consultation.status = 'cancelled';
     consultation.cancelledAt = Date.now();
     await consultation.save();
+
+    // Send WhatsApp notifications for client-initiated cancellation (non-blocking)
+    let cancelledLawyer = null;
+    try {
+      cancelledLawyer = await Lawyer.findById(consultation.lawyerId);
+    } catch (e) {
+      console.error('Failed to find lawyer for WhatsApp cancellation notification:', e);
+    }
+
+    whatsappService.sendAppointmentCancelled({
+      clientPhone: consultation.clientInfo.phone,
+      professionalPhone: cancelledLawyer ? cancelledLawyer.phone : null,
+      clientName: consultation.clientInfo.name,
+      lawyerName: consultation.lawyerInfo.name,
+      preferredDate: consultation.preferredDate,
+      preferredTime: consultation.preferredTime,
+      consultationType: consultation.consultationType || 'in-person',
+      reason: 'Cancelled by client',
+      cancelledBy: 'client'
+    }).catch(err => console.error('Failed to send WhatsApp cancellation notifications:', err));
 
     res.status(200).json({
       success: true,
@@ -706,6 +752,40 @@ exports.verifyPayment = async (req, res) => {
       amount: consultation.amount
     }).catch(err => console.error('Failed to send video consultation notification:', err));
 
+    // Send WhatsApp notifications for video consultation payment confirmed (non-blocking)
+    // Look up the lawyer to get their phone number
+    let videoLawyer = null;
+    try {
+      videoLawyer = await Lawyer.findById(consultation.lawyerId);
+    } catch (e) {
+      console.error('Failed to find lawyer for WhatsApp notification:', e);
+    }
+
+    const videoWhatsappData = {
+      clientPhone: consultation.clientInfo.phone,
+      clientName: consultation.clientInfo.name,
+      professionalPhone: videoLawyer ? videoLawyer.phone : null,
+      lawyerName: consultation.lawyerInfo.name,
+      preferredDate: consultation.preferredDate,
+      preferredTime: consultation.preferredTime,
+      consultationType: 'video',
+      amount: consultation.amount
+    };
+
+    // Notify client about video consultation booking
+    whatsappService.sendVideoConsultationBookedToClient(videoWhatsappData)
+      .catch(err => console.error('Failed to send WhatsApp video consultation to client:', err));
+
+    // Notify professional about video consultation booking
+    whatsappService.sendVideoConsultationBookedToProfessional(videoWhatsappData)
+      .catch(err => console.error('Failed to send WhatsApp video consultation to professional:', err));
+
+    // Notify admin about video consultation booking
+    whatsappService.sendConsultationBookedToAdmin({
+      ...videoWhatsappData,
+      caseType: consultation.caseType
+    }).catch(err => console.error('Failed to send WhatsApp video consultation to admin:', err));
+
     res.status(200).json({
       success: true,
       message: 'Payment verified successfully',
@@ -909,6 +989,24 @@ exports.acceptConsultation = async (req, res) => {
     consultation.confirmedAt = Date.now();
     await consultation.save();
 
+    // Send WhatsApp notifications for appointment accepted (non-blocking)
+    let acceptedClient = null;
+    try {
+      acceptedClient = await User.findById(consultation.clientId);
+    } catch (e) {
+      console.error('Failed to find client for WhatsApp notification:', e);
+    }
+
+    whatsappService.sendAppointmentAccepted({
+      clientPhone: acceptedClient ? acceptedClient.phone : consultation.clientInfo.phone,
+      professionalPhone: lawyer.phone,
+      clientName: consultation.clientInfo.name,
+      lawyerName: consultation.lawyerInfo.name,
+      preferredDate: consultation.preferredDate,
+      preferredTime: consultation.preferredTime,
+      consultationType: consultation.consultationType || 'in-person'
+    }).catch(err => console.error('Failed to send WhatsApp appointment accepted notifications:', err));
+
     res.status(200).json({
       success: true,
       message: 'Consultation accepted successfully',
@@ -969,6 +1067,26 @@ exports.rejectConsultation = async (req, res) => {
     consultation.cancelledAt = Date.now();
     consultation.lawyerNotes = reason || 'Rejected by lawyer';
     await consultation.save();
+
+    // Send WhatsApp notifications for appointment cancelled/rejected by professional (non-blocking)
+    let rejectedClient = null;
+    try {
+      rejectedClient = await User.findById(consultation.clientId);
+    } catch (e) {
+      console.error('Failed to find client for WhatsApp notification:', e);
+    }
+
+    whatsappService.sendAppointmentCancelled({
+      clientPhone: rejectedClient ? rejectedClient.phone : consultation.clientInfo.phone,
+      professionalPhone: lawyer.phone,
+      clientName: consultation.clientInfo.name,
+      lawyerName: consultation.lawyerInfo.name,
+      preferredDate: consultation.preferredDate,
+      preferredTime: consultation.preferredTime,
+      consultationType: consultation.consultationType || 'in-person',
+      reason: reason || 'Rejected by professional',
+      cancelledBy: 'professional'
+    }).catch(err => console.error('Failed to send WhatsApp appointment rejected notifications:', err));
 
     res.status(200).json({
       success: true,
@@ -1040,6 +1158,25 @@ exports.rescheduleConsultation = async (req, res) => {
     consultation.status = 'rescheduled';
     consultation.lawyerNotes = reason || 'Rescheduled by lawyer';
     await consultation.save();
+
+    // Send WhatsApp notifications for appointment rescheduled (non-blocking)
+    let rescheduledClient = null;
+    try {
+      rescheduledClient = await User.findById(consultation.clientId);
+    } catch (e) {
+      console.error('Failed to find client for WhatsApp notification:', e);
+    }
+
+    whatsappService.sendAppointmentRescheduled({
+      clientPhone: rescheduledClient ? rescheduledClient.phone : consultation.clientInfo.phone,
+      professionalPhone: lawyer.phone,
+      clientName: consultation.clientInfo.name,
+      lawyerName: consultation.lawyerInfo.name,
+      preferredDate: consultation.preferredDate,
+      preferredTime: consultation.preferredTime,
+      consultationType: consultation.consultationType || 'in-person',
+      reason: reason || 'Rescheduled by professional'
+    }).catch(err => console.error('Failed to send WhatsApp appointment rescheduled notifications:', err));
 
     res.status(200).json({
       success: true,

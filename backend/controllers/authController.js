@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Lawyer = require('../models/Lawyer');
 const Location = require('../models/Location');
 const emailService = require('../services/emailService');
+const whatsappService = require('../services/whatsappService');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -63,6 +64,20 @@ exports.register = async (req, res) => {
       user.role || 'client',
       'user' // Client registration
     ).catch(err => console.error('Failed to send welcome email:', err));
+
+    // Send WhatsApp notification to admin about new signup (non-blocking)
+    whatsappService.sendNewUserSignupToAdmin({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role || 'client'
+    }).catch(err => console.error('Failed to send WhatsApp new user notification to admin:', err));
+
+    // Send WhatsApp welcome message to the new user (non-blocking)
+    whatsappService.sendWelcomeToUser({
+      name: user.name,
+      phone: user.phone
+    }).catch(err => console.error('Failed to send WhatsApp welcome to user:', err));
 
     res.status(201).json({
       success: true,
@@ -344,6 +359,25 @@ exports.registerLawyer = async (req, res) => {
       profType, // Role is the professional type
       profType  // Professional type: lawyer, tax-consultant, or auditor
     ).catch(err => console.error(`Failed to send welcome email to ${profType}:`, err));
+
+    // Send WhatsApp notification to admin about new professional signup (non-blocking)
+    whatsappService.sendNewProfessionalSignupToAdmin({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      professionalType: profType,
+      specialization: professional.specialization,
+      experience: professional.experience,
+      barRegistrationNo: professional.barRegistrationNo,
+      registrationNo: professional.registrationNo
+    }).catch(err => console.error(`Failed to send WhatsApp ${profType} signup notification to admin:`, err));
+
+    // Send WhatsApp welcome message to the new professional (non-blocking)
+    whatsappService.sendWelcomeToProfessional({
+      name: user.name,
+      phone: user.phone,
+      professionalType: profType
+    }).catch(err => console.error(`Failed to send WhatsApp welcome to ${profType}:`, err));
 
     // Prepare response message
     const roleLabel = profType === 'lawyer' ? 'Lawyer' :
