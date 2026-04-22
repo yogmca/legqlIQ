@@ -17,48 +17,53 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Google OAuth Strategy
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        // Check if user already exists
-        let user = await User.findOne({ email: profile.emails[0].value });
+// Google OAuth Strategy - only register if credentials are configured
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: process.env.GOOGLE_CALLBACK_URL
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          // Check if user already exists
+          let user = await User.findOne({ email: profile.emails[0].value });
 
-        if (user) {
-          // User exists, update Google ID if not set
-          if (!user.googleId) {
-            user.googleId = profile.id;
-            user.profilePicture = profile.photos[0]?.value || user.profilePicture;
-            await user.save();
+          if (user) {
+            // User exists, update Google ID if not set
+            if (!user.googleId) {
+              user.googleId = profile.id;
+              user.profilePicture = profile.photos[0]?.value || user.profilePicture;
+              await user.save();
+            }
+            return done(null, user);
           }
-          return done(null, user);
+
+          // Create new user
+          user = await User.create({
+            googleId: profile.id,
+            name: profile.displayName,
+            email: profile.emails[0].value,
+            phone: '', // Will be updated later by user
+            password: Math.random().toString(36).slice(-8), // Random password for OAuth users
+            profilePicture: profile.photos[0]?.value || '',
+            isVerified: true, // Google accounts are pre-verified
+            role: 'user'
+          });
+
+          done(null, user);
+        } catch (error) {
+          console.error('Google OAuth error:', error);
+          done(error, null);
         }
-
-        // Create new user
-        user = await User.create({
-          googleId: profile.id,
-          name: profile.displayName,
-          email: profile.emails[0].value,
-          phone: '', // Will be updated later by user
-          password: Math.random().toString(36).slice(-8), // Random password for OAuth users
-          profilePicture: profile.photos[0]?.value || '',
-          isVerified: true, // Google accounts are pre-verified
-          role: 'user'
-        });
-
-        done(null, user);
-      } catch (error) {
-        console.error('Google OAuth error:', error);
-        done(error, null);
       }
-    }
-  )
-);
+    )
+  );
+} else {
+  console.warn('⚠️  Google OAuth credentials not found. Google login will be disabled.');
+  console.warn('   Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env to enable.');
+}
 
 module.exports = passport;

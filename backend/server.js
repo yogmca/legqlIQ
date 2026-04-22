@@ -1,4 +1,5 @@
-require('dotenv').config(); // Load environment variables FIRST
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') }); // Load environment variables FIRST (explicit path for PM2 compatibility)
 
 const express = require('express');
 const cors = require('cors');
