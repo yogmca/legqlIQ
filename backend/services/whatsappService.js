@@ -1,5 +1,4 @@
 const axios = require('axios');
-const crypto = require('crypto');
 
 /**
  * MSG91 WhatsApp Service for LegalIQ
@@ -130,13 +129,9 @@ class WhatsAppService {
     try {
       const components = this._buildComponents(variables);
       
-      // Generate a unique request_id (UUID) for MSG91 log tracking
-      const requestId = crypto.randomUUID();
-      
       const payload = {
         integrated_number: this.integratedNumberId,
         content_type: 'template',
-        request_id: requestId,
         payload: {
           messaging_product: 'whatsapp',
           type: 'template',
@@ -156,7 +151,7 @@ class WhatsAppService {
         }
       };
 
-      console.log(`📱 WhatsApp: Sending API request to MSG91 (request_id: ${requestId})...`);
+      console.log(`📱 WhatsApp: Sending API request to MSG91...`);
       console.log(`📱 WhatsApp: Payload:`, JSON.stringify(payload, null, 2));
 
       const response = await axios.post(this.baseUrl, payload, {
@@ -165,8 +160,9 @@ class WhatsAppService {
           'Content-Type': 'application/json'
         }
       });
+      
+      const msg91RequestId = response.data?.request_id || 'N/A';
 
-      const msg91RequestId = response.data?.request_id || requestId;
       console.log(`✅ WhatsApp message sent to ${formattedPhone} (template: ${templateName})`);
       console.log(`✅ WhatsApp API Response:`, JSON.stringify(response.data, null, 2));
       console.log(`✅ MSG91 Request ID for log tracking: ${msg91RequestId}`);
@@ -174,7 +170,6 @@ class WhatsAppService {
         success: true,
         provider: 'MSG91',
         request_id: msg91RequestId,
-        our_request_id: requestId,
         response: response.data
       };
     } catch (error) {
@@ -191,40 +186,32 @@ class WhatsAppService {
 
   /**
    * Build template components from variables
-   * MSG91 expects components in the WhatsApp Cloud API format with UPPERCASE type values.
-   * Only include component types that the template actually uses.
+   * MSG91 expects components as an object with body_1, body_2, etc. keys
+   *
+   * CRITICAL: We NEVER include header keys for templates with static headers.
+   * This prevents "Invalid Header Component" errors.
+   *
    * @param {Object} variables - Key-value pairs of template variables
-   * @returns {Array} - Components array for MSG91 API
+   * @returns {Object} - Components object for MSG91 API (e.g., {body_1: "value", body_2: "value"})
    */
   _buildComponents(variables) {
     if (!variables || Object.keys(variables).length === 0) {
-      return [];
+      return {};
     }
 
-    const components = [];
+    const components = {};
 
-    // Header parameters (if explicitly provided) — must come before body
-    if (variables.header) {
-      const headerParams = Array.isArray(variables.header)
-        ? variables.header.map(val => ({ type: 'text', text: String(val) }))
-        : [{ type: 'text', text: String(variables.header) }];
-      
-      // Only add header component if there are actual parameters
-      if (headerParams.length > 0) {
-        components.push({
-          type: 'HEADER',
-          parameters: headerParams
-        });
-      }
-    }
+    // NEVER include header - causes "Invalid Header Component" error
+    // MSG91 templates with static text headers don't need header keys in payload
 
     // Body parameters (most common)
     if (variables.body) {
-      components.push({
-        type: 'BODY',
-        parameters: Array.isArray(variables.body) 
-          ? variables.body.map(val => ({ type: 'text', text: String(val) }))
-          : Object.values(variables.body).map(val => ({ type: 'text', text: String(val) }))
+      const bodyArray = Array.isArray(variables.body)
+        ? variables.body
+        : Object.values(variables.body);
+      
+      bodyArray.forEach((val, index) => {
+        components[`body_${index + 1}`] = String(val);
       });
     } else {
       // If no explicit body key, treat all non-header/button variables as body parameters
@@ -232,23 +219,15 @@ class WhatsAppService {
         .filter(([key]) => key !== 'header' && key !== 'buttons')
         .map(([, val]) => val);
       
-      if (bodyVars.length > 0) {
-        components.push({
-          type: 'BODY',
-          parameters: bodyVars.map(val => ({ type: 'text', text: String(val) }))
-        });
-      }
+      bodyVars.forEach((val, index) => {
+        components[`body_${index + 1}`] = String(val);
+      });
     }
 
     // Button parameters (if provided)
     if (variables.buttons && Array.isArray(variables.buttons)) {
       variables.buttons.forEach((button, index) => {
-        components.push({
-          type: 'BUTTON',
-          sub_type: button.sub_type || 'url',
-          index: index,
-          parameters: button.parameters || [{ type: 'text', text: String(button.text || button) }]
-        });
+        components[`button_${index + 1}`] = String(button.text || button);
       });
     }
 
@@ -409,6 +388,7 @@ class WhatsAppService {
     const type = consultationType === 'video' ? 'Video' : 'In-Person';
 
     return this.sendWhatsAppMessage(professionalPhone, 'consultation_booked_professional', {
+      // Don't include header - let MSG91 use the template's default header
       body: [
         lawyerName || 'Professional',
         clientName || 'Client',
