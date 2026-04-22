@@ -1,4 +1,5 @@
 const axios = require('axios');
+const crypto = require('crypto');
 
 /**
  * MSG91 WhatsApp Service for LegalIQ
@@ -129,9 +130,13 @@ class WhatsAppService {
     try {
       const components = this._buildComponents(variables);
       
+      // Generate a unique request_id (UUID) for MSG91 log tracking
+      const requestId = crypto.randomUUID();
+      
       const payload = {
         integrated_number: this.integratedNumberId,
         content_type: 'template',
+        request_id: requestId,
         payload: {
           messaging_product: 'whatsapp',
           type: 'template',
@@ -151,7 +156,7 @@ class WhatsAppService {
         }
       };
 
-      console.log(`📱 WhatsApp: Sending API request to MSG91...`);
+      console.log(`📱 WhatsApp: Sending API request to MSG91 (request_id: ${requestId})...`);
       console.log(`📱 WhatsApp: Payload:`, JSON.stringify(payload, null, 2));
 
       const response = await axios.post(this.baseUrl, payload, {
@@ -161,11 +166,15 @@ class WhatsAppService {
         }
       });
 
+      const msg91RequestId = response.data?.request_id || requestId;
       console.log(`✅ WhatsApp message sent to ${formattedPhone} (template: ${templateName})`);
       console.log(`✅ WhatsApp API Response:`, JSON.stringify(response.data, null, 2));
+      console.log(`✅ MSG91 Request ID for log tracking: ${msg91RequestId}`);
       return {
         success: true,
         provider: 'MSG91',
+        request_id: msg91RequestId,
+        our_request_id: requestId,
         response: response.data
       };
     } catch (error) {
