@@ -43,6 +43,14 @@ class WhatsAppService {
     this.isDevelopment = process.env.NODE_ENV === 'development';
     this.isEnabled = process.env.WHATSAPP_ENABLED === 'true';
     this.baseUrl = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
+    
+    // Log configuration status on startup
+    console.log('📱 WhatsApp Service Configuration:');
+    console.log(`   Enabled: ${this.isEnabled}`);
+    console.log(`   Auth Key: ${this.authKey ? '✅ Set (' + this.authKey.substring(0, 8) + '...)' : '❌ Missing'}`);
+    console.log(`   Integrated Number ID: ${this.integratedNumberId || '❌ Missing'}`);
+    console.log(`   Admin Phone: ${this.adminPhone || '❌ Not set'}`);
+    console.log(`   Environment: ${process.env.NODE_ENV || 'not set'}`);
   }
 
   /**
@@ -82,12 +90,16 @@ class WhatsAppService {
    * @returns {Promise<Object>} - API response
    */
   async sendWhatsAppMessage(phone, templateName, variables = {}) {
+    console.log(`\n📱 WhatsApp: Attempting to send "${templateName}" to ${phone}`);
+    
     const formattedPhone = this.formatPhone(phone);
     
     if (!formattedPhone) {
-      console.warn('⚠️ WhatsApp: Invalid phone number provided, skipping message');
+      console.warn(`⚠️ WhatsApp: Invalid/empty phone number provided: "${phone}", skipping message`);
       return { success: false, reason: 'invalid_phone' };
     }
+
+    console.log(`📱 WhatsApp: Formatted phone: ${formattedPhone}`);
 
     // Development mode - log instead of sending
     if (this.isDevelopment && !this.isEnabled) {
@@ -100,7 +112,7 @@ class WhatsAppService {
     }
 
     if (!this.isEnabled) {
-      console.log(`📱 WhatsApp disabled. Would send "${templateName}" to ${formattedPhone}`);
+      console.log(`📱 WhatsApp disabled (WHATSAPP_ENABLED=${process.env.WHATSAPP_ENABLED}). Would send "${templateName}" to ${formattedPhone}`);
       return { success: false, reason: 'whatsapp_disabled' };
     }
 
@@ -115,6 +127,8 @@ class WhatsAppService {
     }
 
     try {
+      const components = this._buildComponents(variables);
+      
       const payload = {
         integrated_number: this.integratedNumberId,
         content_type: 'template',
@@ -127,16 +141,18 @@ class WhatsAppService {
               code: 'en',
               policy: 'deterministic'
             },
-            namespace: this.integratedNumberId,
             to_and_components: [
               {
                 to: [formattedPhone],
-                components: this._buildComponents(variables)
+                components: components
               }
             ]
           }
         }
       };
+
+      console.log(`📱 WhatsApp: Sending API request to MSG91...`);
+      console.log(`📱 WhatsApp: Payload:`, JSON.stringify(payload, null, 2));
 
       const response = await axios.post(this.baseUrl, payload, {
         headers: {
@@ -146,14 +162,17 @@ class WhatsAppService {
       });
 
       console.log(`✅ WhatsApp message sent to ${formattedPhone} (template: ${templateName})`);
+      console.log(`✅ WhatsApp API Response:`, JSON.stringify(response.data, null, 2));
       return {
         success: true,
         provider: 'MSG91',
         response: response.data
       };
     } catch (error) {
-      console.error(`❌ WhatsApp Error (${templateName} to ${formattedPhone}):`, 
-        error.response?.data || error.message);
+      console.error(`❌ WhatsApp Error (${templateName} to ${formattedPhone}):`);
+      console.error(`❌ Status: ${error.response?.status}`);
+      console.error(`❌ Response Data:`, JSON.stringify(error.response?.data, null, 2));
+      console.error(`❌ Error Message:`, error.message);
       return {
         success: false,
         error: error.response?.data || error.message
@@ -321,8 +340,12 @@ class WhatsAppService {
    * @param {Object} consultationData - Consultation details
    */
   async sendConsultationBookedToClient(consultationData) {
+    console.log('📱 WhatsApp: sendConsultationBookedToClient called with:', JSON.stringify(consultationData, null, 2));
     const { clientPhone, clientName, lawyerName, caseType, preferredDate, preferredTime } = consultationData;
-    if (!clientPhone) return;
+    if (!clientPhone) {
+      console.warn('⚠️ WhatsApp: No client phone number provided, skipping consultation booked notification to client');
+      return { success: false, reason: 'no_client_phone' };
+    }
 
     const formattedDate = this._formatDate(preferredDate);
 
@@ -342,8 +365,12 @@ class WhatsAppService {
    * @param {Object} consultationData - Consultation details
    */
   async sendConsultationBookedToProfessional(consultationData) {
+    console.log('📱 WhatsApp: sendConsultationBookedToProfessional called');
     const { professionalPhone, clientName, lawyerName, caseType, preferredDate, preferredTime, consultationType } = consultationData;
-    if (!professionalPhone) return;
+    if (!professionalPhone) {
+      console.warn('⚠️ WhatsApp: No professional phone number provided, skipping consultation booked notification to professional');
+      return { success: false, reason: 'no_professional_phone' };
+    }
 
     const formattedDate = this._formatDate(preferredDate);
     const type = consultationType === 'video' ? 'Video' : 'In-Person';
@@ -365,7 +392,11 @@ class WhatsAppService {
    * @param {Object} consultationData - Consultation details
    */
   async sendConsultationBookedToAdmin(consultationData) {
-    if (!this.adminPhone) return;
+    console.log('📱 WhatsApp: sendConsultationBookedToAdmin called');
+    if (!this.adminPhone) {
+      console.warn('⚠️ WhatsApp: No admin phone number configured, skipping admin notification');
+      return { success: false, reason: 'no_admin_phone' };
+    }
 
     const { clientName, lawyerName, caseType, preferredDate, preferredTime, consultationType, amount } = consultationData;
     const formattedDate = this._formatDate(preferredDate);
@@ -389,8 +420,12 @@ class WhatsAppService {
    * @param {Object} consultationData - Consultation details
    */
   async sendVideoConsultationBookedToClient(consultationData) {
+    console.log('📱 WhatsApp: sendVideoConsultationBookedToClient called');
     const { clientPhone, clientName, lawyerName, preferredDate, preferredTime, amount } = consultationData;
-    if (!clientPhone) return;
+    if (!clientPhone) {
+      console.warn('⚠️ WhatsApp: No client phone for video consultation notification');
+      return { success: false, reason: 'no_client_phone' };
+    }
 
     const formattedDate = this._formatDate(preferredDate);
 
@@ -410,8 +445,12 @@ class WhatsAppService {
    * @param {Object} consultationData - Consultation details
    */
   async sendVideoConsultationBookedToProfessional(consultationData) {
+    console.log('📱 WhatsApp: sendVideoConsultationBookedToProfessional called');
     const { professionalPhone, clientName, lawyerName, preferredDate, preferredTime, amount } = consultationData;
-    if (!professionalPhone) return;
+    if (!professionalPhone) {
+      console.warn('⚠️ WhatsApp: No professional phone for video consultation notification');
+      return { success: false, reason: 'no_professional_phone' };
+    }
 
     const formattedDate = this._formatDate(preferredDate);
 
@@ -435,6 +474,7 @@ class WhatsAppService {
    * @param {Object} data - Appointment data
    */
   async sendAppointmentAccepted(data) {
+    console.log('📱 WhatsApp: sendAppointmentAccepted called with:', JSON.stringify(data, null, 2));
     const { clientPhone, professionalPhone, clientName, lawyerName, preferredDate, preferredTime, consultationType } = data;
     const formattedDate = this._formatDate(preferredDate);
     const type = consultationType === 'video' ? 'Video' : 'In-Person';
@@ -495,6 +535,7 @@ class WhatsAppService {
    * @param {Object} data - Appointment data with new date/time
    */
   async sendAppointmentRescheduled(data) {
+    console.log('📱 WhatsApp: sendAppointmentRescheduled called with:', JSON.stringify(data, null, 2));
     const { clientPhone, professionalPhone, clientName, lawyerName, preferredDate, preferredTime, consultationType, reason } = data;
     const formattedDate = this._formatDate(preferredDate);
     const type = consultationType === 'video' ? 'Video' : 'In-Person';
@@ -557,6 +598,7 @@ class WhatsAppService {
    * @param {Object} data - Appointment data
    */
   async sendAppointmentCancelled(data) {
+    console.log('📱 WhatsApp: sendAppointmentCancelled called with:', JSON.stringify(data, null, 2));
     const { clientPhone, professionalPhone, clientName, lawyerName, preferredDate, preferredTime, consultationType, reason, cancelledBy } = data;
     const formattedDate = this._formatDate(preferredDate);
     const type = consultationType === 'video' ? 'Video' : 'In-Person';

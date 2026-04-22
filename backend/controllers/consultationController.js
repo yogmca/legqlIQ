@@ -195,16 +195,23 @@ exports.createConsultation = async (req, res) => {
       consultationType: 'in-person'
     };
 
+    console.log('📱 WhatsApp notification data for in-person consultation:', JSON.stringify(whatsappData, null, 2));
+    console.log('📱 Client phone from consultation:', consultation.clientInfo.phone);
+    console.log('📱 Professional phone from lawyer record:', professionalPhone);
+
     // Notify client
     whatsappService.sendConsultationBookedToClient(whatsappData)
+      .then(result => console.log('📱 WhatsApp client notification result:', JSON.stringify(result)))
       .catch(err => console.error('Failed to send WhatsApp consultation booked to client:', err));
 
     // Notify professional
     whatsappService.sendConsultationBookedToProfessional(whatsappData)
+      .then(result => console.log('📱 WhatsApp professional notification result:', JSON.stringify(result)))
       .catch(err => console.error('Failed to send WhatsApp consultation booked to professional:', err));
 
     // Notify admin
     whatsappService.sendConsultationBookedToAdmin(whatsappData)
+      .then(result => console.log('📱 WhatsApp admin notification result:', JSON.stringify(result)))
       .catch(err => console.error('Failed to send WhatsApp consultation booked to admin:', err));
 
     console.log('=== End Create Consultation ===');

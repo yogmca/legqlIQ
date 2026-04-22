@@ -307,6 +307,26 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Graceful shutdown handler
+function gracefulShutdown(signal) {
+  console.log(`\n🛑 Received ${signal}. Shutting down gracefully...`);
+  server.close(() => {
+    console.log('✅ HTTP server closed');
+    mongoose.connection.close(false, () => {
+      console.log('✅ MongoDB connection closed');
+      process.exit(0);
+    });
+  });
+  // Force close after 10 seconds
+  setTimeout(() => {
+    console.error('⚠️ Could not close connections in time, forcefully shutting down');
+    process.exit(1);
+  }, 10000);
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
 // Start server
 server.listen(PORT, () => {
   console.log(`🚀 Backend server running on http://localhost:${PORT}`);
@@ -314,4 +334,15 @@ server.listen(PORT, () => {
   console.log('💬 Chat service ready for real-time messaging');
   console.log('📊 Using MongoDB database ONLY for lawyer data');
   console.log('✅ No hardcoded fallback data - lawyers must register through the system');
+});
+
+// Handle port already in use
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`❌ Port ${PORT} is already in use. Attempting to recover...`);
+    console.error('   Try: pm2 delete all && pm2 start server.js --name backend');
+    process.exit(1);
+  } else {
+    throw err;
+  }
 });
