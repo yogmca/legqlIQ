@@ -182,7 +182,8 @@ class WhatsAppService {
 
   /**
    * Build template components from variables
-   * MSG91 expects components in a specific format for template variables
+   * MSG91 expects components in the WhatsApp Cloud API format with UPPERCASE type values.
+   * Only include component types that the template actually uses.
    * @param {Object} variables - Key-value pairs of template variables
    * @returns {Array} - Components array for MSG91 API
    */
@@ -193,29 +194,52 @@ class WhatsAppService {
 
     const components = [];
 
+    // Header parameters (if explicitly provided) — must come before body
+    if (variables.header) {
+      const headerParams = Array.isArray(variables.header)
+        ? variables.header.map(val => ({ type: 'text', text: String(val) }))
+        : [{ type: 'text', text: String(variables.header) }];
+      
+      // Only add header component if there are actual parameters
+      if (headerParams.length > 0) {
+        components.push({
+          type: 'HEADER',
+          parameters: headerParams
+        });
+      }
+    }
+
     // Body parameters (most common)
     if (variables.body) {
       components.push({
-        type: 'body',
+        type: 'BODY',
         parameters: Array.isArray(variables.body) 
           ? variables.body.map(val => ({ type: 'text', text: String(val) }))
           : Object.values(variables.body).map(val => ({ type: 'text', text: String(val) }))
       });
     } else {
-      // If no explicit body key, treat all variables as body parameters
-      components.push({
-        type: 'body',
-        parameters: Object.values(variables).map(val => ({ type: 'text', text: String(val) }))
-      });
+      // If no explicit body key, treat all non-header/button variables as body parameters
+      const bodyVars = Object.entries(variables)
+        .filter(([key]) => key !== 'header' && key !== 'buttons')
+        .map(([, val]) => val);
+      
+      if (bodyVars.length > 0) {
+        components.push({
+          type: 'BODY',
+          parameters: bodyVars.map(val => ({ type: 'text', text: String(val) }))
+        });
+      }
     }
 
-    // Header parameters (if provided)
-    if (variables.header) {
-      components.push({
-        type: 'header',
-        parameters: Array.isArray(variables.header)
-          ? variables.header.map(val => ({ type: 'text', text: String(val) }))
-          : [{ type: 'text', text: String(variables.header) }]
+    // Button parameters (if provided)
+    if (variables.buttons && Array.isArray(variables.buttons)) {
+      variables.buttons.forEach((button, index) => {
+        components.push({
+          type: 'BUTTON',
+          sub_type: button.sub_type || 'url',
+          index: index,
+          parameters: button.parameters || [{ type: 'text', text: String(button.text || button) }]
+        });
       });
     }
 
