@@ -39,6 +39,7 @@ class WhatsAppService {
   constructor() {
     this.authKey = process.env.MSG91_AUTH_KEY;
     this.integratedNumberId = process.env.MSG91_WHATSAPP_INTEGRATED_NUMBER_ID;
+    this.namespace = process.env.MSG91_WHATSAPP_NAMESPACE;
     this.adminPhone = process.env.ADMIN_WHATSAPP_NUMBER || '';
     this.isDevelopment = process.env.NODE_ENV === 'development';
     this.isEnabled = process.env.WHATSAPP_ENABLED === 'true';
@@ -49,6 +50,7 @@ class WhatsAppService {
     console.log(`   Enabled: ${this.isEnabled}`);
     console.log(`   Auth Key: ${this.authKey ? '✅ Set (' + this.authKey.substring(0, 8) + '...)' : '❌ Missing'}`);
     console.log(`   Integrated Number ID: ${this.integratedNumberId || '❌ Missing'}`);
+    console.log(`   Namespace: ${this.namespace || '❌ Missing'}`);
     console.log(`   Admin Phone: ${this.adminPhone || '❌ Not set'}`);
     console.log(`   Environment: ${process.env.NODE_ENV || 'not set'}`);
   }
@@ -141,6 +143,7 @@ class WhatsAppService {
               code: 'en',
               policy: 'deterministic'
             },
+            namespace: this.namespace,
             to_and_components: [
               {
                 to: [formattedPhone],
@@ -186,13 +189,14 @@ class WhatsAppService {
 
   /**
    * Build template components from variables
-   * MSG91 expects components as an object with body_1, body_2, etc. keys
+   * MSG91 expects components as an OBJECT with body_1, body_2, etc. keys
+   * Each key has { type: "text", value: "..." }
    *
-   * CRITICAL: We NEVER include header keys for templates with static headers.
+   * CRITICAL: We NEVER include header_1 keys for templates with static headers.
    * This prevents "Invalid Header Component" errors.
    *
    * @param {Object} variables - Key-value pairs of template variables
-   * @returns {Object} - Components object for MSG91 API (e.g., {body_1: "value", body_2: "value"})
+   * @returns {Object} - Components object for MSG91 API (e.g., {body_1: {type: "text", value: "..."}, body_2: {...}})
    */
   _buildComponents(variables) {
     if (!variables || Object.keys(variables).length === 0) {
@@ -201,33 +205,37 @@ class WhatsAppService {
 
     const components = {};
 
-    // NEVER include header - causes "Invalid Header Component" error
-    // MSG91 templates with static text headers don't need header keys in payload
+    // NEVER include header_1, header_2, etc. - causes "Invalid Header Component" error
+    // MSG91 templates with static text headers don't need header keys in components
 
     // Body parameters (most common)
+    let bodyArray = [];
     if (variables.body) {
-      const bodyArray = Array.isArray(variables.body)
+      bodyArray = Array.isArray(variables.body)
         ? variables.body
         : Object.values(variables.body);
-      
-      bodyArray.forEach((val, index) => {
-        components[`body_${index + 1}`] = String(val);
-      });
     } else {
       // If no explicit body key, treat all non-header/button variables as body parameters
-      const bodyVars = Object.entries(variables)
+      bodyArray = Object.entries(variables)
         .filter(([key]) => key !== 'header' && key !== 'buttons')
         .map(([, val]) => val);
-      
-      bodyVars.forEach((val, index) => {
-        components[`body_${index + 1}`] = String(val);
-      });
     }
+
+    // Add body_1, body_2, body_3, etc. with MSG91 format
+    bodyArray.forEach((val, index) => {
+      components[`body_${index + 1}`] = {
+        type: 'text',
+        value: String(val)
+      };
+    });
 
     // Button parameters (if provided)
     if (variables.buttons && Array.isArray(variables.buttons)) {
       variables.buttons.forEach((button, index) => {
-        components[`button_${index + 1}`] = String(button.text || button);
+        components[`button_${index + 1}`] = {
+          type: 'text',
+          value: String(button.text || button)
+        };
       });
     }
 
