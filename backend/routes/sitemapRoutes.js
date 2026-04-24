@@ -156,16 +156,22 @@ router.get('/sitemap-lawyers.xml', async (req, res) => {
     const baseUrl = process.env.CLIENT_URL || 'https://legaliq.in';
     const currentDate = new Date().toISOString().split('T')[0];
 
+    // Use lean() for better performance and limit to 50,000 URLs (sitemap limit)
     const lawyers = await User.find({
       role: 'lawyer',
       isVerified: true
-    }).select('_id city state specialization updatedAt');
+    })
+    .select('_id updatedAt')
+    .limit(50000)
+    .lean()
+    .maxTimeMS(10000) // 10 second timeout
+    .exec();
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n';
 
     lawyers.forEach(lawyer => {
-      const lastMod = lawyer.updatedAt 
+      const lastMod = lawyer.updatedAt
         ? new Date(lawyer.updatedAt).toISOString().split('T')[0]
         : currentDate;
       
@@ -183,7 +189,12 @@ router.get('/sitemap-lawyers.xml', async (req, res) => {
     res.send(xml);
   } catch (error) {
     console.error('Error generating lawyers sitemap:', error);
-    res.status(500).send('Error generating sitemap');
+    // Return valid empty sitemap on error instead of 500
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n';
+    xml += '</urlset>';
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
   }
 });
 
@@ -193,16 +204,22 @@ router.get('/sitemap-tax-consultants.xml', async (req, res) => {
     const baseUrl = process.env.CLIENT_URL || 'https://legaliq.in';
     const currentDate = new Date().toISOString().split('T')[0];
 
+    // Use lean() for better performance and limit to 50,000 URLs (sitemap limit)
     const taxConsultants = await User.find({
-      role: 'tax_consultant',
+      role: 'tax-consultant',
       isVerified: true
-    }).select('_id city state updatedAt');
+    })
+    .select('_id updatedAt')
+    .limit(50000)
+    .lean()
+    .maxTimeMS(10000) // 10 second timeout
+    .exec();
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n';
 
     taxConsultants.forEach(consultant => {
-      const lastMod = consultant.updatedAt 
+      const lastMod = consultant.updatedAt
         ? new Date(consultant.updatedAt).toISOString().split('T')[0]
         : currentDate;
       
@@ -220,7 +237,12 @@ router.get('/sitemap-tax-consultants.xml', async (req, res) => {
     res.send(xml);
   } catch (error) {
     console.error('Error generating tax consultants sitemap:', error);
-    res.status(500).send('Error generating sitemap');
+    // Return valid empty sitemap on error instead of 500
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n';
+    xml += '</urlset>';
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
   }
 });
 
@@ -230,16 +252,22 @@ router.get('/sitemap-auditors.xml', async (req, res) => {
     const baseUrl = process.env.CLIENT_URL || 'https://legaliq.in';
     const currentDate = new Date().toISOString().split('T')[0];
 
+    // Use lean() for better performance and limit to 50,000 URLs (sitemap limit)
     const auditors = await User.find({
       role: 'auditor',
       isVerified: true
-    }).select('_id city state updatedAt');
+    })
+    .select('_id updatedAt')
+    .limit(50000)
+    .lean()
+    .maxTimeMS(10000) // 10 second timeout
+    .exec();
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n';
 
     auditors.forEach(auditor => {
-      const lastMod = auditor.updatedAt 
+      const lastMod = auditor.updatedAt
         ? new Date(auditor.updatedAt).toISOString().split('T')[0]
         : currentDate;
       
@@ -257,7 +285,12 @@ router.get('/sitemap-auditors.xml', async (req, res) => {
     res.send(xml);
   } catch (error) {
     console.error('Error generating auditors sitemap:', error);
-    res.status(500).send('Error generating sitemap');
+    // Return valid empty sitemap on error instead of 500
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n';
+    xml += '</urlset>';
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
   }
 });
 
