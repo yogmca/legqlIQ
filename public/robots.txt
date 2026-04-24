@@ -1,0 +1,109 @@
+# robots.txt for https://legaliq.in/
+# Optimized for SEO and Local Visibility
+
+# Default rules for all bots
+User-agent: *
+Allow: /
+Allow: /lawyers/
+Allow: /tax-consultants/
+Allow: /auditors/
+Allow: /articles/
+Allow: /about
+Allow: /contact
+Allow: /consultation
+Disallow: /admin/
+Disallow: /api/
+Disallow: /profile/edit
+Disallow: /chat/
+Disallow: /video-consultation/
+Disallow: /login
+Disallow: /register
+Disallow: /reset-password
+Disallow: /forgot-password
+
+# Sitemap locations
+Sitemap: https://legaliq.in/api/sitemap/sitemap.xml
+Sitemap: https://legaliq.in/api/sitemap/sitemap-index.xml
+Sitemap: https://legaliq.in/api/sitemap/sitemap-lawyers.xml
+Sitemap: https://legaliq.in/api/sitemap/sitemap-tax-consultants.xml
+Sitemap: https://legaliq.in/api/sitemap/sitemap-auditors.xml
+Sitemap: https://legaliq.in/api/sitemap/sitemap-locations.xml
+Sitemap: https://legaliq.in/api/sitemap/sitemap-static.xml
+
+# Crawl-delay for all bots (reduced for better indexing)
+Crawl-delay: 0.5
+
+# Google bots - Priority crawling
+User-agent: Googlebot
+Allow: /
+Allow: /lawyers/
+Allow: /tax-consultants/
+Allow: /auditors/
+Allow: /articles/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /chat/
+Disallow: /video-consultation/
+Crawl-delay: 0
+
+# Google Image bot
+User-agent: Googlebot-Image
+Allow: /
+Allow: /uploads/
+Allow: /images/
+
+# Google Mobile bot
+User-agent: Googlebot-Mobile
+Allow: /
+Allow: /lawyers/
+Allow: /tax-consultants/
+Allow: /auditors/
+
+# Bing bots
+User-agent: Bingbot
+Allow: /
+Allow: /lawyers/
+Allow: /tax-consultants/
+Allow: /auditors/
+Allow: /articles/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /chat/
+Disallow: /video-consultation/
+Crawl-delay: 0.5
+
+# Yandex bot
+User-agent: Yandex
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Crawl-delay: 1
+
+# Baidu bot (for potential international reach)
+User-agent: Baiduspider
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Crawl-delay: 1
+
+# DuckDuckGo bot
+User-agent: DuckDuckBot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Block bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Host (optional, for Google)
+Host: https://legaliq.in

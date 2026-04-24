@@ -182,6 +182,31 @@ exports.createConsultation = async (req, res) => {
       consultationType: 'in-person'
     }).catch(err => console.error('Failed to send consultation notification:', err));
 
+    // Send booking confirmation email to client (non-blocking)
+    emailService.sendConsultationBookingToClient({
+      clientName: consultation.clientInfo.name,
+      clientEmail: consultation.clientInfo.email,
+      lawyerName: consultation.lawyerInfo.name,
+      caseType: consultation.caseType,
+      caseDescription: consultation.caseDescription,
+      preferredDate: consultation.preferredDate,
+      preferredTime: consultation.preferredTime,
+      consultationType: 'in-person'
+    }).catch(err => console.error('Failed to send booking confirmation to client:', err));
+
+    // Send booking notification email to professional (non-blocking)
+    emailService.sendConsultationBookingToProfessional({
+      clientName: consultation.clientInfo.name,
+      clientPhone: consultation.clientInfo.phone,
+      lawyerName: consultation.lawyerInfo.name,
+      lawyerEmail: consultation.lawyerInfo.email,
+      caseType: consultation.caseType,
+      caseDescription: consultation.caseDescription,
+      preferredDate: consultation.preferredDate,
+      preferredTime: consultation.preferredTime,
+      consultationType: 'in-person'
+    }).catch(err => console.error('Failed to send booking notification to professional:', err));
+
     // Send WhatsApp notifications for in-person consultation booking (non-blocking)
     const professionalPhone = lawyer ? lawyer.phone : null;
     const whatsappData = {
@@ -758,6 +783,31 @@ exports.verifyPayment = async (req, res) => {
       consultationType: 'video',
       amount: consultation.amount
     }).catch(err => console.error('Failed to send video consultation notification:', err));
+
+    // Send booking confirmation email to client (non-blocking)
+    emailService.sendConsultationBookingToClient({
+      clientName: consultation.clientInfo.name,
+      clientEmail: consultation.clientInfo.email,
+      lawyerName: consultation.lawyerInfo.name,
+      caseType: consultation.caseType,
+      caseDescription: consultation.caseDescription,
+      preferredDate: consultation.preferredDate,
+      preferredTime: consultation.preferredTime,
+      consultationType: 'video'
+    }).catch(err => console.error('Failed to send video booking confirmation to client:', err));
+
+    // Send booking notification email to professional (non-blocking)
+    emailService.sendConsultationBookingToProfessional({
+      clientName: consultation.clientInfo.name,
+      clientPhone: consultation.clientInfo.phone,
+      lawyerName: consultation.lawyerInfo.name,
+      lawyerEmail: consultation.lawyerInfo.email,
+      caseType: consultation.caseType,
+      caseDescription: consultation.caseDescription,
+      preferredDate: consultation.preferredDate,
+      preferredTime: consultation.preferredTime,
+      consultationType: 'video'
+    }).catch(err => console.error('Failed to send video booking notification to professional:', err));
 
     // Send WhatsApp notifications for video consultation payment confirmed (non-blocking)
     // Look up the lawyer to get their phone number

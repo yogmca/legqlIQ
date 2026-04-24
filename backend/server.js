@@ -34,14 +34,36 @@ chatService.initialize();
 console.log('✅ Chat Service initialized');
 
 // MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/legaliq';
+const MONGODB_URI = process.env.MONGODB_URI;
 
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('✅ MongoDB connected successfully'))
-  .catch((err) => {
-    console.error('❌ MongoDB connection error:', err);
-    console.log('⚠️  Server will continue without database functionality');
-  });
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI is not defined in environment variables');
+  console.log('⚠️  Server will continue without database functionality');
+} else {
+  mongoose.connect(MONGODB_URI, {
+    serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
+    socketTimeoutMS: 45000, // Socket timeout
+    bufferCommands: false, // Disable buffering
+  })
+    .then(() => console.log('✅ MongoDB connected successfully'))
+    .catch((err) => {
+      console.error('❌ MongoDB connection error:', err);
+      console.log('⚠️  Server will continue without database functionality');
+    });
+}
+
+// Handle MongoDB connection events
+mongoose.connection.on('connected', () => {
+  console.log('✅ Mongoose connected to MongoDB');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ Mongoose connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('⚠️  Mongoose disconnected from MongoDB');
+});
 
 // Middleware
 app.use(cors({
@@ -76,6 +98,7 @@ const chatbotRoutes = require('./routes/chatbotRoutes');
 const scraperRoutes = require('./routes/scraperRoutes');
 const articleRoutes = require('./routes/articles');
 const chatRoutes = require('./routes/chatRoutes');
+const sitemapRoutes = require('./routes/sitemapRoutes');
 
 // Now using ONLY MongoDB database for lawyer data
 // No hardcoded fallback data or web scraping
@@ -105,6 +128,9 @@ app.use('/api/articles', articleRoutes);
 
 // Chat routes
 app.use('/api/chats', chatRoutes);
+
+// Sitemap routes (for SEO)
+app.use('/api/sitemap', sitemapRoutes);
 
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));

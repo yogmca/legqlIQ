@@ -1066,6 +1066,617 @@ This is an automated email. Please do not reply to this message.
   updateRecipientEmail(newEmail) {
     this.recipientEmail = newEmail;
   }
+
+  // Send consultation booking confirmation to client
+  async sendConsultationBookingToClient(consultationData) {
+    const {
+      clientName,
+      clientEmail,
+      lawyerName,
+      caseType,
+      caseDescription,
+      preferredDate,
+      preferredTime,
+      consultationType
+    } = consultationData;
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'noreply@legaliq.in',
+      to: clientEmail,
+      subject: `✅ Consultation Booked Successfully - LegalIQ`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: white; padding: 30px; border-radius: 0 0 8px 8px; }
+            .badge { display: inline-block; padding: 5px 15px; background: #28a745; color: white; border-radius: 20px; font-size: 14px; font-weight: bold; }
+            .info-box { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #667eea; }
+            .footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>✅ Consultation Booked!</h1>
+              <p>Your consultation has been confirmed</p>
+            </div>
+            <div class="content">
+              <p>Dear <strong>${clientName}</strong>,</p>
+              <p>Your consultation has been successfully booked on LegalIQ platform.</p>
+              
+              <div style="text-align: center; margin: 20px 0;">
+                <span class="badge">${consultationType === 'video' ? '🎥 VIDEO CONSULTATION' : '🏢 IN-PERSON CONSULTATION'}</span>
+              </div>
+              
+              <div class="info-box">
+                <h3 style="color: #667eea; margin-top: 0;">📋 Consultation Details</h3>
+                <p><strong>Professional:</strong> ${lawyerName}</p>
+                <p><strong>Case Type:</strong> ${caseType}</p>
+                <p><strong>Date:</strong> ${new Date(preferredDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p><strong>Time:</strong> ${preferredTime}</p>
+                <p><strong>Description:</strong> ${caseDescription}</p>
+              </div>
+              
+              <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <strong>📌 Next Steps:</strong>
+                <ul style="margin: 10px 0;">
+                  <li>The professional will review your booking request</li>
+                  <li>You will receive a confirmation once accepted</li>
+                  <li>Check your dashboard for updates</li>
+                  ${consultationType === 'video' ? '<li>Video call link will be shared before the consultation</li>' : '<li>Visit the professional\'s office at the scheduled time</li>'}
+                </ul>
+              </div>
+              
+              <p style="margin-top: 30px;">Best regards,<br><strong>The LegalIQ Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>LegalIQ - Your Trusted Legal Partner</p>
+              <p>© ${new Date().getFullYear()} LegalIQ. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+Consultation Booked Successfully - LegalIQ
+
+Dear ${clientName},
+
+Your consultation has been successfully booked on LegalIQ platform.
+
+CONSULTATION DETAILS:
+Professional: ${lawyerName}
+Case Type: ${caseType}
+Date: ${new Date(preferredDate).toLocaleDateString('en-IN')}
+Time: ${preferredTime}
+Type: ${consultationType === 'video' ? 'VIDEO CONSULTATION' : 'IN-PERSON CONSULTATION'}
+
+NEXT STEPS:
+- The professional will review your booking request
+- You will receive a confirmation once accepted
+- Check your dashboard for updates
+
+Best regards,
+The LegalIQ Team
+      `
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Consultation booking email sent to client:', clientEmail);
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      console.error('Error sending consultation booking email to client:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Send consultation booking notification to professional
+  async sendConsultationBookingToProfessional(consultationData) {
+    const {
+      clientName,
+      clientPhone,
+      lawyerName,
+      lawyerEmail,
+      caseType,
+      caseDescription,
+      preferredDate,
+      preferredTime,
+      consultationType
+    } = consultationData;
+
+    if (!lawyerEmail) {
+      console.log('No lawyer email provided, skipping email notification');
+      return { success: false, error: 'No lawyer email' };
+    }
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'noreply@legaliq.in',
+      to: lawyerEmail,
+      subject: `🔔 New Consultation Request - LegalIQ`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: white; padding: 30px; border-radius: 0 0 8px 8px; }
+            .badge { display: inline-block; padding: 5px 15px; background: #007bff; color: white; border-radius: 20px; font-size: 14px; font-weight: bold; }
+            .info-box { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #667eea; }
+            .button { display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 6px; margin: 10px 5px; }
+            .footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🔔 New Consultation Request</h1>
+              <p>A client has requested a consultation with you</p>
+            </div>
+            <div class="content">
+              <p>Dear <strong>${lawyerName}</strong>,</p>
+              <p>You have received a new consultation request on LegalIQ platform.</p>
+              
+              <div style="text-align: center; margin: 20px 0;">
+                <span class="badge">${consultationType === 'video' ? '🎥 VIDEO CONSULTATION' : '🏢 IN-PERSON CONSULTATION'}</span>
+              </div>
+              
+              <div class="info-box">
+                <h3 style="color: #667eea; margin-top: 0;">👤 Client Information</h3>
+                <p><strong>Name:</strong> ${clientName}</p>
+                <p><strong>Phone:</strong> ${clientPhone}</p>
+              </div>
+              
+              <div class="info-box">
+                <h3 style="color: #667eea; margin-top: 0;">📋 Consultation Details</h3>
+                <p><strong>Case Type:</strong> ${caseType}</p>
+                <p><strong>Date:</strong> ${new Date(preferredDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p><strong>Time:</strong> ${preferredTime}</p>
+                <p><strong>Description:</strong> ${caseDescription}</p>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/appointments" class="button">View in Dashboard</a>
+              </div>
+              
+              <div style="background: #fff3cd; padding: 15px; border-radius: 8px;">
+                <strong>⚡ Action Required:</strong>
+                <p>Please log in to your dashboard to accept or reschedule this consultation request.</p>
+              </div>
+              
+              <p style="margin-top: 30px;">Best regards,<br><strong>The LegalIQ Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>LegalIQ - Your Trusted Legal Partner</p>
+              <p>© ${new Date().getFullYear()} LegalIQ. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+New Consultation Request - LegalIQ
+
+Dear ${lawyerName},
+
+You have received a new consultation request on LegalIQ platform.
+
+CLIENT INFORMATION:
+Name: ${clientName}
+Phone: ${clientPhone}
+
+CONSULTATION DETAILS:
+Case Type: ${caseType}
+Date: ${new Date(preferredDate).toLocaleDateString('en-IN')}
+Time: ${preferredTime}
+Type: ${consultationType === 'video' ? 'VIDEO CONSULTATION' : 'IN-PERSON CONSULTATION'}
+Description: ${caseDescription}
+
+ACTION REQUIRED:
+Please log in to your dashboard to accept or reschedule this consultation request.
+
+Dashboard: ${process.env.CLIENT_URL || 'http://localhost:5173'}/appointments
+
+Best regards,
+The LegalIQ Team
+      `
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Consultation booking email sent to professional:', lawyerEmail);
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      console.error('Error sending consultation booking email to professional:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Send consultation accepted notification to client
+  async sendConsultationAcceptedToClient(consultationData) {
+    const {
+      clientName,
+      clientEmail,
+      lawyerName,
+      preferredDate,
+      preferredTime,
+      consultationType
+    } = consultationData;
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'noreply@legaliq.in',
+      to: clientEmail,
+      subject: `✅ Consultation Confirmed - LegalIQ`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+            .header { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: white; padding: 30px; border-radius: 0 0 8px 8px; }
+            .badge { display: inline-block; padding: 5px 15px; background: #28a745; color: white; border-radius: 20px; font-size: 14px; font-weight: bold; }
+            .info-box { background: #d4edda; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #28a745; }
+            .button { display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 6px; }
+            .footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>✅ Consultation Confirmed!</h1>
+              <p>Your consultation has been accepted</p>
+            </div>
+            <div class="content">
+              <p>Dear <strong>${clientName}</strong>,</p>
+              <p>Great news! <strong>${lawyerName}</strong> has accepted your consultation request.</p>
+              
+              <div class="info-box">
+                <h3 style="color: #28a745; margin-top: 0;">📅 Confirmed Appointment</h3>
+                <p><strong>Professional:</strong> ${lawyerName}</p>
+                <p><strong>Date:</strong> ${new Date(preferredDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p><strong>Time:</strong> ${preferredTime}</p>
+                <p><strong>Type:</strong> ${consultationType === 'video' ? 'Video Consultation' : 'In-Person Consultation'}</p>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/appointments" class="button">View Details</a>
+              </div>
+              
+              <div style="background: #fff3cd; padding: 15px; border-radius: 8px;">
+                <strong>📌 Important:</strong>
+                <ul style="margin: 10px 0;">
+                  ${consultationType === 'video' ? '<li>Video call link will be shared before the consultation</li>' : '<li>Please arrive on time at the professional\'s office</li>'}
+                  <li>Prepare any documents or questions in advance</li>
+                  <li>You can reschedule or cancel from your dashboard if needed</li>
+                </ul>
+              </div>
+              
+              <p style="margin-top: 30px;">Best regards,<br><strong>The LegalIQ Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>LegalIQ - Your Trusted Legal Partner</p>
+              <p>© ${new Date().getFullYear()} LegalIQ. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+Consultation Confirmed - LegalIQ
+
+Dear ${clientName},
+
+Great news! ${lawyerName} has accepted your consultation request.
+
+CONFIRMED APPOINTMENT:
+Professional: ${lawyerName}
+Date: ${new Date(preferredDate).toLocaleDateString('en-IN')}
+Time: ${preferredTime}
+Type: ${consultationType === 'video' ? 'Video Consultation' : 'In-Person Consultation'}
+
+View Details: ${process.env.CLIENT_URL || 'http://localhost:5173'}/appointments
+
+Best regards,
+The LegalIQ Team
+      `
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Consultation accepted email sent to client:', clientEmail);
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      console.error('Error sending consultation accepted email to client:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Send consultation rescheduled notification
+  async sendConsultationRescheduledToClient(consultationData) {
+    const {
+      clientName,
+      clientEmail,
+      lawyerName,
+      preferredDate,
+      preferredTime,
+      reason
+    } = consultationData;
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'noreply@legaliq.in',
+      to: clientEmail,
+      subject: `📅 Consultation Rescheduled - LegalIQ`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+            .header { background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: white; padding: 30px; border-radius: 0 0 8px 8px; }
+            .info-box { background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ffc107; }
+            .button { display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 6px; }
+            .footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>📅 Consultation Rescheduled</h1>
+              <p>Your appointment has been rescheduled</p>
+            </div>
+            <div class="content">
+              <p>Dear <strong>${clientName}</strong>,</p>
+              <p><strong>${lawyerName}</strong> has rescheduled your consultation to a new date and time.</p>
+              
+              <div class="info-box">
+                <h3 style="color: #fd7e14; margin-top: 0;">📅 New Appointment Details</h3>
+                <p><strong>Professional:</strong> ${lawyerName}</p>
+                <p><strong>New Date:</strong> ${new Date(preferredDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p><strong>New Time:</strong> ${preferredTime}</p>
+                ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/appointments" class="button">View Details</a>
+              </div>
+              
+              <p>If this new time doesn't work for you, please contact the professional or cancel and book a new consultation.</p>
+              
+              <p style="margin-top: 30px;">Best regards,<br><strong>The LegalIQ Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>LegalIQ - Your Trusted Legal Partner</p>
+              <p>© ${new Date().getFullYear()} LegalIQ. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+Consultation Rescheduled - LegalIQ
+
+Dear ${clientName},
+
+${lawyerName} has rescheduled your consultation to a new date and time.
+
+NEW APPOINTMENT DETAILS:
+Professional: ${lawyerName}
+New Date: ${new Date(preferredDate).toLocaleDateString('en-IN')}
+New Time: ${preferredTime}
+${reason ? `Reason: ${reason}` : ''}
+
+View Details: ${process.env.CLIENT_URL || 'http://localhost:5173'}/appointments
+
+Best regards,
+The LegalIQ Team
+      `
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Consultation rescheduled email sent to client:', clientEmail);
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      console.error('Error sending consultation rescheduled email to client:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Send consultation cancelled notification
+  async sendConsultationCancelledToClient(consultationData) {
+    const {
+      clientName,
+      clientEmail,
+      lawyerName,
+      preferredDate,
+      preferredTime,
+      reason
+    } = consultationData;
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'noreply@legaliq.in',
+      to: clientEmail,
+      subject: `❌ Consultation Cancelled - LegalIQ`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+            .header { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: white; padding: 30px; border-radius: 0 0 8px 8px; }
+            .info-box { background: #f8d7da; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #dc3545; }
+            .button { display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 6px; }
+            .footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>❌ Consultation Cancelled</h1>
+              <p>Your appointment has been cancelled</p>
+            </div>
+            <div class="content">
+              <p>Dear <strong>${clientName}</strong>,</p>
+              <p>Your consultation with <strong>${lawyerName}</strong> has been cancelled.</p>
+              
+              <div class="info-box">
+                <h3 style="color: #dc3545; margin-top: 0;">📅 Cancelled Appointment</h3>
+                <p><strong>Professional:</strong> ${lawyerName}</p>
+                <p><strong>Date:</strong> ${new Date(preferredDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p><strong>Time:</strong> ${preferredTime}</p>
+                ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/lawyers" class="button">Book Another Consultation</a>
+              </div>
+              
+              <p>We apologize for any inconvenience. You can book a new consultation with another professional or try again later.</p>
+              
+              <p style="margin-top: 30px;">Best regards,<br><strong>The LegalIQ Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>LegalIQ - Your Trusted Legal Partner</p>
+              <p>© ${new Date().getFullYear()} LegalIQ. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+Consultation Cancelled - LegalIQ
+
+Dear ${clientName},
+
+Your consultation with ${lawyerName} has been cancelled.
+
+CANCELLED APPOINTMENT:
+Professional: ${lawyerName}
+Date: ${new Date(preferredDate).toLocaleDateString('en-IN')}
+Time: ${preferredTime}
+${reason ? `Reason: ${reason}` : ''}
+
+Book Another Consultation: ${process.env.CLIENT_URL || 'http://localhost:5173'}/lawyers
+
+Best regards,
+The LegalIQ Team
+      `
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Consultation cancelled email sent to client:', clientEmail);
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      console.error('Error sending consultation cancelled email to client:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Send consultation cancelled notification to professional
+  async sendConsultationCancelledToProfessional(consultationData) {
+    const {
+      clientName,
+      lawyerName,
+      lawyerEmail,
+      preferredDate,
+      preferredTime,
+      reason
+    } = consultationData;
+
+    if (!lawyerEmail) {
+      console.log('No lawyer email provided, skipping email notification');
+      return { success: false, error: 'No lawyer email' };
+    }
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'noreply@legaliq.in',
+      to: lawyerEmail,
+      subject: `❌ Consultation Cancelled by Client - LegalIQ`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+            .header { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: white; padding: 30px; border-radius: 0 0 8px 8px; }
+            .info-box { background: #f8d7da; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #dc3545; }
+            .footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>❌ Consultation Cancelled</h1>
+              <p>A client has cancelled their consultation</p>
+            </div>
+            <div class="content">
+              <p>Dear <strong>${lawyerName}</strong>,</p>
+              <p>The consultation with <strong>${clientName}</strong> has been cancelled.</p>
+              
+              <div class="info-box">
+                <h3 style="color: #dc3545; margin-top: 0;">📅 Cancelled Appointment</h3>
+                <p><strong>Client:</strong> ${clientName}</p>
+                <p><strong>Date:</strong> ${new Date(preferredDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p><strong>Time:</strong> ${preferredTime}</p>
+                ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+              </div>
+              
+              <p>This time slot is now available for other bookings.</p>
+              
+              <p style="margin-top: 30px;">Best regards,<br><strong>The LegalIQ Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>LegalIQ - Your Trusted Legal Partner</p>
+              <p>© ${new Date().getFullYear()} LegalIQ. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+Consultation Cancelled - LegalIQ
+
+Dear ${lawyerName},
+
+The consultation with ${clientName} has been cancelled.
+
+CANCELLED APPOINTMENT:
+Client: ${clientName}
+Date: ${new Date(preferredDate).toLocaleDateString('en-IN')}
+Time: ${preferredTime}
+${reason ? `Reason: ${reason}` : ''}
+
+This time slot is now available for other bookings.
+
+Best regards,
+The LegalIQ Team
+      `
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Consultation cancelled email sent to professional:', lawyerEmail);
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      console.error('Error sending consultation cancelled email to professional:', error);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 module.exports = new EmailService();

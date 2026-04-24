@@ -204,6 +204,80 @@ Your {{3}} appointment with {{2}} has been rescheduled:
 Please check the new schedule.
 ```
 
+**`new_professional_signup`** (Admin notification for professional signup):
+```
+🆕 New Professional Signup on LegalIQ!
+
+Name: {{1}}
+Role: {{2}}
+Email: {{3}}
+Phone: {{4}}
+Registration No: {{5}}
+Specialization: {{6}}
+Experience: {{7}}
+Time: {{8}}
+
+Please review and verify in the admin dashboard.
+```
+
+**`consultation_booked_admin`** (Admin booking notification):
+```
+📋 New Consultation Booking!
+
+Client: {{1}}
+Professional: {{2}}
+Type: {{3}}
+Case Type: {{4}}
+Date: {{5}}
+Time: {{6}}
+Amount: {{7}}
+
+Please review in the admin dashboard.
+```
+
+**`video_consultation_booked_professional`** (Professional video booking notification):
+```
+🎥 New Video Consultation Request!
+
+Hi {{1}},
+
+You have a new video consultation request:
+👤 Client: {{2}}
+📅 Date: {{3}}
+🕐 Time: {{4}}
+💰 Amount: {{5}}
+
+Please log in to review and prepare.
+```
+
+**`appointment_accepted_professional`** (Professional acceptance confirmation):
+```
+✅ Appointment Confirmed!
+
+Hi {{1}},
+
+You have confirmed the {{3}} appointment:
+👤 Client: {{2}}
+📅 Date: {{4}}
+🕐 Time: {{5}}
+
+Please be available at the scheduled time.
+```
+
+**`appointment_rescheduled_professional`** (Professional reschedule confirmation):
+```
+🔄 Appointment Rescheduled
+
+Hi {{1}},
+
+Your {{3}} appointment with {{2}} has been rescheduled:
+📅 New Date: {{4}}
+🕐 New Time: {{5}}
+📝 Reason: {{6}}
+
+Please update your schedule accordingly.
+```
+
 **`appointment_cancelled_client`** (Appointment cancelled):
 ```
 ❌ Appointment Cancelled
@@ -216,6 +290,34 @@ Your {{3}} appointment with {{2}} has been cancelled:
 📝 Reason: {{6}}
 
 You can book a new consultation anytime.
+```
+
+**`appointment_cancelled_professional`** (Professional cancellation notification):
+```
+❌ Appointment Cancelled
+
+Hi {{1}},
+
+The {{3}} appointment with {{2}} has been cancelled:
+📅 Date: {{4}}
+🕐 Time: {{5}}
+📝 Reason: {{6}}
+
+The time slot is now available for other bookings.
+```
+
+**`appointment_status_admin`** (Admin status change notification):
+```
+📋 Appointment Status Update
+
+Status: {{1}}
+Client: {{2}}
+Professional: {{3}}
+Type: {{4}}
+Date: {{5}}
+Time: {{6}}
+
+Please review in the admin dashboard.
 ```
 
 ### Step 4: Configure Environment Variables
