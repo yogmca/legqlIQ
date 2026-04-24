@@ -129,8 +129,9 @@ app.use('/api/articles', articleRoutes);
 // Chat routes
 app.use('/api/chats', chatRoutes);
 
-// Sitemap routes (for SEO)
+// Sitemap routes (for SEO) - Available at both /api/sitemap and root level
 app.use('/api/sitemap', sitemapRoutes);
+app.use('/', sitemapRoutes); // Also serve at root for Google
 
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));
