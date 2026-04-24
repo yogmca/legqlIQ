@@ -168,6 +168,7 @@ router.get('/sitemap-lawyers.xml', async (req, res) => {
     .exec();
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n';
 
     lawyers.forEach(lawyer => {
@@ -191,6 +192,7 @@ router.get('/sitemap-lawyers.xml', async (req, res) => {
     console.error('Error generating lawyers sitemap:', error);
     // Return valid empty sitemap on error instead of 500
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n';
     xml += '</urlset>';
     res.header('Content-Type', 'application/xml');
@@ -239,6 +241,7 @@ router.get('/sitemap-tax-consultants.xml', async (req, res) => {
     console.error('Error generating tax consultants sitemap:', error);
     // Return valid empty sitemap on error instead of 500
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n';
     xml += '</urlset>';
     res.header('Content-Type', 'application/xml');
@@ -264,6 +267,7 @@ router.get('/sitemap-auditors.xml', async (req, res) => {
     .exec();
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n';
 
     auditors.forEach(auditor => {
@@ -301,6 +305,7 @@ router.get('/sitemap-locations.xml', async (req, res) => {
     const currentDate = new Date().toISOString().split('T')[0];
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n';
 
     const majorCities = [
