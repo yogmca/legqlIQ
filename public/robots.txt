@@ -22,13 +22,12 @@ Disallow: /reset-password
 Disallow: /forgot-password
 
 # Sitemap locations
-Sitemap: https://legaliq.in/sitemap.xml
 Sitemap: https://legaliq.in/sitemap-index.xml
+Sitemap: https://legaliq.in/sitemap-static.xml
+Sitemap: https://legaliq.in/sitemap-locations.xml
 Sitemap: https://legaliq.in/sitemap-lawyers.xml
 Sitemap: https://legaliq.in/sitemap-tax-consultants.xml
 Sitemap: https://legaliq.in/sitemap-auditors.xml
-Sitemap: https://legaliq.in/sitemap-locations.xml
-Sitemap: https://legaliq.in/sitemap-static.xml
 
 # Crawl-delay for all bots (reduced for better indexing)
 Crawl-delay: 0.5

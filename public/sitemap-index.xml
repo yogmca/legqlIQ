@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <sitemap>
+    <loc>https://legaliq.in/sitemap-static.xml</loc>
+    <lastmod>2026-04-24</lastmod>
+  </sitemap>
+
+  <sitemap>
+    <loc>https://legaliq.in/sitemap-lawyers.xml</loc>
+    <lastmod>2026-04-24</lastmod>
+  </sitemap>
+
+  <sitemap>
+    <loc>https://legaliq.in/sitemap-tax-consultants.xml</loc>
+    <lastmod>2026-04-24</lastmod>
+  </sitemap>
+
+  <sitemap>
+    <loc>https://legaliq.in/sitemap-auditors.xml</loc>
+    <lastmod>2026-04-24</lastmod>
+  </sitemap>
+
+  <sitemap>
+    <loc>https://legaliq.in/sitemap-locations.xml</loc>
+    <lastmod>2026-04-24</lastmod>
+  </sitemap>
+
+</sitemapindex>
