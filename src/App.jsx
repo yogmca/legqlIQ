@@ -402,8 +402,31 @@ function VideoConsultationRoom() {
   );
 }
 
+function App() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const currentUser = authService.getUser();
+    setUser(currentUser);
+  }, []);
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+  };
+
+  const handleRegister = (userData) => {
+    setUser(userData);
+  };
+
+  return (
+    <Router>
+      <AppContent user={user} handleLogin={handleLogin} handleRegister={handleRegister} />
+    </Router>
+  );
+}
+
 // Wrapper component to conditionally show mobile menu
-function AppContent() {
+function AppContent({ user, handleLogin, handleRegister }) {
   const location = useLocation();
   const isHomepage = location.pathname === '/';
 
@@ -493,29 +516,6 @@ function AppContent() {
       {/* AI Legal Chatbot - Available on all pages */}
       <LegalChatbot />
     </>
-  );
-}
-
-function App() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const currentUser = authService.getUser();
-    setUser(currentUser);
-  }, []);
-
-  const handleLogin = (userData) => {
-    setUser(userData);
-  };
-
-  const handleRegister = (userData) => {
-    setUser(userData);
-  };
-
-  return (
-    <Router>
-      <AppContent />
-    </Router>
   );
 }
 
