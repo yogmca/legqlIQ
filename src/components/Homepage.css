@@ -935,13 +935,18 @@
     justify-content: center;
   }
 
+  /* Hide navigation on mobile - using mobile menu instead */
+  .header-nav {
+    display: none !important;
+  }
+
   .logo-section {
     margin-left: 0;
   }
 
   /* Add padding to content to account for fixed header */
   .hero-section {
-    padding-top: 110px;
+    padding-top: 70px;
     padding-bottom: 40px;
     padding-left: 20px;
     padding-right: 20px;
