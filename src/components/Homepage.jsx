@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
+import MobileMenu from './MobileMenu';
 import './Homepage.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
@@ -90,6 +91,9 @@ const Homepage = () => {
 
   return (
     <div className="homepage">
+      {/* Mobile Menu - Only visible on mobile */}
+      <MobileMenu />
+      
       {/* Header */}
       <header className="homepage-header">
         <div className="header-container">

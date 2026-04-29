@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import './App.css';
 import Homepage from './components/Homepage';
 import Login from './components/Login';
@@ -17,6 +17,7 @@ import AboutUs from './components/AboutUs';
 import ContactUs from './components/ContactUs';
 import Logo from './components/Logo';
 import LegalChatbot from './components/LegalChatbot';
+import MobileMenu from './components/MobileMenu';
 import ArticlesPage from './components/ArticlesPage';
 import ArticleDetail from './components/ArticleDetail';
 import ArticleSubmission from './components/ArticleSubmission';
@@ -401,24 +402,16 @@ function VideoConsultationRoom() {
   );
 }
 
-function App() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const currentUser = authService.getUser();
-    setUser(currentUser);
-  }, []);
-
-  const handleLogin = (userData) => {
-    setUser(userData);
-  };
-
-  const handleRegister = (userData) => {
-    setUser(userData);
-  };
+// Wrapper component to conditionally show mobile menu
+function AppContent() {
+  const location = useLocation();
+  const isHomepage = location.pathname === '/';
 
   return (
-    <Router>
+    <>
+      {/* Show mobile menu on all pages except homepage (homepage has its own) */}
+      {!isHomepage && <MobileMenu />}
+      
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
@@ -499,6 +492,29 @@ function App() {
       
       {/* AI Legal Chatbot - Available on all pages */}
       <LegalChatbot />
+    </>
+  );
+}
+
+function App() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const currentUser = authService.getUser();
+    setUser(currentUser);
+  }, []);
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+  };
+
+  const handleRegister = (userData) => {
+    setUser(userData);
+  };
+
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
