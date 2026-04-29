@@ -930,8 +930,8 @@
   }
 
   .header-container {
-    min-height: 70px;
-    padding: 12px 20px 12px 80px;
+    min-height: 60px;
+    padding: 8px 20px 8px 80px;
     justify-content: center;
   }
 
@@ -943,10 +943,15 @@
   .logo-section {
     margin-left: 0;
   }
+  
+  .logo-section .logo-image {
+    width: 80px;
+    height: 80px;
+  }
 
   /* Add padding to content to account for fixed header */
   .hero-section {
-    padding-top: 70px;
+    padding-top: 80px;
     padding-bottom: 40px;
     padding-left: 20px;
     padding-right: 20px;
