@@ -29,6 +29,13 @@ body {
   z-index: 100;
 }
 
+/* Mobile: Add padding to prevent menu overlap with logo */
+@media (max-width: 768px) {
+  .app-logo-header {
+    padding-left: 80px; /* Make room for mobile menu button */
+  }
+}
+
 .app-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
