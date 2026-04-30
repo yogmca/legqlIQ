@@ -428,6 +428,11 @@
 }
 
 @media (max-width: 768px) {
+  /* Prevent mobile menu from overlapping logo */
+  .articles-logo-header {
+    padding-left: 80px;
+  }
+
   .hero-content h1 {
     font-size: 24px;
   }
