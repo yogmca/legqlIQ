@@ -7,7 +7,7 @@
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
-  const LawyerCard = ({ lawyer }) => {
+  const LawyerCard = ({ lawyer, professionalType: propProfessionalType }) => {
     const navigate = useNavigate();
     const [showConsultationForm, setShowConsultationForm] = useState(false);
 
@@ -105,7 +105,8 @@
       (new Date() - new Date(lawyer.lastActive)) < 5 * 60 * 1000;
 
     // Determine professional type for dynamic labels
-    const professionalType = lawyer.professionalType || 'lawyer';
+    // Use lawyer's professionalType field, fallback to prop, then default to 'lawyer'
+    const professionalType = lawyer.professionalType || propProfessionalType || 'lawyer';
     
     // Get appropriate label for court/office field
     const getCourtLabel = () => {

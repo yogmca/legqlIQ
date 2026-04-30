@@ -250,7 +250,11 @@ function LawyersDirectory() {
             <>
               <div className="lawyers-grid">
                 {lawyers.map((lawyer, index) => (
-                  <LawyerCard key={lawyer.id || lawyer._id || `lawyer-${index}`} lawyer={lawyer} />
+                  <LawyerCard
+                    key={lawyer.id || lawyer._id || `lawyer-${index}`}
+                    lawyer={lawyer}
+                    professionalType={professionalType}
+                  />
                 ))}
               </div>
               
