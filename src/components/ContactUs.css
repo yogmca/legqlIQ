@@ -314,6 +314,11 @@
 }
 
 @media (max-width: 768px) {
+  /* Prevent mobile menu from overlapping logo */
+  .contact-page-header {
+    padding-left: 80px;
+  }
+
   .contact-header h1 {
     font-size: 36px;
   }

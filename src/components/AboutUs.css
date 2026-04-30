@@ -539,6 +539,11 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  /* Prevent mobile menu from overlapping logo */
+  .about-page-header {
+    padding-left: 80px;
+  }
+
   .about-hero {
     padding: 4rem 1.5rem;
   }
