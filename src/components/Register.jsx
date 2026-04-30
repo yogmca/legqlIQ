@@ -774,7 +774,21 @@ const Register = ({ onRegister }) => {
                     </div>
                   )}
                   
-                  {(userType === 'tax-consultant' || userType === 'auditor') && (
+                  {userType === 'auditor' && (
+                    <div className="form-group">
+                      <label htmlFor="court">Audit Firm/Office Name</label>
+                      <input
+                        type="text"
+                        id="court"
+                        name="court"
+                        value={formData.court}
+                        onChange={handleChange}
+                        placeholder="e.g., ABC Audit Services"
+                      />
+                    </div>
+                  )}
+
+                  {userType === 'tax-consultant' && (
                     <div className="form-group">
                       <label htmlFor="court">Office/Firm Name</label>
                       <input
@@ -783,7 +797,7 @@ const Register = ({ onRegister }) => {
                         name="court"
                         value={formData.court}
                         onChange={handleChange}
-                        placeholder="e.g., ABC Consultancy Services"
+                        placeholder="e.g., ABC Tax Consultancy Services"
                       />
                     </div>
                   )}

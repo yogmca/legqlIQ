@@ -832,7 +832,11 @@ const Profile = () => {
 
               <div className="form-group">
                 <label htmlFor="court">
-                  {user?.role === 'lawyer' ? 'Court/Practice Area *' : 'Office/Firm Name *'}
+                  {user?.role === 'lawyer'
+                    ? 'Court/Practice Area *'
+                    : user?.role === 'auditor'
+                    ? 'Audit Firm/Office Name *'
+                    : 'Office/Firm Name *'}
                 </label>
                 <input
                   type="text"
@@ -840,7 +844,13 @@ const Profile = () => {
                   name="court"
                   value={professionalData.court}
                   onChange={handleProfessionalChange}
-                  placeholder={user?.role === 'lawyer' ? 'e.g., High Court, District Court' : 'Your office or firm name'}
+                  placeholder={
+                    user?.role === 'lawyer'
+                      ? 'e.g., High Court, District Court'
+                      : user?.role === 'auditor'
+                      ? 'e.g., ABC Audit Services'
+                      : 'e.g., ABC Tax Consultancy'
+                  }
                   required
                 />
               </div>

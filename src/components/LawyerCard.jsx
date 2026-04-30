@@ -104,6 +104,33 @@
     const isOnline = lawyer.lastActive &&
       (new Date() - new Date(lawyer.lastActive)) < 5 * 60 * 1000;
 
+    // Determine professional type for dynamic labels
+    const professionalType = lawyer.professionalType || 'lawyer';
+    
+    // Get appropriate label for court/office field
+    const getCourtLabel = () => {
+      switch(professionalType) {
+        case 'auditor':
+          return '🏢 Audit Firm/Office:';
+        case 'tax-consultant':
+          return '🏢 Office/Firm:';
+        default:
+          return '⚖️ Court:';
+      }
+    };
+
+    // Get appropriate button text
+    const getBookButtonText = () => {
+      switch(professionalType) {
+        case 'auditor':
+          return '📅 Book Auditor Visit';
+        case 'tax-consultant':
+          return '📅 Book Tax Consultant Visit';
+        default:
+          return '📅 Book Lawyer Visit';
+      }
+    };
+
     return (
       <div className="lawyer-card">
         <div className="lawyer-card-header">
@@ -151,7 +178,7 @@
               <span className="info-value">{lawyer.location}</span>
             </div>
             <div className="info-row">
-              <span className="info-label">⚖️ Court:</span>
+              <span className="info-label">{getCourtLabel()}</span>
               <span className="info-value">{lawyer.court}</span>
             </div>
             <div className="info-row">
@@ -188,7 +215,7 @@
 
         <div className="lawyer-card-footer">
           <button className="btn-contact" onClick={handleBookConsultation}>
-            📅 Book Lawyer Visit
+            {getBookButtonText()}
           </button>
           <button className="btn-video-consultation" onClick={handleBookVideoConsultation}>
             📹 Book Video Consultation
