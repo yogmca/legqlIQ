@@ -260,8 +260,21 @@ app.get('/api/lawyers/search', async (req, res) => {
       const matchesSpecialization = specialization === 'All Specializations' ||
         (Array.isArray(professional.specialization) && professional.specialization.includes(specialization));
 
-      const matchesLocation = location === 'All Locations' ||
-        (professional.location && professional.location === location);
+      // Handle location matching with Bangalore/Bengaluru alias
+      let matchesLocation = location === 'All Locations';
+      if (!matchesLocation && professional.location) {
+        // Direct match
+        if (professional.location === location) {
+          matchesLocation = true;
+        }
+        // Handle Bangalore/Bengaluru alias
+        else if (
+          (location.toLowerCase() === 'bangalore' || location.toLowerCase() === 'bengaluru') &&
+          (professional.location.toLowerCase() === 'bangalore' || professional.location.toLowerCase() === 'bengaluru')
+        ) {
+          matchesLocation = true;
+        }
+      }
 
       return matchesSearch && matchesSpecialization && matchesLocation;
     });
