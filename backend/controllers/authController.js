@@ -628,38 +628,59 @@ exports.updateProfessionalProfile = async (req, res) => {
       });
     }
 
-    // Find professional profile
-    const professionalProfile = await Lawyer.findOne({ userId: user._id });
+    // Find or create professional profile
+    let professionalProfile = await Lawyer.findOne({ userId: user._id });
 
     if (!professionalProfile) {
-      return res.status(404).json({
-        success: false,
-        message: 'Professional profile not found'
+      // Create a new professional profile if it doesn't exist
+      // This handles cases where registration was incomplete
+      professionalProfile = await Lawyer.create({
+        userId: user._id,
+        professionalType: user.role,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        specialization: specialization || ['General'],
+        experience: experience ? parseInt(experience) : 0,
+        location: location || 'Not specified',
+        court: court || 'Not specified',
+        education: education || '',
+        consultationFee: consultationFee ? parseInt(consultationFee) : 500,
+        description: description || '',
+        languages: languages || [],
+        isVerified: true,
+        source: 'registration',
+        profilePicture: user.profilePicture || ''
       });
-    }
 
-    // Update professional fields
-    if (specialization) professionalProfile.specialization = specialization;
-    if (experience !== undefined) professionalProfile.experience = parseInt(experience);
-    if (location) {
-      // If location is changing, update the location counts
-      if (professionalProfile.location !== location) {
-        // Decrement old location count
-        if (professionalProfile.location) {
-          await Location.decrementCount(professionalProfile.location);
-        }
-        // Add or increment new location
+      // Add location to database
+      if (location) {
         await Location.addOrUpdateLocation(location);
       }
-      professionalProfile.location = location;
-    }
-    if (court) professionalProfile.court = court;
-    if (education) professionalProfile.education = education;
-    if (consultationFee !== undefined) professionalProfile.consultationFee = parseInt(consultationFee);
-    if (description) professionalProfile.description = description;
-    if (languages) professionalProfile.languages = languages;
+    } else {
+      // Update existing professional fields
+      if (specialization) professionalProfile.specialization = specialization;
+      if (experience !== undefined) professionalProfile.experience = parseInt(experience);
+      if (location) {
+        // If location is changing, update the location counts
+        if (professionalProfile.location !== location) {
+          // Decrement old location count
+          if (professionalProfile.location) {
+            await Location.decrementCount(professionalProfile.location);
+          }
+          // Add or increment new location
+          await Location.addOrUpdateLocation(location);
+        }
+        professionalProfile.location = location;
+      }
+      if (court) professionalProfile.court = court;
+      if (education) professionalProfile.education = education;
+      if (consultationFee !== undefined) professionalProfile.consultationFee = parseInt(consultationFee);
+      if (description) professionalProfile.description = description;
+      if (languages) professionalProfile.languages = languages;
 
-    await professionalProfile.save();
+      await professionalProfile.save();
+    }
 
     res.status(200).json({
       success: true,
