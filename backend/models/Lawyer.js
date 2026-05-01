@@ -34,20 +34,14 @@ const lawyerSchema = new mongoose.Schema({
   },
   barRegistrationNo: {
     type: String,
-    required: function() {
-      // Only required for lawyers
-      return this.professionalType === 'lawyer';
-    },
+    required: false,
     sparse: true, // Allow null for non-lawyers
     trim: true
   },
-  // Registration number for tax consultants and auditors
+  // Registration number for tax consultants and auditors (optional)
   registrationNo: {
     type: String,
-    required: function() {
-      // Required for tax consultants and auditors
-      return this.professionalType === 'tax-consultant' || this.professionalType === 'auditor';
-    },
+    required: false,
     sparse: true,
     trim: true
   },
