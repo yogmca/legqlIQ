@@ -44,7 +44,7 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
-  z-index: 999;
+  z-index: 10002;
   overflow: hidden;
   animation: slideUp 0.3s ease;
 }
@@ -257,6 +257,8 @@
   padding: 15px 20px;
   background: white;
   border-top: 1px solid #e0e0e0;
+  position: relative;
+  z-index: 10003;
 }
 
 .chatbot-input textarea {
@@ -289,6 +291,8 @@
   justify-content: center;
   transition: all 0.3s ease;
   flex-shrink: 0;
+  position: relative;
+  z-index: 10004;
 }
 
 .send-button:hover:not(:disabled) {
