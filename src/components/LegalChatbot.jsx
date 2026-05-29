@@ -142,6 +142,15 @@ const LegalChatbot = () => {
                 <h3>LegalIQ AI Assistant</h3>
                 <p>Your Legal Companion</p>
               </div>
+              <button
+                className="chatbot-close-btn"
+                onClick={() => setIsOpen(false)}
+                aria-label="Close chat"
+              >
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </button>
             </div>
           </div>
 
