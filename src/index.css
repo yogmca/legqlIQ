@@ -46,6 +46,7 @@ a {
   body {
     background-color: #f8f9fa;
     overflow-x: hidden;
+    font-size: 14px;
   }
 
   /* Prevent text selection on mobile for app-like feel */
@@ -86,6 +87,12 @@ a {
   input[type="submit"] {
     min-height: 44px;
     min-width: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 13px;
   }
 }
 

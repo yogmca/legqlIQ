@@ -1162,15 +1162,35 @@
 
 @media (max-width: 640px) {
   .hero-title {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .gradient-text {
-    font-size: 26px !important;
+    font-size: 22px !important;
   }
 
   .hero-subtitle {
-    font-size: 14px;
+    font-size: 13px;
+  }
+  
+  .card-title {
+    font-size: 13px;
+  }
+  
+  .card-description {
+    font-size: 11px;
+  }
+  
+  .specialization-card h3 {
+    font-size: 13px;
+  }
+  
+  .feature-card h3 {
+    font-size: 15px;
+  }
+  
+  .feature-card p {
+    font-size: 12px;
   }
 
   .quick-stats {

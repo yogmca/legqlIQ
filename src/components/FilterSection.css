@@ -97,10 +97,38 @@
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: #4a5568;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .filter-label {
+    font-size: 13px;
+  }
+  
+  .filter-select {
+    font-size: 13px;
+  }
+  
+  .reset-button {
+    font-size: 13px;
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-label {
+    font-size: 12px;
+  }
+  
+  .filter-select {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+  
+  .reset-button {
+    font-size: 12px;
+    padding: 9px 18px;
+  }
 }
 
 .reset-btn:hover {

@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
-require('dotenv').config({ path: '../.env' });
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 // Email configuration
 const transporter = nodemailer.createTransport({
@@ -11,7 +12,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // List of lawyers to send signup invitation emails
-const lawyers = [
+const allLawyers = [
   // --- Original list ---
   { name: 'Tanvi Nigam', email: 'nigam.tanvi@gmail.com', location: 'Delhi-based Advocate', enrollment: 'D/2657/2019' },
   { name: 'Shighra Kumar', email: 'adv.shighra@gmail.com', location: 'Delhi-based Advocate', enrollment: 'D/899/2022' },
@@ -103,6 +104,9 @@ const lawyers = [
   { name: 'Sushil Sorengh', email: 'advocatesushilsoreng@gmail.com', location: 'Simdega, Jharkhand', enrollment: '' },
   { name: 'Shanker Mahto', email: 'shankermahto1971@gmail.com', location: 'Simdega, Jharkhand', enrollment: '' },
 ];
+
+// Send to all lawyers (change to allLawyers.slice(0, 5) for testing with first 5)
+const lawyers = allLawyers;
 
 // Generate personalized email HTML for LegalIQ signup invitation
 function generateEmailHTML(lawyerName) {

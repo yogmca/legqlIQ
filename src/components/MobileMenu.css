@@ -359,6 +359,26 @@
   .logo-text {
     font-size: 18px !important;
   }
+  
+  .mobile-menu-header h2 {
+    font-size: 20px;
+  }
+  
+  .user-name {
+    font-size: 16px;
+  }
+  
+  .user-role {
+    font-size: 12px;
+  }
+  
+  .mobile-nav-link {
+    font-size: 15px;
+  }
+  
+  .menu-section-title {
+    font-size: 12px;
+  }
 }
 
 /* Tablet adjustments */

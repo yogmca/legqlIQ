@@ -288,15 +288,15 @@ body {
   }
 
   .app-title {
-    font-size: 26px;
+    font-size: 22px;
   }
 
   .app-subtitle {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .app-description {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .app-main {
@@ -317,21 +317,77 @@ body {
   }
 
   .no-results h3 {
-    font-size: 20px;
+    font-size: 18px;
+  }
+  
+  .no-results p {
+    font-size: 13px;
+  }
+  
+  .nav-btn {
+    font-size: 13px;
+    padding: 10px 20px;
+  }
+  
+  .results-count {
+    font-size: 13px;
+  }
+  
+  .load-more-btn {
+    font-size: 13px;
+    padding: 14px 40px;
+  }
+  
+  .load-more-text {
+    font-size: 13px;
   }
 }
 
 @media (max-width: 480px) {
   .app-title {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   .app-subtitle {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .app-description {
+    font-size: 11px;
+  }
+  
+  .nav-btn {
     font-size: 12px;
+    padding: 8px 16px;
+  }
+  
+  .no-results h3 {
+    font-size: 16px;
+  }
+  
+  .no-results p {
+    font-size: 12px;
+  }
+  
+  .results-count {
+    font-size: 12px;
+  }
+  
+  .load-more-btn {
+    font-size: 12px;
+    padding: 12px 32px;
+  }
+  
+  .load-more-text {
+    font-size: 12px;
+  }
+  
+  .app-footer p {
+    font-size: 12px;
+  }
+  
+  .footer-note {
+    font-size: 11px;
   }
 }
 

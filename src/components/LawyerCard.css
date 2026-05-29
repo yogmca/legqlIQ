@@ -248,8 +248,65 @@
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .lawyer-name {
+    font-size: 16px;
+  }
+  
+  .lawyer-specialization {
+    font-size: 11px;
+  }
+  
+  .lawyer-location {
+    font-size: 10px;
+  }
+  
+  .lawyer-description {
+    font-size: 12px;
+  }
+  
+  .contact-info {
+    font-size: 12px;
+  }
+  
+  .action-button {
+    font-size: 12px;
+    padding: 10px 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lawyer-name {
+    font-size: 15px;
+  }
+  
+  .lawyer-specialization {
+    font-size: 10px;
+  }
+  
+  .lawyer-location {
+    font-size: 9px;
+  }
+  
+  .lawyer-description {
+    font-size: 11px;
+  }
+  
+  .contact-info {
+    font-size: 11px;
+  }
+  
+  .action-button {
+    font-size: 11px;
+    padding: 9px 16px;
+  }
+  
+  .online-badge {
+    font-size: 10px;
+  }
 }
 
 .btn-contact {
