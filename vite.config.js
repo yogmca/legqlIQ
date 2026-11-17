@@ -16,4 +16,5 @@ export default defineConfig({
       '.legaliq.in' // Allow all subdomains
     ]
   }
+  // Render production optimizations
 })
