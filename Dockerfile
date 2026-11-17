@@ -2,7 +2,7 @@
 # Multi-stage build for optimized production image
 # This Dockerfile works for both Render and AWS deployment
 
-# Stage 1: Build the React application
+# Stage 1: Build the React application - Production build with VITE_API_URL from Render Dashboard
 FROM node:20-alpine as build
 
 # Set working directory
