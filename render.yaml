@@ -32,7 +32,8 @@ services:
     env_variables:
       # Server Configuration
       NODE_ENV: production
-      PORT: 4000
+      # PORT: Render sets $PORT automatically - do not override
+      # The backend server.js uses: process.env.PORT || 4000
       
       # MongoDB Connection
       MONGODB_URI: ${MONGODB_URI}
