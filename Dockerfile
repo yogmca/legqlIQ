@@ -3,6 +3,11 @@
 # This Dockerfile works for both Render and AWS deployment
 
 # Stage 1: Build the React application - Production build with VITE_API_URL from Render Dashboard
+# Debug: Print all Vite env vars during build
+RUN echo "VITE_API_URL = $VITE_API_URL"
+RUN echo "VITE_RAZORPAY_KEY_ID = $VITE_RAZORPAY_KEY_ID"
+RUN echo "VITE_ENABLE_WEBRTC = $VITE_ENABLE_WEBRTC"
+RUN echo "VITE_SOCKET_URL = $VITE_SOCKET_URL"
 FROM node:20-alpine as build
 
 # Set working directory
