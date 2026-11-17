@@ -259,6 +259,23 @@ async function connectToMongo() {
 
   MONGODB_URI = sanitizeMongoUri(MONGODB_URI);
 
+  // Safe diagnostics: print username + password fingerprint (NEVER the password)
+  // so we can tell whether Render is passing the expected credentials.
+  try {
+    const credMatch = MONGODB_URI.match(/^mongodb(?:\+srv)?:\/\/([^:]+):([^@]+)@([^/?]+)/);
+    if (credMatch) {
+      const [, user, pass, host] = credMatch;
+      const fp = pass.length > 2
+        ? `${pass[0]}***${pass[pass.length - 1]} (len=${pass.length})`
+        : `*** (len=${pass.length})`;
+      console.log(`🔐 Mongo user: "${user}" | password fingerprint: ${fp} | host: ${host}`);
+    } else {
+      console.log('🔐 Could not parse credentials from MONGODB_URI for diagnostics');
+    }
+  } catch (e) {
+    console.warn('⚠️  Credential diagnostic failed:', e.message);
+  }
+
   const isSrv = MONGODB_URI.startsWith('mongodb+srv://');
 
   // Build the list of connection strategies to try, in order.
