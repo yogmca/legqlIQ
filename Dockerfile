@@ -1,5 +1,6 @@
 # Frontend Dockerfile for LegalIQ
 # Multi-stage build for optimized production image
+# This Dockerfile works for both Render and AWS deployment
 
 # Stage 1: Build the React application
 FROM node:20-alpine as build
