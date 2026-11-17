@@ -1,0 +1,80 @@
+# render.yaml - LegalIQ Deployment Configuration for Render
+# This config deployments to Render.com
+# Keep aws deployment configs separate
+
+services:
+  # Frontend Service - React + Vite app served via Nginx
+  - type: web
+    name: legaliq-frontend
+    env: docker
+    plan: free
+    dockerfile: Dockerfile
+    # Build the frontend from root directory
+    # Dockerfile already handles the multi-stage build
+    # Environment variables from .env file
+    env_variables:
+      VITE_API_URL: ${VITE_API_URL}
+      VITE_RAZORPAY_KEY_ID: ${VITE_RAZORPAY_KEY_ID}
+      VITE_ENABLE_WEBRTC: ${VITE_ENABLE_WEBRTC}
+      VITE_SOCKET_URL: ${VITE_SOCKET_URL}
+    # Port that Nginx listens on (already exposed in Dockerfile)
+    # Render will set the $PORT env var automatically
+    autoDeploy: true
+
+  # Backend Service - Node.js API
+  - type: web
+    name: legaliq-backend
+    env: docker
+    plan: free
+    dockerfile: backend/Dockerfile
+    # Build from backend directory
+    # Environment variables crucial for backend functionality
+    env_variables:
+      # Server Configuration
+      NODE_ENV: production
+      PORT: 4000
+      
+      # MongoDB Connection
+      MONGODB_URI: ${MONGODB_URI}
+      
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      
+      # Session Configuration
+      SESSION_SECRET: ${SESSION_SECRET}
+      
+      # URLs
+      CLIENT_URL: ${CLIENT_URL}
+      SERVER_URL: ${SERVER_URL}
+      
+      # Google OAuth
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
+      
+      # Razorpay Configuration
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      
+      # Email Configuration
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      CONTACT_EMAIL: ${CONTACT_EMAIL}
+      
+      # WhatsApp Configuration
+      MSG91_AUTH_KEY: ${MSG91_AUTH_KEY}
+      MSG91_WHATSAPP_INTEGRATED_NUMBER_ID: ${MSG91_WHATSAPP_INTEGRATED_NUMBER_ID}
+      ADMIN_WHATSAPP_NUMBER: ${ADMIN_WHATSAPP_NUMBER}
+      WHATSAPP_ENABLED: ${WHATSAPP_ENABLED}
+      MSG91_WHATSAPP_NAMESPACE: ${MSG91_WHATSAPP_NAMESPACE}
+      
+    # Health check setup
+    healthCheckPath: /api/health
+    healthCheckTimeout: 30
+    healthCheckInterval: 30
+    healthCheckRetries: 3
+    autoDeploy: true
+
+# Optional: PostgreSQL or other addons can be added here
+# optionalServices: {}
