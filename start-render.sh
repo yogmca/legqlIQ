@@ -47,7 +47,14 @@ echo "Starting nginx on port $PORT..."
 nginx -g 'daemon off;' &
 NGINX_PID=$!
 
-# If either process dies, exit so Render restarts the container.
-wait -n "$BACKEND_PID" "$NGINX_PID"
-echo "A process exited; shutting down container."
+# POSIX /bin/sh (dash) on Debian does NOT support `wait -n`. Poll both
+# processes instead: if either the backend or nginx exits, stop the container
+# so Render restarts it.
+while kill -0 "$BACKEND_PID" 2>/dev/null && kill -0 "$NGINX_PID" 2>/dev/null; do
+  sleep 5
+done
+
+echo "A process exited (backend or nginx); shutting down container."
+# Try to stop whichever is still alive so the container exits cleanly.
+kill "$BACKEND_PID" "$NGINX_PID" 2>/dev/null || true
 exit 1
