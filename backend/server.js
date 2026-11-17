@@ -37,8 +37,11 @@ console.log('✅ Chat Service initialized');
 // MongoDB Connection
 // Alpine (musl libc) in the Docker image often fails the SRV DNS lookup that
 // mongodb+srv:// requires ("querySrv ENOTFOUND ..."). Force Node's resolver to
-// use public DNS servers that reliably return SRV/TXT records for Atlas.
+// use public DNS servers, and if the connection string is mongodb+srv:// we
+// pre-resolve the SRV/TXT records ourselves and build a standard mongodb://
+// connection string so the driver never has to do the failing SRV lookup.
 const dns = require('dns');
+const dnsPromises = dns.promises;
 try {
   dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
   console.log('🌐 DNS resolvers set to public servers for SRV lookups');
@@ -48,21 +51,97 @@ try {
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-  console.error('❌ MONGODB_URI is not defined in environment variables');
-  console.log('⚠️  Server will continue without database functionality');
-} else {
-  mongoose.connect(MONGODB_URI, {
-    serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
-    socketTimeoutMS: 45000, // Socket timeout
-    bufferCommands: false, // Disable buffering
-  })
-    .then(() => console.log('✅ MongoDB connected successfully'))
-    .catch((err) => {
-      console.error('❌ MongoDB connection error:', err);
-      console.log('⚠️  Server will continue without database functionality');
-    });
+/**
+ * Convert a mongodb+srv:// URI into a standard mongodb:// URI by resolving the
+ * SRV (host list) and TXT (connection options) records via our chosen DNS
+ * servers. This avoids the driver's internal SRV lookup that fails on Alpine.
+ */
+async function resolveSrvUri(srvUri) {
+  // mongodb+srv://user:pass@host/dbAndOptions
+  const match = srvUri.match(/^mongodb\+srv:\/\/([^@]+)@([^/?]+)(.*)$/);
+  if (!match) throw new Error('Unrecognized mongodb+srv:// URI format');
+
+  const [, credentials, hostname, rest] = match;
+  const srvHost = `_mongodb._tcp.${hostname}`;
+
+  console.log(`🔎 Resolving SRV records for ${srvHost} ...`);
+  const srvRecords = await dnsPromises.resolveSrv(srvHost);
+  if (!srvRecords || srvRecords.length === 0) {
+    throw new Error('No SRV records returned');
+  }
+  const hosts = srvRecords.map((r) => `${r.name}:${r.port}`).join(',');
+
+  // TXT record holds default connection options (e.g. authSource, replicaSet)
+  let txtOptions = '';
+  try {
+    const txtRecords = await dnsPromises.resolveTxt(hostname);
+    txtOptions = txtRecords.map((parts) => parts.join('')).join('&');
+  } catch (e) {
+    console.warn('⚠️  Could not read TXT options:', e.message);
+  }
+
+  // Split off path (/db) and existing query string from `rest`
+  let dbPath = '';
+  let userQuery = '';
+  const qIndex = rest.indexOf('?');
+  if (qIndex >= 0) {
+    dbPath = rest.slice(0, qIndex);
+    userQuery = rest.slice(qIndex + 1);
+  } else {
+    dbPath = rest;
+  }
+
+  // SRV implies TLS by default
+  const mergedParams = new URLSearchParams();
+  if (txtOptions) {
+    new URLSearchParams(txtOptions).forEach((v, k) => mergedParams.set(k, v));
+  }
+  if (userQuery) {
+    new URLSearchParams(userQuery).forEach((v, k) => mergedParams.set(k, v));
+  }
+  if (!mergedParams.has('ssl') && !mergedParams.has('tls')) {
+    mergedParams.set('ssl', 'true');
+  }
+  if (!mergedParams.has('authSource')) {
+    mergedParams.set('authSource', 'admin');
+  }
+
+  const standardUri = `mongodb://${credentials}@${hosts}${dbPath}?${mergedParams.toString()}`;
+  console.log('✅ Built standard mongodb:// URI from SRV records');
+  return standardUri;
 }
+
+async function connectToMongo() {
+  if (!MONGODB_URI) {
+    console.error('❌ MONGODB_URI is not defined in environment variables');
+    console.log('⚠️  Server will continue without database functionality');
+    return;
+  }
+
+  let connectionUri = MONGODB_URI;
+  if (MONGODB_URI.startsWith('mongodb+srv://')) {
+    try {
+      connectionUri = await resolveSrvUri(MONGODB_URI);
+    } catch (e) {
+      console.warn('⚠️  SRV pre-resolution failed, falling back to original URI:', e.message);
+      connectionUri = MONGODB_URI;
+    }
+  }
+
+  try {
+    await mongoose.connect(connectionUri, {
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
+      bufferCommands: false,
+    });
+    console.log('✅ MongoDB connected successfully');
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err);
+    console.log('⚠️  Server will continue without database functionality');
+  }
+}
+
+connectToMongo();
 
 // Handle MongoDB connection events
 mongoose.connection.on('connected', () => {
