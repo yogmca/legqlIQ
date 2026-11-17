@@ -153,11 +153,67 @@ function buildStandardUriFromAtlasPattern(srvUri) {
   return standardUri;
 }
 
-async function tryConnect(uri, label) {
+/**
+ * Build a connection using the Atlas shard hostnames resolved to IP addresses
+ * via our chosen public DNS resolver (dns.resolve4 honours dns.setServers,
+ * unlike getaddrinfo which uses the broken /etc/resolv.conf). We connect by IP
+ * and set tlsAllowInvalidHostnames so the Atlas TLS cert (CN = hostname) is
+ * still accepted. This bypasses the container's broken OS resolver entirely.
+ */
+async function buildIpBasedConnection(srvUri) {
+  const match = srvUri.match(/^mongodb\+srv:\/\/([^@]+)@([^/?]+)(.*)$/);
+  if (!match) throw new Error('Unrecognized mongodb+srv:// URI format');
+
+  const [, credentials, hostname, rest] = match;
+  const dotIndex = hostname.indexOf('.');
+  const cluster = hostname.slice(0, dotIndex);
+  const domain = hostname.slice(dotIndex + 1);
+
+  const shardHosts = [0, 1, 2].map((n) => `${cluster}-shard-00-0${n}.${domain}`);
+
+  // Resolve each shard host to an IP using the public DNS resolver.
+  const resolvedHosts = [];
+  for (const h of shardHosts) {
+    const addrs = await dnsPromises.resolve4(h);
+    if (addrs && addrs.length > 0) {
+      resolvedHosts.push(`${addrs[0]}:27017`);
+      console.log(`🔗 Resolved ${h} -> ${addrs[0]}`);
+    }
+  }
+  if (resolvedHosts.length === 0) {
+    throw new Error('Could not resolve any shard host to an IP');
+  }
+
+  // Parse db path + query from the original URI
+  let dbPath = '';
+  let userQuery = '';
+  const qIndex = rest.indexOf('?');
+  if (qIndex >= 0) {
+    dbPath = rest.slice(0, qIndex);
+    userQuery = rest.slice(qIndex + 1);
+  } else {
+    dbPath = rest;
+  }
+
+  const params = new URLSearchParams(userQuery);
+  params.set('authSource', 'admin');
+
+  const uri = `mongodb://${credentials}@${resolvedHosts.join(',')}${dbPath}?${params.toString()}`;
+  return {
+    uri,
+    options: {
+      tls: true,
+      tlsAllowInvalidHostnames: true, // connecting by IP; cert CN is the hostname
+    },
+  };
+}
+
+async function tryConnect(uri, label, extraOptions = {}) {
   await mongoose.connect(uri, {
     serverSelectionTimeoutMS: 30000,
     socketTimeoutMS: 45000,
     bufferCommands: false,
+    ...extraOptions,
   });
   console.log(`✅ MongoDB connected successfully (${label})`);
 }
@@ -178,30 +234,35 @@ async function connectToMongo() {
     // 1) Pre-resolve SRV ourselves (works if outbound SRV DNS is allowed).
     attempts.push({
       label: 'SRV pre-resolved',
-      getUri: async () => await resolveSrvUri(MONGODB_URI),
+      prepare: async () => ({ uri: await resolveSrvUri(MONGODB_URI) }),
     });
-    // 2) Deterministic Atlas shard pattern (no SRV at all) - the reliable
-    //    fallback for networks (like Render) that block SRV queries.
+    // 2) Deterministic Atlas shard pattern by hostname (needs working getaddrinfo).
     attempts.push({
       label: 'Atlas shard pattern (no SRV)',
-      getUri: async () => buildStandardUriFromAtlasPattern(MONGODB_URI),
+      prepare: async () => ({ uri: buildStandardUriFromAtlasPattern(MONGODB_URI) }),
     });
-    // 3) Last resort: hand the original mongodb+srv:// to the driver.
+    // 3) Atlas shard hosts resolved to IPs via public DNS (bypasses the broken
+    //    OS resolver / getaddrinfo entirely). Most reliable on Render.
+    attempts.push({
+      label: 'Atlas shard IPs (public DNS resolve4)',
+      prepare: async () => await buildIpBasedConnection(MONGODB_URI),
+    });
+    // 4) Last resort: hand the original mongodb+srv:// to the driver.
     attempts.push({
       label: 'original mongodb+srv:// (driver SRV)',
-      getUri: async () => MONGODB_URI,
+      prepare: async () => ({ uri: MONGODB_URI }),
     });
   } else {
     attempts.push({
       label: 'standard URI',
-      getUri: async () => MONGODB_URI,
+      prepare: async () => ({ uri: MONGODB_URI }),
     });
   }
 
   for (const attempt of attempts) {
     try {
-      const uri = await attempt.getUri();
-      await tryConnect(uri, attempt.label);
+      const { uri, options } = await attempt.prepare();
+      await tryConnect(uri, attempt.label, options || {});
       return; // connected
     } catch (err) {
       console.warn(`⚠️  MongoDB connect attempt "${attempt.label}" failed: ${err.message}`);
