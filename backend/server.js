@@ -35,6 +35,17 @@ chatService.initialize();
 console.log('✅ Chat Service initialized');
 
 // MongoDB Connection
+// Alpine (musl libc) in the Docker image often fails the SRV DNS lookup that
+// mongodb+srv:// requires ("querySrv ENOTFOUND ..."). Force Node's resolver to
+// use public DNS servers that reliably return SRV/TXT records for Atlas.
+const dns = require('dns');
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+  console.log('🌐 DNS resolvers set to public servers for SRV lookups');
+} catch (e) {
+  console.warn('⚠️  Could not set custom DNS servers:', e.message);
+}
+
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
