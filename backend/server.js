@@ -387,3 +387,5 @@ server.on('error', (err) => {
     throw err;
   }
 });
+const lawyersRoutes = require('./routes/lawyersRoutes');
+app.use('/api/lawyers', lawyersRoutes);

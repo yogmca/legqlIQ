@@ -29,13 +29,14 @@ RUN addgroup -g 1001 -S nodejs && \
 # Switch to non-root user
 USER nodejs
 
-# Expose port - Render will override with its PORT env var
-# NOTE: Actual port set by server.js process.env.PORT || 4000
-EXPOSE 4000
+# EXPOSE is omitted to prevent Render from scanning port 4000
+# Render discovers the port from the running process automatically
+# server.js uses: const PORT = process.env.PORT || 4000
+# If Render sets $PORT, app uses it; otherwise falls back to 4000 for local dev
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:4000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "require('http').get('http://localhost:${PORT:-4000}/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start application - use PORT env var (Render sets this automatically) or default to 4000
 # server.js reads: const PORT = process.env.PORT || 4000
