@@ -1,4 +1,4 @@
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:4000/api') + '/auth';
+const API_URL = (import.meta.env.VITE_API_URL || 'https://legqliq-latest.onrender.com/api') + '/auth';
 console.log('authService using API_URL:', API_URL);
 
 class AuthService {

@@ -59,7 +59,7 @@ export const getCurrentBackend = () => {
 
 // Get API endpoint for current backend
 export const getChatbotEndpoint = () => {
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+  const API_URL = import.meta.env.VITE_API_URL || 'https://legqliq-latest.onrender.com/api';
   return `${API_URL}${getCurrentBackend().endpoint}`;
 };
 
