@@ -38,15 +38,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 # Start Node.js Backend Server on port 3001
 WORKDIR /app/backend
 
-# Wait for backend to start
-sleep 3
-
-# Verify backend is running
-if pgrep -f "npm start" > /dev/null; then
-    echo "✅ Backend started"
-else
-    echo "❌ Backend failed to start. Check /app/backend.log for errors."
-fi
-
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
