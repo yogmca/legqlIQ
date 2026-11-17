@@ -215,7 +215,7 @@ const ArticlesPage = () => {
                       <div className="article-author">
                         <div className="author-info">
                           {article.author.profileImage ? (
-                            <img src={`http://localhost:4000${article.author.profileImage}`} alt={article.author.name} />
+                            <img src={article.author.profileImage} alt={article.author.name} />
                           ) : (
                             <div className="author-avatar">{article.author.name.charAt(0)}</div>
                           )}

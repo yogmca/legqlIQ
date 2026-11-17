@@ -1,81 +1,73 @@
-# render.yaml - LegalIQ Deployment Configuration for Render
-# This config deployments to Render.com
-# Keep aws deployment configs separate
+# render.yaml - LegalIQ single-container deployment for Render
+# ONE web service runs BOTH the React frontend (nginx) and the Node backend.
+# nginx listens on Render's $PORT and proxies /api, /uploads and /socket.io
+# to the backend running internally on port 4000.
+# Because everything is served from the same origin, there are NO CORS issues.
 
 services:
-  # Frontend Service - React + Vite app served via Nginx
   - type: web
-    name: legaliq-frontend
+    name: legaliq
     env: docker
     plan: free
-    dockerfile: Dockerfile
-    # Build the frontend from root directory
-    # Dockerfile already handles the multi-stage build
-    # Environment variables from .env file
-    env_variables:
-      VITE_API_URL: https://legqliq-latest.onrender.com/api
-      VITE_RAZORPAY_KEY_ID: ${VITE_RAZORPAY_KEY_ID}
-      VITE_ENABLE_WEBRTC: ${VITE_ENABLE_WEBRTC}
-      VITE_SOCKET_URL: https://legqliq-latest.onrender.com
-    # Port that Nginx listens on (already exposed in Dockerfile)
-    # Render will set the $PORT env var automatically
+    dockerfilePath: ./Dockerfile
     autoDeploy: true
 
-  # Backend Service - Node.js API
-  - type: web
-    name: legaliq-backend
-    env: docker
-    plan: free
-    dockerfile: backend/Dockerfile
-    # Build from backend directory
-    # Environment variables crucial for backend functionality
-    env_variables:
-      # Server Configuration
-      NODE_ENV: production
-      # PORT: Render sets $PORT automatically - do not override
-      # The backend server.js uses: process.env.PORT || 4000
-      
-      # MongoDB Connection
-      MONGODB_URI: ${MONGODB_URI}
-      
-      # JWT Configuration
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
-      
-      # Session Configuration
-      SESSION_SECRET: ${SESSION_SECRET}
-      
-      # URLs
-      CLIENT_URL: ${CLIENT_URL}
-      SERVER_URL: ${SERVER_URL}
-      
+    # nginx serves "/" so the health check should hit the SPA root (returns 200).
+    healthCheckPath: /
+
+    envVars:
+      # Node backend runtime
+      - key: NODE_ENV
+        value: production
+
+      # MongoDB Connection (REQUIRED for lawyers to load)
+      - key: MONGODB_URI
+        sync: false
+
+      # JWT / Session
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: SESSION_SECRET
+        sync: false
+
+      # URLs - same-origin single service. Set to the public service URL.
+      - key: CLIENT_URL
+        sync: false
+      - key: SERVER_URL
+        sync: false
+
       # Google OAuth
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
-      
-      # Razorpay Configuration
-      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
-      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
-      
-      # Email Configuration
-      EMAIL_USER: ${EMAIL_USER}
-      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
-      CONTACT_EMAIL: ${CONTACT_EMAIL}
-      
-      # WhatsApp Configuration
-      MSG91_AUTH_KEY: ${MSG91_AUTH_KEY}
-      MSG91_WHATSAPP_INTEGRATED_NUMBER_ID: ${MSG91_WHATSAPP_INTEGRATED_NUMBER_ID}
-      ADMIN_WHATSAPP_NUMBER: ${ADMIN_WHATSAPP_NUMBER}
-      WHATSAPP_ENABLED: ${WHATSAPP_ENABLED}
-      MSG91_WHATSAPP_NAMESPACE: ${MSG91_WHATSAPP_NAMESPACE}
-      
-    # Health check setup
-    healthCheckPath: /api/health
-    healthCheckTimeout: 30
-    healthCheckInterval: 30
-    healthCheckRetries: 3
-    autoDeploy: true
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false
 
-# Optional: PostgreSQL or other addons can be added here
-# optionalServices: {}
+      # Razorpay
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+
+      # Email
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASSWORD
+        sync: false
+      - key: CONTACT_EMAIL
+        sync: false
+
+      # WhatsApp (MSG91)
+      - key: MSG91_AUTH_KEY
+        sync: false
+      - key: MSG91_WHATSAPP_INTEGRATED_NUMBER_ID
+        sync: false
+      - key: ADMIN_WHATSAPP_NUMBER
+        sync: false
+      - key: WHATSAPP_ENABLED
+        sync: false
+      - key: MSG91_WHATSAPP_NAMESPACE
+        sync: false

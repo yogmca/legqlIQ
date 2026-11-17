@@ -50,8 +50,10 @@ const LocationLandingPage = () => {
       };
       
       const role = roleMap[professionalType];
+      const rawBase = (import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/$/, '');
+      const apiBase = rawBase.includes('/api') ? rawBase : `${rawBase}/api`;
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/lawyers?professionalType=${role}&city=${cityName}&limit=50`
+        `${apiBase}/lawyers?professionalType=${role}&city=${cityName}&limit=50`
       );
       
       if (response.ok) {

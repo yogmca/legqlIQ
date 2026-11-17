@@ -16,7 +16,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    // Same-origin single-container deploy: reflect request origin.
+    origin: process.env.CLIENT_URL || true,
     credentials: true
   }
 });
@@ -67,7 +68,10 @@ mongoose.connection.on('disconnected', () => {
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  // Single-container deploy serves frontend + backend from the SAME origin,
+  // so requests are same-origin. Reflect the request origin to avoid CORS 404s
+  // if CLIENT_URL is not explicitly set.
+  origin: process.env.CLIENT_URL || true,
   credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));
