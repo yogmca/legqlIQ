@@ -208,14 +208,21 @@ async function buildIpBasedConnection(srvUri) {
   };
 }
 
+// The application data lives in the "legaliq" database. Force it explicitly so
+// the correct DB is used even when the connection string omits the db name
+// (e.g. ".../?ssl=true" instead of ".../legaliq?ssl=true"). Overridable via
+// the MONGODB_DB_NAME env var.
+const MONGO_DB_NAME = process.env.MONGODB_DB_NAME || 'legaliq';
+
 async function tryConnect(uri, label, extraOptions = {}) {
   await mongoose.connect(uri, {
     serverSelectionTimeoutMS: 30000,
     socketTimeoutMS: 45000,
     bufferCommands: false,
+    dbName: MONGO_DB_NAME,
     ...extraOptions,
   });
-  console.log(`✅ MongoDB connected successfully (${label})`);
+  console.log(`✅ MongoDB connected successfully (${label}) using DB "${MONGO_DB_NAME}"`);
 }
 
 /**
