@@ -18,6 +18,26 @@ echo "Starting single-container deployment..."
 echo "  nginx public port : $PORT"
 echo "  backend internal  : $BACKEND_PORT"
 
+# ---------------------------------------------------------------------------
+# DNS fix: the container's /etc/resolv.conf can be empty/broken on Render,
+# which makes ALL hostname resolution fail (getaddrinfo ENOTFOUND ...),
+# including the MongoDB Atlas shard hosts. Ensure working public resolvers
+# are present so both getaddrinfo (A records) and SRV lookups succeed.
+# ---------------------------------------------------------------------------
+echo "Current /etc/resolv.conf:"
+cat /etc/resolv.conf 2>/dev/null || echo "(missing)"
+if ! grep -q "8.8.8.8" /etc/resolv.conf 2>/dev/null; then
+  echo "Injecting public DNS resolvers into /etc/resolv.conf"
+  {
+    echo "nameserver 8.8.8.8"
+    echo "nameserver 1.1.1.1"
+    echo "nameserver 8.8.4.4"
+    echo "options timeout:2 attempts:3"
+  } > /etc/resolv.conf 2>/dev/null || echo "⚠️  Could not write /etc/resolv.conf"
+fi
+echo "Effective /etc/resolv.conf:"
+cat /etc/resolv.conf 2>/dev/null || echo "(missing)"
+
 # Remove Debian's default site so it doesn't conflict with our server block.
 rm -f /etc/nginx/sites-enabled/default /etc/nginx/conf.d/default.conf 2>/dev/null || true
 
