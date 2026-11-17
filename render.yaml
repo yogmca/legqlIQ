@@ -13,10 +13,10 @@ services:
     # Dockerfile already handles the multi-stage build
     # Environment variables from .env file
     env_variables:
-      VITE_API_URL: ${VITE_API_URL}
+      VITE_API_URL: https://legqliq-latest.onrender.com/api
       VITE_RAZORPAY_KEY_ID: ${VITE_RAZORPAY_KEY_ID}
       VITE_ENABLE_WEBRTC: ${VITE_ENABLE_WEBRTC}
-      VITE_SOCKET_URL: ${VITE_SOCKET_URL}
+      VITE_SOCKET_URL: https://legqliq-latest.onrender.com
     # Port that Nginx listens on (already exposed in Dockerfile)
     # Render will set the $PORT env var automatically
     autoDeploy: true
