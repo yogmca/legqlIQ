@@ -36,15 +36,14 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
 
 # Start Node.js Backend Server on port 3001
-cd backend && npm start > /app/backend.log 2>&1 &
-BACKEND_PID=$!
+WORKDIR /app/backend
 
 # Wait for backend to start
 sleep 3
 
 # Verify backend is running
-if ps -p $BACKEND_PID > /dev/null; then
-    echo "✅ Backend started (PID: $BACKEND_PID)"
+if pgrep -f "npm start" > /dev/null; then
+    echo "✅ Backend started"
 else
     echo "❌ Backend failed to start. Check /app/backend.log for errors."
 fi
