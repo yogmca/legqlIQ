@@ -111,6 +111,57 @@ async function resolveSrvUri(srvUri) {
   return standardUri;
 }
 
+/**
+ * Build a standard mongodb:// URI WITHOUT any SRV/DNS-TXT lookup, using the
+ * deterministic Atlas shard hostname pattern. Render's network blocks SRV
+ * queries entirely, but normal A-record resolution of the shard hostnames
+ * works. We seed all 3 shard hosts; the driver discovers the replica set
+ * automatically (no replicaSet name needed).
+ */
+function buildStandardUriFromAtlasPattern(srvUri) {
+  const match = srvUri.match(/^mongodb\+srv:\/\/([^@]+)@([^/?]+)(.*)$/);
+  if (!match) throw new Error('Unrecognized mongodb+srv:// URI format');
+
+  const [, credentials, hostname, rest] = match;
+  // hostname e.g. "legaliq.b4xrthx.mongodb.net" -> cluster "legaliq", domain "b4xrthx.mongodb.net"
+  const dotIndex = hostname.indexOf('.');
+  const cluster = hostname.slice(0, dotIndex);
+  const domain = hostname.slice(dotIndex + 1);
+
+  const hosts = [0, 1, 2]
+    .map((n) => `${cluster}-shard-00-0${n}.${domain}:27017`)
+    .join(',');
+
+  // Split path (/db) and existing query string
+  let dbPath = '';
+  let userQuery = '';
+  const qIndex = rest.indexOf('?');
+  if (qIndex >= 0) {
+    dbPath = rest.slice(0, qIndex);
+    userQuery = rest.slice(qIndex + 1);
+  } else {
+    dbPath = rest;
+  }
+
+  const params = new URLSearchParams(userQuery);
+  params.set('ssl', 'true');
+  params.set('authSource', 'admin');
+  // Let the driver auto-discover topology from the seed list.
+
+  const standardUri = `mongodb://${credentials}@${hosts}${dbPath}?${params.toString()}`;
+  console.log('🧩 Built standard mongodb:// URI from Atlas shard pattern (no SRV needed)');
+  return standardUri;
+}
+
+async function tryConnect(uri, label) {
+  await mongoose.connect(uri, {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    bufferCommands: false,
+  });
+  console.log(`✅ MongoDB connected successfully (${label})`);
+}
+
 async function connectToMongo() {
   if (!MONGODB_URI) {
     console.error('❌ MONGODB_URI is not defined in environment variables');
@@ -118,27 +169,47 @@ async function connectToMongo() {
     return;
   }
 
-  let connectionUri = MONGODB_URI;
-  if (MONGODB_URI.startsWith('mongodb+srv://')) {
+  const isSrv = MONGODB_URI.startsWith('mongodb+srv://');
+
+  // Build the list of connection strategies to try, in order.
+  const attempts = [];
+
+  if (isSrv) {
+    // 1) Pre-resolve SRV ourselves (works if outbound SRV DNS is allowed).
+    attempts.push({
+      label: 'SRV pre-resolved',
+      getUri: async () => await resolveSrvUri(MONGODB_URI),
+    });
+    // 2) Deterministic Atlas shard pattern (no SRV at all) - the reliable
+    //    fallback for networks (like Render) that block SRV queries.
+    attempts.push({
+      label: 'Atlas shard pattern (no SRV)',
+      getUri: async () => buildStandardUriFromAtlasPattern(MONGODB_URI),
+    });
+    // 3) Last resort: hand the original mongodb+srv:// to the driver.
+    attempts.push({
+      label: 'original mongodb+srv:// (driver SRV)',
+      getUri: async () => MONGODB_URI,
+    });
+  } else {
+    attempts.push({
+      label: 'standard URI',
+      getUri: async () => MONGODB_URI,
+    });
+  }
+
+  for (const attempt of attempts) {
     try {
-      connectionUri = await resolveSrvUri(MONGODB_URI);
-    } catch (e) {
-      console.warn('⚠️  SRV pre-resolution failed, falling back to original URI:', e.message);
-      connectionUri = MONGODB_URI;
+      const uri = await attempt.getUri();
+      await tryConnect(uri, attempt.label);
+      return; // connected
+    } catch (err) {
+      console.warn(`⚠️  MongoDB connect attempt "${attempt.label}" failed: ${err.message}`);
     }
   }
 
-  try {
-    await mongoose.connect(connectionUri, {
-      serverSelectionTimeoutMS: 30000,
-      socketTimeoutMS: 45000,
-      bufferCommands: false,
-    });
-    console.log('✅ MongoDB connected successfully');
-  } catch (err) {
-    console.error('❌ MongoDB connection error:', err);
-    console.log('⚠️  Server will continue without database functionality');
-  }
+  console.error('❌ All MongoDB connection attempts failed');
+  console.log('⚠️  Server will continue without database functionality');
 }
 
 connectToMongo();
