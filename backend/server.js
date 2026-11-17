@@ -49,7 +49,7 @@ try {
   console.warn('⚠️  Could not set custom DNS servers:', e.message);
 }
 
-const MONGODB_URI = process.env.MONGODB_URI;
+let MONGODB_URI = process.env.MONGODB_URI;
 
 /**
  * Convert a mongodb+srv:// URI into a standard mongodb:// URI by resolving the
@@ -218,12 +218,46 @@ async function tryConnect(uri, label, extraOptions = {}) {
   console.log(`✅ MongoDB connected successfully (${label})`);
 }
 
+/**
+ * Fix a common mistake: an un-encoded special character (e.g. '@') in the
+ * password breaks URL parsing ("Invalid URL: mongodb://user:Diya@2012@host").
+ * Detect extra '@' before the host section and URL-encode the password.
+ */
+function sanitizeMongoUri(uri) {
+  const schemeMatch = uri.match(/^(mongodb(?:\+srv)?:\/\/)(.*)$/);
+  if (!schemeMatch) return uri;
+  const scheme = schemeMatch[1];
+  let afterScheme = schemeMatch[2];
+
+  // Everything up to the LAST '@' is credentials; the rest is host/path.
+  const lastAt = afterScheme.lastIndexOf('@');
+  if (lastAt === -1) return uri; // no credentials
+  const creds = afterScheme.slice(0, lastAt);
+  const hostAndRest = afterScheme.slice(lastAt + 1);
+
+  const colon = creds.indexOf(':');
+  if (colon === -1) return uri; // no password
+  const user = creds.slice(0, colon);
+  const pass = creds.slice(colon + 1);
+
+  // If the password contains characters that would break URL parsing and is
+  // not already percent-encoded, encode it.
+  const needsEncoding = /[@/:?#\[\]]/.test(pass) && !/%[0-9A-Fa-f]{2}/.test(pass);
+  if (!needsEncoding) return uri;
+
+  const encodedPass = encodeURIComponent(pass);
+  console.log('🧼 Sanitized MONGODB_URI: URL-encoded special chars in password');
+  return `${scheme}${user}:${encodedPass}@${hostAndRest}`;
+}
+
 async function connectToMongo() {
   if (!MONGODB_URI) {
     console.error('❌ MONGODB_URI is not defined in environment variables');
     console.log('⚠️  Server will continue without database functionality');
     return;
   }
+
+  MONGODB_URI = sanitizeMongoUri(MONGODB_URI);
 
   const isSrv = MONGODB_URI.startsWith('mongodb+srv://');
 
