@@ -1,12 +1,7 @@
 # Frontend Dockerfile for LegalIQ
 # Multi-stage build for optimized production image
-# This Dockerfile works for both Render and AWS deployment
 
-# Stage 1: Build the React application - Production build with VITE_API_URL from Render Dashboard
-# Debug: Print all Vite env vars during build
-# These should show the values from Render Dashboard if .dockerignore is working
-RUN echo "VITE_API_URL_EXPORTED=$VITE_API_URL"
-RUN echo "VITE_SOCKET_URL_EXPORTED=$VITE_SOCKET_URL"
+# Stage 1: Build the React application
 FROM node:20-alpine as build
 
 # Set working directory
@@ -15,14 +10,19 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies (with --legacy-peer-deps for React 19 / react-quill v3 compatibility)
-RUN npm install --legacy-peer-deps
+# Install dependencies
+RUN npm install
 
 # Copy application code
 COPY . .
 
 # Build the application
 RUN npm run build
+
+# Debug: Print Vite env vars that were available during build
+# These should show values from Render Dashboard if .dockerignore excludes .env
+RUN echo "VITE_API_URL_FROM_DASHBOARD=$VITE_API_URL"
+RUN echo "VITE_SOCKET_URL_FROM_DASHBOARD=$VITE_SOCKET_URL"
 
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
