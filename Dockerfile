@@ -19,11 +19,6 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Debug: Print Vite env vars that were available during build
-# These should show values from Render Dashboard if .dockerignore excludes .env
-RUN echo "VITE_API_URL_FROM_DASHBOARD=$VITE_API_URL"
-RUN echo "VITE_SOCKET_URL_FROM_DASHBOARD=$VITE_SOCKET_URL"
-
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
 
