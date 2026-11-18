@@ -115,10 +115,8 @@ const SearchBar = ({ searchTerm, onSearchChange }) => {
             const normalizedCity = normalizeCityName(city);
             
             setDetectedCity(normalizedCity);
-            // Auto-fill search with normalized city name
-            if (!searchTerm) {
-              onSearchChange(normalizedCity);
-            }
+            // NOTE: Don't auto-fill search - let user initiate search manually
+            // to avoid overwriting the initial lawyer results with filtered results
             console.log('🏙️ Detected city:', city, '→ Normalized:', normalizedCity);
           }
           

@@ -40,11 +40,11 @@ function LawyersDirectory() {
   const [lawyers, setLawyers] = useState([]);
   const [totalLawyers, setTotalLawyers] = useState(0);
   const [hasMore, setHasMore] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [offset, setOffset] = useState(0);
   const limit = 12;
-  
+
   // Get display labels based on professional type
   const getLabels = () => {
     switch(professionalType) {
@@ -83,20 +83,7 @@ function LawyersDirectory() {
   
   const labels = getLabels();
 
-  // Re-fetch when professional type changes
-  useEffect(() => {
-    setSearchTerm('');
-    setSelectedSpecialization('All Specializations');
-    setSelectedLocation('All Locations');
-    fetchInitialLawyers();
-  }, [professionalType]);
-
-  useEffect(() => {
-    if (searchTerm || selectedSpecialization !== 'All Specializations' || selectedLocation !== 'All Locations') {
-      performSearch();
-    }
-  }, [searchTerm, selectedSpecialization, selectedLocation]);
-
+  // Fetch initial lawyers - defined before useEffect hooks to avoid reference issues
   const fetchInitialLawyers = async () => {
     setLoading(true);
     setError(null);
@@ -121,6 +108,8 @@ function LawyersDirectory() {
   };
 
   const performSearch = async () => {
+    // Reset offset to 0 for new searches so we start from the beginning
+    setOffset(0);
     setLoading(true);
     setError(null);
     try {
@@ -128,7 +117,7 @@ function LawyersDirectory() {
         searchTerm,
         selectedSpecialization,
         selectedLocation,
-        0,
+        offset,
         limit,
         professionalType
       );
@@ -178,6 +167,7 @@ function LawyersDirectory() {
         
         setLawyers(prev => [...prev, ...newLawyers]);
         setHasMore(result.hasMore || false);
+        // Increment offset for next load more
         setOffset(prev => prev + limit);
       } else {
         throw new Error('Invalid response format from server');
@@ -196,6 +186,24 @@ function LawyersDirectory() {
     setSelectedLocation('All Locations');
     fetchInitialLawyers();
   };
+
+  // Fetch initial lawyers on component mount
+  useEffect(() => {
+    let cancelled = false;
+    const loadLawyers = async () => {
+      if (cancelled) return;
+      await fetchInitialLawyers();
+    };
+    loadLawyers();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Re-search when filters change
+  useEffect(() => {
+    if (searchTerm || selectedSpecialization !== 'All Specializations' || selectedLocation !== 'All Locations') {
+      performSearch();
+    }
+  }, [searchTerm, selectedSpecialization, selectedLocation]);
 
   return (
     <div className="app">
@@ -522,5 +530,4 @@ function AppContent({ user, handleLogin, handleRegister }) {
     </>
   );
 }
-
 export default App;

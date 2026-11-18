@@ -117,6 +117,8 @@ body {
   flex: 1;
   padding: 40px 20px;
   background: #f7fafc;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .container {
