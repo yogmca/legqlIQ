@@ -9,18 +9,18 @@
   transform: scale(1.02);
 }
 
-@media (max-width: 768px) {
-  .logo-image {
-    height: 40px;
-  }
-}
-
 .logo-image {
-  height: 48px;
+  height: 60px;
   width: auto;
   display: block;
   background: transparent;
   border: none;
   outline: none;
   box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .logo-image {
+    height: 45px;
+  }
 }
