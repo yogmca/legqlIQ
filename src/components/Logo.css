@@ -10,7 +10,7 @@
 }
 
 .logo-image {
-  height: 60px;
+  height: 70px;
   width: auto;
   display: block;
   background: transparent;
@@ -21,6 +21,6 @@
 
 @media (max-width: 768px) {
   .logo-image {
-    height: 45px;
+    height: 50px;
   }
 }
