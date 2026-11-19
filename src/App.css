@@ -21,7 +21,7 @@ body {
 }
 
 .app-header {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); /* vibrant blue header */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* matches load-more button blue */
   color: white;
   padding: 14px 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
