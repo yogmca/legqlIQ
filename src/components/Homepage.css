@@ -1,6 +1,14 @@
 .homepage {
   min-height: 100vh;
-  background: #fff;
+  background: #fff !important;
+}
+
+/* Ensure white background on home page - override global blue gradient */
+html, body {
+  background: #fff !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
 }
 
 /* Header */
@@ -753,27 +761,47 @@
 
 .cta-buttons {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   justify-content: center;
 }
 
 .cta-primary, .cta-secondary {
-  padding: 14px 36px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 15px;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  display: inline-block;
+  cursor: pointer;
 }
 
 .cta-primary {
-  background: white;
-  color: #667eea;
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #e2e8f0;
 }
 
 .cta-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255,255,255,0.3);
+  background: #f1f5f9;
+  color: #1e293b;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.cta-secondary {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.cta-secondary:hover {
+  background: #dcfce7;
+  color: #14532d;
+  border-color: #86efac;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.1);
 }
 
 .cta-secondary {

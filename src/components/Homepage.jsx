@@ -12,6 +12,16 @@ const Homepage = () => {
   const [featuredArticles, setFeaturedArticles] = useState([]);
   const user = authService.getUser();
 
+  // Set white background to override global blue gradient
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = 'html, body { background: #fff !important; min-height: 100vh !important; }';
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   useEffect(() => {
     fetchFeaturedArticles();
   }, []);
@@ -313,7 +323,7 @@ const Homepage = () => {
           <p>Join thousands of satisfied clients who found the right professional on LegalIQ</p>
           <div className="cta-buttons">
             <Link to="/lawyers" className="cta-primary">Find Professionals</Link>
-            <Link to="/video-consultations" className="cta-secondary">Book Video Consultation</Link>
+            <Link to="/video-consultations" className="cta-secondary">Video Consultation</Link>
             {!user && <Link to="/register" className="cta-secondary">Create Account</Link>}
           </div>
         </div>

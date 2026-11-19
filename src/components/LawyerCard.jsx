@@ -124,11 +124,11 @@
     const getBookButtonText = () => {
       switch(professionalType) {
         case 'auditor':
-          return '📅 Book Auditor Visit';
+          return '📅 Book Visit';
         case 'tax-consultant':
-          return '📅 Book Tax Consultant Visit';
+          return '📅 Book Visit';
         default:
-          return '📅 Book Lawyer Visit';
+          return '📅 Book Visit';
       }
     };
 
@@ -216,13 +216,13 @@
 
         <div className="lawyer-card-footer">
           <button className="btn-contact" onClick={handleBookConsultation}>
-            {getBookButtonText()}
+            📅 Book Visit
           </button>
           <button className="btn-video-consultation" onClick={handleBookVideoConsultation}>
-            📹 Book Video Consultation
+            📹 Video
           </button>
           <button className="btn-chat" onClick={handleStartChat}>
-            💬 Start Chat
+            💬 Chat
           </button>
         </div>
 
