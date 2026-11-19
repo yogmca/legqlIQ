@@ -16,9 +16,10 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    // Same-origin single-container deploy: reflect request origin.
-    origin: process.env.CLIENT_URL || true,
-    credentials: true
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['*']
   }
 });
 
@@ -504,7 +505,7 @@ app.get('/api/lawyers/search', async (req, res) => {
     
     const professionalsFromDB = await Lawyer.find(query)
       .sort({ createdAt: -1 })
-      .exec(); // Use exec() instead of lean() to get full documents
+      .lean();
       
     const dbProfessionals = professionalsFromDB.map(professional => ({
       id: professional._id.toString(),
