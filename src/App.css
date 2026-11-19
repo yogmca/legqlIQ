@@ -282,7 +282,7 @@ body {
 
 @media (max-width: 768px) {
   .app-header {
-    padding: 30px 15px;
+    padding: 30px 15px 15px 70px; /* Make room for mobile menu toggle button */
   }
 
   .app-title {

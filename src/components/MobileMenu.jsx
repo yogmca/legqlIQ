@@ -49,7 +49,7 @@ const MobileMenu = () => {
       <div className={`mobile-menu-drawer ${isOpen ? 'open' : ''}`}>
         <div className="mobile-menu-header">
           <div className="mobile-menu-logo">
-            <img src="/Legaliq.jpg" alt="LegalIQ Logo" className="mobile-logo-image" />
+            <img src="/legaliq-logo-white.jpg" alt="LegalIQ Logo" className="mobile-logo-image" />
             <h2>LegalIQ</h2>
           </div>
           <button className="mobile-menu-close" onClick={closeMenu} aria-label="Close menu">
