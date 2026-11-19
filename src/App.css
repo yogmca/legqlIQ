@@ -21,10 +21,10 @@ body {
 }
 
 .app-header {
-  background: white; /* same as home page header */
-  color: #1f2937;
-  padding: 12px 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); /* vibrant blue header */
+  color: white;
+  padding: 14px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .header-content {

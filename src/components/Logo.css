@@ -12,6 +12,7 @@
 .logo-image {
   height: 70px;
   width: auto;
+  max-width: none;
   display: block;
   background: transparent;
   border: none;
@@ -22,5 +23,6 @@
 @media (max-width: 768px) {
   .logo-image {
     height: 50px;
+    max-width: none;
   }
 }
