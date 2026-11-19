@@ -210,7 +210,7 @@ function LawyersDirectory() {
       <header className="app-header">
         <div className="header-content">
           <div className="header-left">
-            <Logo variant="light" />
+            <Logo variant="default" />
           </div>
           <div className="header-center">
             <h1 className="app-title">{labels.title}</h1>
