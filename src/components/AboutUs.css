@@ -25,14 +25,20 @@
 }
 
 .about-page-header .logo-section .logo-image {
-  width: 120px;
-  height: 120px;
+  height: 70px;
+  width: auto;
   object-fit: contain;
   border-radius: 0;
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
   background: transparent !important;
+}
+
+@media (max-width: 768px) {
+  .about-page-header .logo-section .logo-image {
+    height: 50px;
+  }
 }
 
 .about-page-header .logo-section .logo-image:hover {

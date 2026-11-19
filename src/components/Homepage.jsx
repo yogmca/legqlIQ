@@ -108,8 +108,7 @@ const Homepage = () => {
       <header className="homepage-header">
         <div className="header-container">
           <Link to="/" className="logo-section">
-            <img src="/Legaliq.jpg" alt="LegalIQ Logo" className="logo-image" />
-            <h1 className="logo-text">LegalIQ</h1>
+            <img src="/legaliq-logo-white.jpg" alt="LegalIQ Logo" className="logo-image" />
           </Link>
 
           <nav className="header-nav">

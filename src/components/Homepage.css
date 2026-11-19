@@ -40,10 +40,16 @@ html, body {
 }
 
 .logo-section .logo-image {
-  width: 120px;
-  height: 120px;
+  height: 70px;
+  width: auto;
   object-fit: contain;
   border-radius: 0;
+}
+
+@media (max-width: 768px) {
+  .logo-section .logo-image {
+    height: 50px;
+  }
 }
 
 .logo-icon svg {

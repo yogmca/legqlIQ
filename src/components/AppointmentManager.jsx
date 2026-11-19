@@ -599,8 +599,7 @@ const AppointmentManager = ({ userEmail }) => {
       <div className="appointment-container">
         <div className="appointment-nav">
           <Link to="/" className="logo-section">
-            <img src="/Legaliq.jpg" alt="LegalIQ Logo" className="logo-image" />
-            <h1 className="logo-text">LegalIQ</h1>
+            <img src="/legaliq-logo-white.jpg" alt="LegalIQ Logo" className="logo-image" />
           </Link>
         </div>
 
