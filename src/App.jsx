@@ -207,14 +207,15 @@ function LawyersDirectory() {
 
   return (
     <div className="app">
-      <div className="app-logo-header">
-        <Logo />
-      </div>
-      
       <header className="app-header">
         <div className="header-content">
-          <h1 className="app-title">{labels.title}</h1>
-          <p className="app-subtitle">{labels.subtitle}</p>
+          <div className="header-left">
+            <Logo variant="light" />
+          </div>
+          <div className="header-center">
+            <h1 className="app-title">{labels.title}</h1>
+            <p className="app-subtitle">{labels.subtitle}</p>
+          </div>
         </div>
       </header>
 
