@@ -21,8 +21,8 @@ body {
 }
 
 .app-header {
-  background: #2563eb; /* brand blue matching home page */
-  color: white;
+  background: white; /* same as home page header */
+  color: #1f2937;
   padding: 12px 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
